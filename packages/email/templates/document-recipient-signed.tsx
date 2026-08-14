@@ -34,7 +34,7 @@ export const DocumentRecipientSignedEmailTemplate = ({
         <Section className="bg-background">
           <Container className="mx-auto mt-8 mb-2 max-w-xl rounded-lg border border-border border-solid p-2 backdrop-blur-sm">
             <Section className="p-2">
-              <TemplateBrandingLogo assetBaseUrl={assetBaseUrl} className="mb-4 h-10" />
+              <TemplateBrandingLogo assetBaseUrl={assetBaseUrl} className="mb-4 h-12" />
 
               <TemplateDocumentRecipientSigned
                 documentName={documentName}

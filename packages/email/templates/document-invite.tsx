@@ -63,7 +63,7 @@ export const DocumentInviteEmailTemplate = ({
         <Section>
           <Container className="mx-auto mt-8 mb-2 max-w-xl rounded-lg border border-border border-solid p-4 backdrop-blur-sm">
             <Section>
-              <TemplateBrandingLogo assetBaseUrl={assetBaseUrl} className="mb-4 h-10" />
+              <TemplateBrandingLogo assetBaseUrl={assetBaseUrl} className="mb-4 h-12" />
 
               <TemplateDocumentInvite
                 inviterName={inviterName}
@@ -80,30 +80,28 @@ export const DocumentInviteEmailTemplate = ({
             </Section>
           </Container>
 
-          <Container className="mx-auto mt-12 max-w-xl">
-            <Section>
-              {organisationType === OrganisationType.PERSONAL && (
-                <Text className="my-4 font-semibold text-base">
-                  <Trans>
-                    {inviterName}{' '}
-                    <Link className="font-normal text-muted-foreground" href={`mailto:${inviterEmail}`}>
-                      ({inviterEmail})
-                    </Link>
-                  </Trans>
-                </Text>
-              )}
-
-              <Text className="mt-2 text-base text-muted-foreground">
-                {customBody ? (
-                  <TemplateCustomMessageBody text={customBody} />
-                ) : (
-                  <Trans>
-                    {inviterName} has invited you to {action} the document "{documentName}".
-                  </Trans>
+          {(organisationType === OrganisationType.PERSONAL || customBody) && (
+            <Container className="mx-auto mt-12 max-w-xl">
+              <Section>
+                {organisationType === OrganisationType.PERSONAL && (
+                  <Text className="my-4 font-semibold text-base">
+                    <Trans>
+                      {inviterName}{' '}
+                      <Link className="font-normal text-muted-foreground" href={`mailto:${inviterEmail}`}>
+                        ({inviterEmail})
+                      </Link>
+                    </Trans>
+                  </Text>
                 )}
-              </Text>
-            </Section>
-          </Container>
+
+                {customBody && (
+                  <Text className="mt-2 text-base text-muted-foreground">
+                    <TemplateCustomMessageBody text={customBody} />
+                  </Text>
+                )}
+              </Section>
+            </Container>
+          )}
 
           <Hr className="mx-auto mt-12 max-w-xl" />
 
