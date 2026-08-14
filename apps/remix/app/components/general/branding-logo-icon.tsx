@@ -5,5 +5,7 @@ import type { ImgHTMLAttributes } from 'react';
 export type LogoProps = Omit<ImgHTMLAttributes<HTMLImageElement>, 'src' | 'alt'>;
 
 export const BrandingLogoIcon = ({ className, ...props }: LogoProps) => {
-  return <img src={CodedevzaIcon} alt="Codedevza" className={cn('object-contain dark:invert', className)} {...props} />;
+  return (
+    <img src={CodedevzaIcon} alt="Codedevza AI" className={cn('object-contain dark:invert', className)} {...props} />
+  );
 };

@@ -18,7 +18,7 @@ export const EmbedDocumentCompleted = ({ name, signature }: EmbedDocumentComplet
       <div className="mt-8 w-full max-w-md">
         <SigningCard3D
           className="mx-auto w-full"
-          name={name || 'Codedevza'}
+          name={name || 'Codedevza AI'}
           signature={signature}
           signingCelebrationImage={signingCelebration}
         />

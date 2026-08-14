@@ -1,11 +1,13 @@
+import { useIsMounted } from '@documenso/lib/client-only/hooks/use-is-mounted';
 import { getRootHref } from '@documenso/lib/utils/params';
 import { trpc } from '@documenso/trpc/react';
 import { cn } from '@documenso/ui/lib/utils';
 import { Button } from '@documenso/ui/primitives/button';
 import { ReadStatus } from '@prisma/client';
-import { InboxIcon, MenuIcon, SearchIcon } from 'lucide-react';
+import { InboxIcon, MenuIcon, MoonIcon, SearchIcon, SunIcon } from 'lucide-react';
 import { type HTMLAttributes, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router';
+import { Theme, useTheme } from 'remix-themes';
 
 import { BrandingLogo } from '~/components/general/branding-logo';
 
@@ -21,6 +23,8 @@ export type HeaderProps = HTMLAttributes<HTMLDivElement> & {
 
 export const Header = ({ className, fullWidth = false, ...props }: HeaderProps) => {
   const params = useParams();
+  const [theme, setTheme] = useTheme();
+  const isMounted = useIsMounted();
 
   const [isCommandMenuOpen, setIsCommandMenuOpen] = useState(false);
   const [isHamburgerMenuOpen, setIsHamburgerMenuOpen] = useState(false);
@@ -80,6 +84,19 @@ export const Header = ({ className, fullWidth = false, ...props }: HeaderProps) 
               </span>
             )}
           </Link>
+        </Button>
+
+        <Button
+          variant="outline"
+          className="hidden h-10 w-10 rounded-lg md:flex"
+          onClick={() => setTheme(theme === Theme.DARK ? Theme.LIGHT : Theme.DARK)}
+          aria-label="Toggle theme"
+        >
+          {isMounted && theme === Theme.DARK ? (
+            <SunIcon className="h-5 w-5 text-muted-foreground" />
+          ) : (
+            <MoonIcon className="h-5 w-5 text-muted-foreground" />
+          )}
         </Button>
 
         <div className="md:ml-4">
