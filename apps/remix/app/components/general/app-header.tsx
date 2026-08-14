@@ -93,9 +93,9 @@ export const Header = ({ className, fullWidth = false, ...props }: HeaderProps) 
           aria-label="Toggle theme"
         >
           {isMounted && theme === Theme.DARK ? (
-            <SunIcon className="h-5 w-5 text-muted-foreground" />
+            <SunIcon className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
           ) : (
-            <MoonIcon className="h-5 w-5 text-muted-foreground" />
+            <MoonIcon className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
           )}
         </Button>
 
