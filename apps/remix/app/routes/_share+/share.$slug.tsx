@@ -12,7 +12,7 @@ export function meta({ params: { slug } }: Route.MetaArgs) {
   }
 
   return [
-    { title: 'Documenso - Share' },
+    { title: 'Codedevza - Share' },
     { description: 'I just signed a document in style with Documenso!' },
     {
       property: 'og:title',
