@@ -143,11 +143,31 @@ module.exports = {
           '0%,70%,100%': { opacity: '1' },
           '20%,50%': { opacity: '0' },
         },
+        'sign-draw': {
+          to: { 'stroke-dashoffset': '0' },
+        },
+        'doc-float': {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-8px)' },
+        },
+        'pop-in': {
+          '0%': { transform: 'scale(0)', opacity: '0' },
+          '60%': { transform: 'scale(1.1)' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        'fade-up': {
+          '0%': { transform: 'translateY(10px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'caret-blink': 'caret-blink 1.25s ease-out infinite',
+        'sign-draw': 'sign-draw 1.6s ease-out 0.5s forwards',
+        'doc-float': 'doc-float 6s ease-in-out infinite',
+        'pop-in': 'pop-in 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both',
+        'fade-up': 'fade-up 0.6s ease-out both',
       },
       screens: {
         '3xl': '1920px',
