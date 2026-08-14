@@ -5,6 +5,7 @@ import { i18n } from '@lingui/core';
 import { msg } from '@lingui/core/macro';
 import { Trans } from '@lingui/react/macro';
 import { ChevronLeft } from 'lucide-react';
+import { useEffect } from 'react';
 import { isRouteErrorResponse, Link, Outlet } from 'react-router';
 import { Header as AuthenticatedHeader } from '~/components/general/app-header';
 import { GenericErrorLayout } from '~/components/general/generic-error-layout';
@@ -25,6 +26,17 @@ export function meta() {
  */
 export default function RecipientLayout({ matches }: Route.ComponentProps) {
   const { sessionData } = useOptionalSession();
+
+  // Public signing pages are shared with external signers — always render them
+  // in light mode so they look consistent regardless of the viewer's theme or
+  // OS preference. Mirrors the `dark-mode-disabled` approach used by embeds.
+  useEffect(() => {
+    const root = document.documentElement;
+
+    root.classList.add('dark-mode-disabled');
+
+    return () => root.classList.remove('dark-mode-disabled');
+  }, []);
 
   // Hide the header for signing routes.
   const hideHeader = matches.some(
