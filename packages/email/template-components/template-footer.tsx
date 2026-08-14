@@ -33,8 +33,8 @@ export const TemplateFooter = ({ isDocument = true, reportUrl }: TemplateFooterP
         <Text className="my-4 text-base text-muted-foreground">
           <Trans>
             This document was sent using{' '}
-            <Link className="text-primary" href="https://codedevza.co.uk">
-              Codedevza AI
+            <Link className="text-primary" href="https://sign.codedevza.co.uk">
+              Codedevza AI Sign
             </Link>
             .
           </Trans>

@@ -1,4 +1,4 @@
-import { Img, Link } from '../components';
+import { Img, Link, Section } from '../components';
 import { useBranding } from '../providers/branding';
 import { getSafeBrandingUrl } from '../utils/branding-url';
 
@@ -8,35 +8,33 @@ export type TemplateBrandingLogoProps = {
 };
 
 /**
- * Renders the email logo.
+ * Renders the email logo, centered.
  *
  * - When custom branding is enabled with a logo, the branding logo is shown.
  *   If a safe (http/https) Brand Website is configured, the logo links to it.
- * - Otherwise the Codedevza AI logo is shown.
+ * - Otherwise the Codedevza AI Sign logo is shown.
  */
 export const TemplateBrandingLogo = ({ assetBaseUrl, className = 'mb-4 h-6' }: TemplateBrandingLogoProps) => {
   const branding = useBranding();
 
   const hasCustomBrandingLogo = branding.brandingEnabled && Boolean(branding.brandingLogo);
 
-  if (!hasCustomBrandingLogo) {
-    const documensoLogoUrl = new URL('/static/logo.png', assetBaseUrl).toString();
+  const logoSrc = hasCustomBrandingLogo ? branding.brandingLogo : new URL('/static/logo.png', assetBaseUrl).toString();
 
-    return <Img src={documensoLogoUrl} alt="Codedevza AI Logo" className={className} />;
-  }
+  const logo = <Img src={logoSrc} alt="Codedevza AI Sign" className={`mx-auto ${className}`} />;
 
-  const brandingLogo = <Img src={branding.brandingLogo} alt="Branding Logo" className={className} />;
-
-  const safeBrandingUrl = getSafeBrandingUrl(branding.brandingUrl);
-
-  if (!safeBrandingUrl) {
-    return brandingLogo;
-  }
+  const safeBrandingUrl = hasCustomBrandingLogo ? getSafeBrandingUrl(branding.brandingUrl) : null;
 
   return (
-    <Link href={safeBrandingUrl} target="_blank">
-      {brandingLogo}
-    </Link>
+    <Section className="text-center">
+      {safeBrandingUrl ? (
+        <Link href={safeBrandingUrl} target="_blank">
+          {logo}
+        </Link>
+      ) : (
+        logo
+      )}
+    </Section>
   );
 };
 
