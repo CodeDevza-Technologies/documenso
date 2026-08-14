@@ -225,11 +225,8 @@ export const resendDocument = async ({ id, userId, recipients, teamId, requestMe
 
       if (organisationType === OrganisationType.ORGANISATION) {
         emailSubject = i18n._(msg`Reminder: ${envelope.team.name} invited you to ${recipientActionVerb} a document`);
-        emailMessage =
-          envelope.documentMeta.message ||
-          i18n._(
-            msg`${user.name || user.email} on behalf of "${envelope.team.name}" has invited you to ${recipientActionVerb} the document "${envelope.title}".`,
-          );
+        // Empty body when no custom message — the heading already says it.
+        emailMessage = envelope.documentMeta.message || '';
       }
 
       const customEmailTemplate = {

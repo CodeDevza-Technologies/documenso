@@ -145,17 +145,10 @@ export const run = async ({ payload, io }: { payload: TSendSigningEmailJobDefini
 
   if (organisationType === OrganisationType.ORGANISATION) {
     emailSubject = i18n._(msg`${team.name} invited you to ${recipientActionVerb} a document`);
+    // Leave the body message empty when the sender writes no custom message —
+    // the heading already states who invited them to sign which document, so a
+    // default body just duplicates it.
     emailMessage = customEmail?.message ?? '';
-
-    if (!emailMessage) {
-      const inviterName = user.name || '';
-
-      emailMessage = i18n._(
-        settings.includeSenderDetails
-          ? msg`${inviterName} on behalf of "${team.name}" has invited you to ${recipientActionVerb} the document "${envelope.title}".`
-          : msg`${team.name} has invited you to ${recipientActionVerb} the document "${envelope.title}".`,
-      );
-    }
   }
 
   const customEmailTemplate = {
