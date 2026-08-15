@@ -277,19 +277,21 @@ export const OrgMenuSwitcher = () => {
                 </Link>
               </DropdownMenuItem>
 
-              <DropdownMenuItem className="px-4 py-2 text-muted-foreground" asChild>
-                <Link
-                  to={
-                    canAccessOrganisationSettings && !isSignOnly
-                      ? `/o/${currentOrganisation?.url}/settings/general`
-                      : canAccessTeamSettings && !isSignOnly
-                        ? `/t/${currentTeam?.url}/settings/general`
-                        : '/settings/profile'
-                  }
-                >
-                  <Trans>Settings</Trans>
-                </Link>
-              </DropdownMenuItem>
+              {!isSignOnly && (
+                <DropdownMenuItem className="px-4 py-2 text-muted-foreground" asChild>
+                  <Link
+                    to={
+                      canAccessOrganisationSettings
+                        ? `/o/${currentOrganisation?.url}/settings/general`
+                        : canAccessTeamSettings
+                          ? `/t/${currentTeam?.url}/settings/general`
+                          : '/settings/profile'
+                    }
+                  >
+                    <Trans>Settings</Trans>
+                  </Link>
+                </DropdownMenuItem>
+              )}
 
               <DropdownMenuItem className="px-4 py-2 text-muted-foreground" asChild>
                 <Link to="/settings/profile">
