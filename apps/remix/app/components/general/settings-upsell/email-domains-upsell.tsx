@@ -23,7 +23,7 @@ const BRANDED_SENDERS = [
 ];
 
 /**
- * How long the initial unbranded (Documenso default) state is shown before
+ * How long the initial unbranded (Codedevza AI Sign default) state is shown before
  * the first flip starts. Shown exactly once — the cycle never returns to it.
  */
 const INITIAL_STATE_DURATION_MS = 2500;
@@ -46,7 +46,7 @@ export const EmailDomainsUpsell = () => {
 
   const isReducedMotion = useReducedMotion();
 
-  // Loop from index 1: the unbranded Documenso intro plays exactly once,
+  // Loop from index 1: the unbranded Codedevza AI Sign intro plays exactly once,
   // then the cycle rotates through the branded senders only.
   const cycleIndex = useTimedCycle(EMAIL_CYCLE_DURATIONS_MS, 1);
 
@@ -92,7 +92,7 @@ export const EmailDomainsUpsell = () => {
                 )}
 
                 <span className="truncate">
-                  {isBranded ? <Trans>Sending from your domain</Trans> : <Trans>Sending from app.documenso.com</Trans>}
+                  {isBranded ? <Trans>Sending from your domain</Trans> : <Trans>Sending from send.codedevza.co.uk</Trans>}
                 </span>
               </motion.div>
             </AnimatePresence>
@@ -147,7 +147,7 @@ export const EmailDomainsUpsell = () => {
                       transition={{ duration: 0.28, ease: EASE }}
                       className="flex min-w-0 items-center gap-1.5"
                     >
-                      <span className="min-w-0 truncate">{isBranded ? brandedSender.name : 'Documenso'}</span>
+                      <span className="min-w-0 truncate">{isBranded ? brandedSender.name : 'Codedevza AI Sign'}</span>
 
                       {/* Inside the keyed row so it exits with the name and pops back in on every cycle step. */}
                       {isBranded && (
@@ -174,7 +174,7 @@ export const EmailDomainsUpsell = () => {
                       transition={{ duration: 0.28, ease: EASE }}
                       className="truncate"
                     >
-                      {isBranded ? brandedSender.email : 'noreply@app.documenso.com'}
+                      {isBranded ? brandedSender.email : 'sign@send.codedevza.co.uk'}
                     </motion.p>
                   </AnimatePresence>
                 </div>

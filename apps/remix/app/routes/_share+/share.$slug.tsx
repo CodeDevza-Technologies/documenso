@@ -31,10 +31,6 @@ export function meta({ params: { slug } }: Route.MetaArgs) {
       content: `${NEXT_PUBLIC_WEBAPP_URL()}/share/${slug}/opengraph`,
     },
     {
-      name: 'twitter:site',
-      content: '@documenso',
-    },
-    {
       name: 'twitter:card',
       content: 'summary_large_image',
     },
@@ -69,8 +65,7 @@ export const loader = async ({ request, params: { slug } }: Route.LoaderArgs) =>
     return {};
   }
 
-  // Is hardcoded because this whole meta is hardcoded anyway for Codedevza AI.
-  throw redirect('https://documenso.com');
+  throw redirect('/');
 };
 
 export default function SharePage() {

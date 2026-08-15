@@ -38,7 +38,7 @@ export const sendResetPassword = async ({ userId }: SendResetPasswordOptions) =>
     },
     from: {
       name: env('NEXT_PRIVATE_SMTP_FROM_NAME') || 'Codedevza AI Sign',
-      address: env('NEXT_PRIVATE_SMTP_FROM_ADDRESS') || 'noreply@documenso.com',
+      address: env('NEXT_PRIVATE_SMTP_FROM_ADDRESS') || 'hello@codedevza.co.uk',
     },
     subject: 'Password Reset Success!',
     html,

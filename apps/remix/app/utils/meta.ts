@@ -16,11 +16,11 @@ export const appMetaTags = (title?: MessageDescriptor) => {
     {
       name: 'keywords',
       content:
-        'Documenso, open source, DocuSign alternative, document signing, open signing infrastructure, open-source community, fast signing, beautiful signing, smart templates',
+        'Codedevza AI, document signing, e-signatures, sign documents online, fast signing, smart templates, secure signing',
     },
     {
       name: 'author',
-      content: 'Documenso, Inc.',
+      content: 'Codedevza AI',
     },
     {
       name: 'robots',
@@ -28,7 +28,7 @@ export const appMetaTags = (title?: MessageDescriptor) => {
     },
     {
       property: 'og:title',
-      content: 'Documenso - The Open Source DocuSign Alternative',
+      content: 'Codedevza AI - Secure, Effortless Document Signing',
     },
     {
       property: 'og:description',
@@ -45,10 +45,6 @@ export const appMetaTags = (title?: MessageDescriptor) => {
     {
       name: 'twitter:card',
       content: 'summary_large_image',
-    },
-    {
-      name: 'twitter:site',
-      content: '@documenso',
     },
     {
       name: 'twitter:description',
