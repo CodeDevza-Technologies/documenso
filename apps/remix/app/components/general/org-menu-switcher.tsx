@@ -131,13 +131,16 @@ export const OrgMenuSwitcher = () => {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
-        className={cn('z-[60] ml-6 flex w-full divide-x divide-border p-0 md:ml-0 md:min-w-[40rem]')}
+        className={cn(
+          'z-[60] ml-6 flex w-full divide-x divide-border p-0 md:ml-0',
+          isSignOnly ? 'md:min-w-[16rem]' : 'md:min-w-[40rem]',
+        )}
         align="end"
         forceMount
       >
-        <div className="flex h-[400px] w-full divide-x">
+        <div className={cn('flex w-full divide-x', isSignOnly ? 'h-auto' : 'h-[400px]')}>
           {/* Organisations column */}
-          <div className="flex w-full flex-col md:w-1/3">
+          <div className={cn('w-full flex-col md:w-1/3', isSignOnly ? 'hidden' : 'flex')}>
             <div className="flex h-12 items-center border-b p-2">
               <h3 className="flex items-center px-2 font-medium text-muted-foreground text-sm">
                 <Building2Icon className="mr-2 h-3.5 w-3.5" />
@@ -191,7 +194,7 @@ export const OrgMenuSwitcher = () => {
           </div>
 
           {/* Teams column */}
-          <div className="hidden w-1/3 flex-col md:flex">
+          <div className={cn('w-1/3 flex-col', isSignOnly ? 'hidden' : 'hidden md:flex')}>
             <div className="flex h-12 items-center border-b p-2">
               <h3 className="flex items-center px-2 font-medium text-muted-foreground text-sm">
                 <UsersIcon className="mr-2 h-3.5 w-3.5" />
@@ -252,7 +255,7 @@ export const OrgMenuSwitcher = () => {
           </div>
 
           {/* Settings column */}
-          <div className="hidden w-1/3 flex-col md:flex">
+          <div className={cn('flex-col', isSignOnly ? 'flex w-full' : 'hidden w-1/3 md:flex')}>
             <div className="flex h-12 items-center border-b p-2">
               <h3 className="flex items-center px-2 font-medium text-muted-foreground text-sm">
                 <SettingsIcon className="mr-2 h-3.5 w-3.5" />
@@ -277,9 +280,9 @@ export const OrgMenuSwitcher = () => {
               <DropdownMenuItem className="px-4 py-2 text-muted-foreground" asChild>
                 <Link
                   to={
-                    canAccessOrganisationSettings
+                    canAccessOrganisationSettings && !isSignOnly
                       ? `/o/${currentOrganisation?.url}/settings/general`
-                      : canAccessTeamSettings
+                      : canAccessTeamSettings && !isSignOnly
                         ? `/t/${currentTeam?.url}/settings/general`
                         : '/settings/profile'
                   }
