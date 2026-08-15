@@ -1,4 +1,3 @@
-import communityCardsImage from '@documenso/assets/images/community-cards.png';
 import { authClient } from '@documenso/auth/client';
 import { useAnalytics } from '@documenso/lib/client-only/hooks/use-analytics';
 import { AppError, AppErrorCode } from '@documenso/lib/errors/app-error';
@@ -26,8 +25,6 @@ import { FaIdCardClip } from 'react-icons/fa6';
 import { FcGoogle } from 'react-icons/fc';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { z } from 'zod';
-
-import { UserProfileTimur } from '~/components/general/user-profile-timur';
 
 export const ZSignUpFormSchema = z
   .object({
@@ -207,49 +204,18 @@ export const SignUpForm = ({
   }, [form]);
 
   return (
-    <div className={cn('flex justify-center gap-x-12', className)}>
-      <div className="relative hidden flex-1 overflow-hidden rounded-xl border border-border xl:flex">
-        <div className="absolute -inset-8 -z-[2] backdrop-blur">
-          <img
-            src={communityCardsImage}
-            alt="community-cards"
-            className="h-full w-full object-cover dark:brightness-95 dark:contrast-[70%] dark:invert"
-          />
-        </div>
+    <div className={cn('w-full', className)}>
+      <h1 className="font-semibold text-2xl tracking-tight">
+        <Trans>Create your account</Trans>
+      </h1>
 
-        <div className="absolute -inset-8 -z-[1] bg-background/50 backdrop-blur-[2px]" />
+      <p className="mt-2 text-muted-foreground text-sm">
+        <Trans>Sign up to view and sign documents securely with Codedevza AI Sign.</Trans>
+      </p>
 
-        <div className="relative flex h-full w-full flex-col items-center justify-evenly">
-          <div className="rounded-2xl border bg-background px-4 py-1 font-medium text-sm">
-            <Trans>User profiles are here!</Trans>
-          </div>
-
-          <div className="w-full max-w-md">
-            <UserProfileTimur rows={2} className="rounded-2xl border border-border bg-background shadow-md" />
-          </div>
-
-          <div />
-        </div>
-      </div>
-
-      <div className="relative z-10 flex min-h-[min(850px,80vh)] w-full max-w-lg flex-col rounded-xl border border-border bg-neutral-100 p-6 dark:bg-background">
-        <div className="h-20">
-          <h1 className="font-semibold text-xl md:text-2xl">
-            <Trans>Create a new account</Trans>
-          </h1>
-
-          <p className="mt-2 text-muted-foreground text-xs md:text-sm">
-            <Trans>
-              Create your account and start using state-of-the-art document signing. Open and beautiful signing is
-              within your grasp.
-            </Trans>
-          </p>
-        </div>
-
-        <hr className="-mx-6 my-4" />
-
+      <div className="mt-8">
         <Form {...form}>
-          <form className="flex w-full flex-1 flex-col gap-y-4" onSubmit={form.handleSubmit(onFormSubmit)}>
+          <form className="flex w-full flex-col gap-y-4" onSubmit={form.handleSubmit(onFormSubmit)}>
             <fieldset className="flex w-full flex-col gap-y-4" disabled={isSubmitting}>
               {isEmailPasswordSignupEnabled && (
                 <>
@@ -388,44 +354,27 @@ export const SignUpForm = ({
                   <Trans>Sign Up with OIDC</Trans>
                 </Button>
               )}
-
-              <p className="mt-4 text-muted-foreground text-sm">
-                <Trans>
-                  Already have an account?{' '}
-                  <Link to="/signin" className="text-documenso-700 duration-200 hover:opacity-70">
-                    Sign in instead
-                  </Link>
-                </Trans>
-              </p>
             </fieldset>
 
             {isEmailPasswordSignupEnabled && (
-              <Button loading={form.formState.isSubmitting} type="submit" size="lg" className="mt-6 w-full">
+              <Button loading={form.formState.isSubmitting} type="submit" size="lg" className="mt-2 w-full">
                 <Trans>Create account</Trans>
               </Button>
             )}
           </form>
         </Form>
-        <p className="mt-6 text-muted-foreground text-xs">
+
+        <p className="mt-8 text-center text-muted-foreground text-sm">
           <Trans>
-            By proceeding, you agree to our{' '}
-            <Link
-              to="https://documen.so/terms"
-              target="_blank"
-              className="text-documenso-700 duration-200 hover:opacity-70"
-            >
-              Terms of Service
-            </Link>{' '}
-            and{' '}
-            <Link
-              to="https://documen.so/privacy"
-              target="_blank"
-              className="text-documenso-700 duration-200 hover:opacity-70"
-            >
-              Privacy Policy
+            Already have an account?{' '}
+            <Link to="/signin" className="font-medium text-primary duration-200 hover:opacity-70">
+              Sign in
             </Link>
-            .
           </Trans>
+        </p>
+
+        <p className="mt-6 text-center text-muted-foreground text-xs">
+          <Trans>By proceeding, you agree to our Terms of Service and Privacy Policy.</Trans>
         </p>
       </div>
     </div>
