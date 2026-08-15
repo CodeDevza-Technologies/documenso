@@ -17,6 +17,29 @@ export const isPersonalLayout = (organisations: Pick<Organisation, 'type'>[]) =>
 };
 
 /**
+ * Whether the session belongs to a sign-only account.
+ *
+ * Self-signup accounts only hold a personal organisation, so anyone without an
+ * admin/manager role in a real (non-personal) organisation — and without the
+ * instance ADMIN role — can only sign documents sent to them. Mirrors the
+ * server-side gate in `can-user-author-envelopes.ts`.
+ */
+export const isSignOnlyUser = (
+  user: { roles: string[] },
+  organisations: Array<Pick<Organisation, 'type'> & { currentOrganisationRole: OrganisationMemberRole }>,
+) => {
+  if (user.roles.includes('ADMIN')) {
+    return false;
+  }
+
+  return !organisations.some(
+    (org) =>
+      org.type === 'ORGANISATION' &&
+      (org.currentOrganisationRole === 'ADMIN' || org.currentOrganisationRole === 'MANAGER'),
+  );
+};
+
+/**
  * Determines whether a team member can execute a given action.
  *
  * @param action The action the user is trying to execute.

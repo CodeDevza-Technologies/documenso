@@ -1,5 +1,6 @@
 import { authClient } from '@documenso/auth/client';
 import { useSession } from '@documenso/lib/client-only/providers/session';
+import { isSignOnlyUser } from '@documenso/lib/utils/organisations';
 import { trpc } from '@documenso/trpc/react';
 import { Sheet, SheetContent } from '@documenso/ui/primitives/sheet';
 import { ThemeSwitcher } from '@documenso/ui/primitives/theme-switcher';
@@ -19,7 +20,7 @@ export type AppNavMobileProps = {
 export const AppNavMobile = ({ isMenuOpen, onMenuOpenChange }: AppNavMobileProps) => {
   const { t } = useLingui();
 
-  const { organisations } = useSession();
+  const { user, organisations } = useSession();
 
   const currentTeam = useOptionalCurrentTeam();
 
@@ -39,7 +40,10 @@ export const AppNavMobile = ({ isMenuOpen, onMenuOpenChange }: AppNavMobileProps
   const menuNavigationLinks = useMemo(() => {
     let teamUrl = currentTeam?.url || null;
 
-    if (!teamUrl && organisations.length === 1 && organisations[0].teams.length === 1) {
+    // Sign-only accounts have no documents or templates of their own.
+    if (isSignOnlyUser(user, organisations)) {
+      teamUrl = null;
+    } else if (!teamUrl && organisations.length === 1 && organisations[0].teams.length === 1) {
       teamUrl = organisations[0].teams[0].url;
     }
 
@@ -74,7 +78,7 @@ export const AppNavMobile = ({ isMenuOpen, onMenuOpenChange }: AppNavMobileProps
         text: t`Settings`,
       },
     ];
-  }, [currentTeam, organisations]);
+  }, [currentTeam, organisations, user]);
 
   return (
     <Sheet open={isMenuOpen} onOpenChange={onMenuOpenChange}>

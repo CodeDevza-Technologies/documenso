@@ -5,7 +5,7 @@ import { DOCUMENSO_CLOUD_ENTERPRISE_CTA_URL, IS_BILLING_ENABLED } from '@documen
 import { AppError } from '@documenso/lib/errors/app-error';
 import { INTERNAL_CLAIM_ID } from '@documenso/lib/types/subscription';
 import { parseMessageDescriptorMacro } from '@documenso/lib/utils/i18n';
-import { isPersonalLayout } from '@documenso/lib/utils/organisations';
+import { isPersonalLayout, isSignOnlyUser } from '@documenso/lib/utils/organisations';
 import { trpc } from '@documenso/trpc/react';
 import { ZCreateOrganisationRequestSchema } from '@documenso/trpc/server/organisation-router/create-organisation.types';
 import { cn } from '@documenso/ui/lib/utils';
@@ -52,7 +52,7 @@ export type TCreateOrganisationFormSchema = z.infer<typeof ZCreateOrganisationFo
 export const OrganisationCreateDialog = ({ trigger, ...props }: OrganisationCreateDialogProps) => {
   const { t } = useLingui();
   const { toast } = useToast();
-  const { refreshSession, organisations } = useSession();
+  const { user, refreshSession, organisations } = useSession();
 
   const [searchParams] = useSearchParams();
   const updateSearchParams = useUpdateSearchParams();
@@ -131,6 +131,11 @@ export const OrganisationCreateDialog = ({ trigger, ...props }: OrganisationCrea
       plansData?.plans[INTERNAL_CLAIM_ID.INDIVIDUAL]?.yearlyPrice?.id === priceId
     );
   };
+
+  // Sign-only accounts cannot create organisations.
+  if (isSignOnlyUser(user, organisations)) {
+    return null;
+  }
 
   return (
     <Dialog {...props} open={open} onOpenChange={(value) => !form.formState.isSubmitting && setOpen(value)}>
@@ -395,7 +400,6 @@ const BillingPlanForm = ({ value, onChange, plans, canCreateFreeOrganisation }: 
           </div>
         </Link>
       </div>
-
     </div>
   );
 };

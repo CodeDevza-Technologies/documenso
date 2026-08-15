@@ -4,11 +4,12 @@ import { OrganisationProvider } from '@documenso/lib/client-only/providers/organ
 import { useSession } from '@documenso/lib/client-only/providers/session';
 import { getSiteSettings } from '@documenso/lib/server-only/site-settings/get-site-settings';
 import { SITE_SETTINGS_BANNER_ID } from '@documenso/lib/server-only/site-settings/schemas/banner';
+import { isSignOnlyUser } from '@documenso/lib/utils/organisations';
 import { cn } from '@documenso/ui/lib/utils';
 import { Button } from '@documenso/ui/primitives/button';
 import { msg } from '@lingui/core/macro';
 import { Trans } from '@lingui/react/macro';
-import { Link, Outlet, redirect } from 'react-router';
+import { Link, Navigate, Outlet, redirect, useLocation } from 'react-router';
 
 import { AppBanner } from '~/components/general/app-banner';
 import { Header } from '~/components/general/app-header';
@@ -49,6 +50,8 @@ export default function Layout({ loaderData, params, matches }: Route.ComponentP
 
   const { layoutMode } = useChildRouteFlags();
 
+  const { pathname } = useLocation();
+
   const teamUrl = params.teamUrl;
   const orgUrl = params.orgUrl;
 
@@ -79,6 +82,13 @@ export default function Layout({ loaderData, params, matches }: Route.ComponentP
       match?.id === 'routes/_authenticated+/t.$teamUrl+/documents.$id.edit' ||
       match?.id === 'routes/_authenticated+/t.$teamUrl+/templates.$id.edit',
   );
+
+  // Sign-only accounts only get their inbox and account settings — everything
+  // else (documents, templates, teams, orgs, admin) is off limits. The API is
+  // hard-gated server-side; this keeps the UI consistent with that.
+  if (isSignOnlyUser(user, organisations) && !['/inbox', '/settings'].some((prefix) => pathname.startsWith(prefix))) {
+    return <Navigate to="/inbox" replace />;
+  }
 
   if (orgNotFound || teamNotFound) {
     return (

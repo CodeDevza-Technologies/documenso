@@ -42,6 +42,7 @@ import { assertCompatibleRecipientRole } from '../signature-level/assert-compati
 import { resolveSignatureLevel } from '../signature-level/resolve-signature-level';
 import { getTeamSettings } from '../team/get-team-settings';
 import { assertUserNotDisabledById } from '../user/assert-user-not-disabled';
+import { assertUserCanAuthorEnvelopes } from '../user/can-user-author-envelopes';
 import { triggerWebhook } from '../webhooks/trigger/trigger-webhook';
 
 type CreateEnvelopeRecipientFieldOptions = TFieldAndMeta & {
@@ -126,6 +127,10 @@ export const createEnvelope = async ({
   // funnels through here (document.create, envelope.use, template create,
   // embedding template/document create, API v1) and the seed/job paths.
   await assertUserNotDisabledById({ userId });
+
+  // Sign-only accounts (self-signups with no admin/manager role in a real
+  // organisation) can never author documents or templates.
+  await assertUserCanAuthorEnvelopes(userId);
 
   const {
     type,
@@ -257,8 +262,11 @@ export const createEnvelope = async ({
     );
   }
 
+  // Documents are account-gated by default: recipients must be signed in with
+  // the recipient email to view, so a leaked signing link exposes nothing.
+  // Authors can still explicitly opt out per document in its settings.
   const authOptions = createDocumentAuthOptions({
-    globalAccessAuth: globalAccessAuth || [],
+    globalAccessAuth: globalAccessAuth?.length ? globalAccessAuth : ['ACCOUNT'],
     globalActionAuth: globalActionAuth || [],
   });
 

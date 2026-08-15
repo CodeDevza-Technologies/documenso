@@ -4,6 +4,7 @@ import { IS_BILLING_ENABLED, NEXT_PUBLIC_WEBAPP_URL } from '@documenso/lib/const
 import { AppError, AppErrorCode } from '@documenso/lib/errors/app-error';
 import { createOrganisation } from '@documenso/lib/server-only/organisation/create-organisation';
 import { getSubscriptionClaim } from '@documenso/lib/server-only/subscription/get-subscription-claim';
+import { assertUserCanAuthorEnvelopes } from '@documenso/lib/server-only/user/can-user-author-envelopes';
 import { INTERNAL_CLAIM_ID } from '@documenso/lib/types/subscription';
 import { prisma } from '@documenso/prisma';
 import { OrganisationType, SubscriptionStatus } from '@prisma/client';
@@ -23,6 +24,10 @@ export const createOrganisationRoute = authenticatedProcedure
         priceId,
       },
     });
+
+    // Sign-only accounts cannot create organisations beyond the personal one
+    // provisioned at signup.
+    await assertUserCanAuthorEnvelopes(user.id);
 
     // Check if user can create a free organiastion.
     if (IS_BILLING_ENABLED() && !priceId) {

@@ -1,4 +1,5 @@
 import { useSession } from '@documenso/lib/client-only/providers/session';
+import { isSignOnlyUser } from '@documenso/lib/utils/organisations';
 import { cn } from '@documenso/ui/lib/utils';
 import { Button } from '@documenso/ui/primitives/button';
 import { msg } from '@lingui/core/macro';
@@ -18,7 +19,7 @@ export type AppNavDesktopProps = HTMLAttributes<HTMLDivElement> & {
 
 export const AppNavDesktop = ({ className, setIsCommandMenuOpen, ...props }: AppNavDesktopProps) => {
   const { _ } = useLingui();
-  const { organisations } = useSession();
+  const { user, organisations } = useSession();
 
   const { pathname } = useLocation();
 
@@ -34,6 +35,11 @@ export const AppNavDesktop = ({ className, setIsCommandMenuOpen, ...props }: App
   }, []);
 
   const menuNavigationLinks = useMemo(() => {
+    // Sign-only accounts have no documents or templates of their own.
+    if (isSignOnlyUser(user, organisations)) {
+      return [];
+    }
+
     let teamUrl = currentTeam?.url || null;
 
     if (!teamUrl && organisations.length === 1 && organisations[0].teams.length === 1) {
@@ -54,7 +60,7 @@ export const AppNavDesktop = ({ className, setIsCommandMenuOpen, ...props }: App
         label: msg`Templates`,
       },
     ];
-  }, [currentTeam, organisations]);
+  }, [currentTeam, organisations, user]);
 
   return (
     <div className={cn('ml-8 hidden flex-1 items-center gap-x-12 md:flex md:justify-between', className)} {...props}>
