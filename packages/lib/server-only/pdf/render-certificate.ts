@@ -591,6 +591,26 @@ const renderBranding = async ({ qrToken, i18n }: { qrToken: string | null; i18n:
     x: text.width() + 16,
   });
 
+  // Full wordmark next to the icon: "Codedevza" regular, "AI Sign" bold.
+  const wordmarkRegular = new Konva.Text({
+    x: documensoImage.x() + documensoImage.width() + 6,
+    verticalAlign: 'middle',
+    text: 'Codedevza',
+    fontFamily: 'Inter',
+    fontSize: textSm,
+    height: brandingHeight,
+  });
+
+  const wordmarkBold = new Konva.Text({
+    x: wordmarkRegular.x() + wordmarkRegular.width() + 3,
+    verticalAlign: 'middle',
+    text: 'AI Sign',
+    fontStyle: 'bold',
+    fontFamily: 'Inter',
+    fontSize: textSm,
+    height: brandingHeight,
+  });
+
   const qrSize = qrToken ? 72 : 0;
 
   const logoGroup = new Konva.Group({
@@ -598,6 +618,8 @@ const renderBranding = async ({ qrToken, i18n }: { qrToken: string | null; i18n:
   });
   logoGroup.add(text);
   logoGroup.add(documensoImage);
+  logoGroup.add(wordmarkRegular);
+  logoGroup.add(wordmarkBold);
 
   branding.add(logoGroup);
 

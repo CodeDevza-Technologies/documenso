@@ -452,7 +452,29 @@ const renderBranding = () => {
     width: brandingHeight * (img.width / img.height),
   });
 
+  // Full wordmark next to the icon: "Codedevza" regular, "AI Sign" bold.
+  const wordmarkRegular = new Konva.Text({
+    x: brandingImage.width() + 6,
+    verticalAlign: 'middle',
+    text: 'Codedevza',
+    fontFamily: 'Inter',
+    fontSize: 11,
+    height: brandingHeight,
+  });
+
+  const wordmarkBold = new Konva.Text({
+    x: wordmarkRegular.x() + wordmarkRegular.width() + 3,
+    verticalAlign: 'middle',
+    text: 'AI Sign',
+    fontStyle: 'bold',
+    fontFamily: 'Inter',
+    fontSize: 11,
+    height: brandingHeight,
+  });
+
   branding.add(brandingImage);
+  branding.add(wordmarkRegular);
+  branding.add(wordmarkBold);
   return branding;
 };
 
