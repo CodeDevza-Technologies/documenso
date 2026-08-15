@@ -1,6 +1,6 @@
 import { useOptionalCurrentOrganisation } from '@documenso/lib/client-only/providers/organisation';
 import { useSession } from '@documenso/lib/client-only/providers/session';
-import { canExecuteOrganisationAction } from '@documenso/lib/utils/organisations';
+import { canExecuteOrganisationAction, isSignOnlyUser } from '@documenso/lib/utils/organisations';
 import { getSettingsNavGroups, type SettingsNavGroup, type SettingsNavItem } from '@documenso/lib/utils/settings-nav';
 import { canExecuteTeamAction } from '@documenso/lib/utils/teams';
 import { Button } from '@documenso/ui/primitives/button';
@@ -68,8 +68,12 @@ const findActiveCrumbs = (group: SettingsNavGroup | null, pathname: string): Mes
 
 export const UnifiedSettingsLayout = ({ activeScope, preferredTeamUrl = null }: UnifiedSettingsLayoutProps) => {
   const { _ } = useLingui();
-  const { organisations } = useSession();
+  const { user, organisations } = useSession();
   const { pathname } = useLocation();
+
+  // Sign-only accounts manage nothing — no organisation or team settings, and
+  // no organisations list. They only get their own account pages.
+  const isSignOnly = isSignOnlyUser(user, organisations);
 
   const currentOrganisation = useOptionalCurrentOrganisation();
   const team = useOptionalCurrentTeam();
@@ -114,18 +118,29 @@ export const UnifiedSettingsLayout = ({ activeScope, preferredTeamUrl = null }: 
   }, [sidebarTeamUrl]);
 
   const groups = getSettingsNavGroups({
-    organisation: organisation
-      ? {
-          url: organisation.url,
-          currentOrganisationRole: organisation.currentOrganisationRole,
-          organisationClaim: organisation.organisationClaim,
-        }
-      : null,
-    team: teamForSidebar ? { url: teamForSidebar.url, currentTeamRole: teamForSidebar.currentTeamRole } : null,
-    hasManageableBillingOrgs: organisations.some((org) =>
-      canExecuteOrganisationAction('MANAGE_BILLING', org.currentOrganisationRole),
-    ),
+    organisation:
+      organisation && !isSignOnly
+        ? {
+            url: organisation.url,
+            currentOrganisationRole: organisation.currentOrganisationRole,
+            organisationClaim: organisation.organisationClaim,
+          }
+        : null,
+    team:
+      teamForSidebar && !isSignOnly
+        ? { url: teamForSidebar.url, currentTeamRole: teamForSidebar.currentTeamRole }
+        : null,
+    hasManageableBillingOrgs:
+      !isSignOnly &&
+      organisations.some((org) => canExecuteOrganisationAction('MANAGE_BILLING', org.currentOrganisationRole)),
   });
+
+  if (isSignOnly) {
+    groups.account = {
+      ...groups.account,
+      items: groups.account.items.filter((item) => item.key !== 'organisations'),
+    };
+  }
 
   const canManageOrg =
     organisation !== null && canExecuteOrganisationAction('MANAGE_ORGANISATION', organisation.currentOrganisationRole);
@@ -185,16 +200,16 @@ export const UnifiedSettingsLayout = ({ activeScope, preferredTeamUrl = null }: 
           <div className="hidden md:block">
             <UnifiedSettingsSidebar
               groups={groups}
-              currentOrgUrl={organisation?.url ?? null}
-              currentTeamUrl={teamForSidebar?.url ?? null}
+              currentOrgUrl={isSignOnly ? null : (organisation?.url ?? null)}
+              currentTeamUrl={isSignOnly ? null : (teamForSidebar?.url ?? null)}
             />
           </div>
           <div className="md:hidden">
             <UnifiedSettingsSidebarMobile
               groups={groups}
               activeScope={activeScope}
-              currentOrgUrl={organisation?.url ?? null}
-              currentTeamUrl={teamForSidebar?.url ?? null}
+              currentOrgUrl={isSignOnly ? null : (organisation?.url ?? null)}
+              currentTeamUrl={isSignOnly ? null : (teamForSidebar?.url ?? null)}
             />
           </div>
         </div>
