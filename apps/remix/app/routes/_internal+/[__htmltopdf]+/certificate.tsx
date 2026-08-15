@@ -22,7 +22,7 @@ import { match } from 'ts-pattern';
 import { UAParser } from 'ua-parser-js';
 import { renderSVG } from 'uqr';
 
-import { BrandingLogo } from '~/components/general/branding-logo';
+import CodedevzaIcon from '@documenso/assets/codedevza-icon-black.png';
 
 import type { Route } from './+types/certificate';
 
@@ -380,7 +380,19 @@ export default function SigningCertificate({ loaderData }: Route.ComponentProps)
             <p className="flex-shrink-0 font-medium text-sm print:text-xs">
               {_(msg`Signing certificate provided by`)}:
             </p>
-            <BrandingLogo className="max-h-6 print:max-h-4" />
+            <span className="inline-flex flex-shrink-0 items-center gap-2 align-middle">
+              <img
+                src={CodedevzaIcon}
+                alt="Codedevza AI Sign"
+                className="h-6 w-auto object-contain print:h-4"
+              />
+              <span
+                className="whitespace-nowrap text-lg leading-none tracking-tight print:text-sm"
+                style={{ color: '#111111' }}
+              >
+                Codedevza <span className="font-bold">AI Sign</span>
+              </span>
+            </span>
           </div>
         </div>
       )}

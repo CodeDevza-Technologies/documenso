@@ -15,7 +15,7 @@ import { DateTime } from 'luxon';
 import { redirect } from 'react-router';
 
 import appStylesheet from '~/app.css?url';
-import { BrandingLogo } from '~/components/general/branding-logo';
+import CodedevzaIcon from '@documenso/assets/codedevza-icon-black.png';
 import { InternalAuditLogTable } from '~/components/tables/internal-audit-log-table';
 
 import type { Route } from './+types/audit-log';
@@ -190,7 +190,19 @@ export default function AuditLog({ loaderData }: Route.ComponentProps) {
       {!hidePoweredBy && (
         <div className="my-8 flex-row-reverse">
           <div className="flex items-end justify-end gap-x-4">
-            <BrandingLogo className="max-h-6 print:max-h-4" />
+            <span className="inline-flex flex-shrink-0 items-center gap-2 align-middle">
+              <img
+                src={CodedevzaIcon}
+                alt="Codedevza AI Sign"
+                className="h-6 w-auto object-contain print:h-4"
+              />
+              <span
+                className="whitespace-nowrap text-lg leading-none tracking-tight print:text-sm"
+                style={{ color: '#111111' }}
+              >
+                Codedevza <span className="font-bold">AI Sign</span>
+              </span>
+            </span>
           </div>
         </div>
       )}
