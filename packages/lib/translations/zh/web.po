@@ -12420,7 +12420,7 @@ msgstr "已处理总行数：{totalProcessed}"
 
 #: apps/remix/app/routes/_authenticated+/admin+/stats.tsx
 msgid "Total Signers that Signed Up"
-msgstr "注册为 Documenso 用户的签署人总数"
+msgstr "注册为 Codedevza AI Sign 用户的签署人总数"
 
 #: apps/remix/app/routes/_authenticated+/admin+/stats.tsx
 msgid "Total Users"

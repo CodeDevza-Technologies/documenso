@@ -8,10 +8,10 @@ export const OpenAPIV1 = Object.assign(
     ApiContractV1,
     {
       info: {
-        title: 'Documenso API',
+        title: 'Codedevza AI Sign API',
         version: '1.0.0',
         description:
-          'API V1 has been deprecated. For more details, see https://docs.documenso.com/docs/developers/api/migrate-to-envelopes. \n\nThe Documenso API for retrieving, creating, updating and deleting documents.',
+          'The Codedevza AI Sign API for retrieving, creating, updating and deleting documents.',
       },
       servers: [
         {
