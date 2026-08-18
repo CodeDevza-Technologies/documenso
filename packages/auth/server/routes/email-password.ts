@@ -297,11 +297,37 @@ export const emailPasswordRoute = new Hono<HonoAuthContext>()
   .post('/verify-email', sValidator('json', ZVerifyEmailSchema), async (c) => {
     const requestMetadata = c.get('requestMetadata');
 
-    const { token } = c.req.valid('json');
+    const body = c.req.valid('json');
+
+    let token: string;
+    let rateLimitIdentifier: string;
+
+    if ('token' in body) {
+      token = body.token;
+      rateLimitIdentifier = body.token;
+    } else {
+      // OTP flow: codes are stored as `<userId>:<code>`, so reconstruct the
+      // stored token from the email. Rate limiting is keyed on the email so a
+      // 6-digit code cannot be brute forced.
+      const email = body.email.toLowerCase();
+
+      rateLimitIdentifier = `verify-email-code:${email}`;
+
+      const user = await prisma.user.findFirst({
+        where: {
+          email,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      token = user ? `${user.id}:${body.code}` : 'unknown-user';
+    }
 
     const verifyLimitResult = await verifyEmailRateLimit.check({
       ip: requestMetadata.ipAddress ?? 'unknown',
-      identifier: token,
+      identifier: rateLimitIdentifier,
     });
 
     const verifyLimited = rateLimitResponse(c, verifyLimitResult);

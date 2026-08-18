@@ -125,13 +125,11 @@ export const SignUpForm = ({
         captchaToken: token ?? undefined,
       });
 
-      await navigate(returnTo ? returnTo : '/unverified-account');
+      await navigate(returnTo ? returnTo : `/unverified-account?email=${encodeURIComponent(email)}`);
 
       toast({
         title: _(msg`Registration Successful`),
-        description: _(
-          msg`You have successfully registered. Please verify your account by clicking on the link you received in the email.`,
-        ),
+        description: _(msg`You have successfully registered. Enter the verification code we emailed you to continue.`),
         duration: 5000,
       });
 

@@ -40,9 +40,15 @@ export const sendConfirmationEmail = async ({ userId }: SendConfirmationEmailPro
   const assetBaseUrl = NEXT_PUBLIC_WEBAPP_URL() || 'http://localhost:3000';
   const confirmationLink = `${assetBaseUrl}/verify-email/${verificationToken.token}`;
 
+  // OTP tokens are stored as `<userId>:<code>` — extract the code the user
+  // types in. Legacy long link tokens have no separator and fall back to the
+  // link-based email.
+  const [, confirmationCode] = verificationToken.token.split(':');
+
   const confirmationTemplate = createElement(ConfirmEmailTemplate, {
     assetBaseUrl,
     confirmationLink,
+    confirmationCode,
   });
 
   const [html, text] = await Promise.all([

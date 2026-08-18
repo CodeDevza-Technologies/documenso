@@ -9,11 +9,14 @@ import { TemplateFooter } from '../template-components/template-footer';
 
 export const ConfirmEmailTemplate = ({
   confirmationLink,
+  confirmationCode,
   assetBaseUrl = 'http://localhost:3002',
 }: TemplateConfirmationEmailProps) => {
   const { _ } = useLingui();
 
-  const previewText = msg`Please confirm your email address`;
+  const previewText = confirmationCode
+    ? msg`Your confirmation code is ${confirmationCode}`
+    : msg`Please confirm your email address`;
 
   return (
     <Html>
@@ -26,7 +29,11 @@ export const ConfirmEmailTemplate = ({
             <Section>
               <TemplateBrandingLogo assetBaseUrl={assetBaseUrl} className="mb-4 h-12" />
 
-              <TemplateConfirmationEmail confirmationLink={confirmationLink} assetBaseUrl={assetBaseUrl} />
+              <TemplateConfirmationEmail
+                confirmationLink={confirmationLink}
+                confirmationCode={confirmationCode}
+                assetBaseUrl={assetBaseUrl}
+              />
             </Section>
           </Container>
           <div className="mx-auto mt-12 max-w-xl" />

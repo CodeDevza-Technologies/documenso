@@ -55,9 +55,15 @@ export const ZResetPasswordSchema = z.object({
 
 export type TResetPasswordSchema = z.infer<typeof ZResetPasswordSchema>;
 
-export const ZVerifyEmailSchema = z.object({
-  token: z.string().min(1),
-});
+export const ZVerifyEmailSchema = z.union([
+  z.object({
+    token: z.string().min(1),
+  }),
+  z.object({
+    email: zEmail().min(1),
+    code: z.string().regex(/^\d{6}$/),
+  }),
+]);
 
 export type TVerifyEmailSchema = z.infer<typeof ZVerifyEmailSchema>;
 

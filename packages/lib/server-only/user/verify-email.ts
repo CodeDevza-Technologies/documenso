@@ -41,8 +41,9 @@ export const verifyEmail = async ({ token }: VerifyEmailProps) => {
       userId: verificationToken.userId,
     });
 
-    // If there isn't a recent token or it's older than 1 hour, send a new token
-    if (!mostRecentToken || DateTime.now().minus({ hours: 1 }).toJSDate() > mostRecentToken.createdAt) {
+    // If there isn't a recent token or it's older than 15 minutes (the OTP
+    // lifetime), send a fresh code so the user always has a working one.
+    if (!mostRecentToken || DateTime.now().minus({ minutes: 15 }).toJSDate() > mostRecentToken.createdAt) {
       await jobsClient.triggerJob({
         name: 'send.signup.confirmation.email',
         payload: {

@@ -10,8 +10,6 @@ import { getMostRecentEmailVerificationToken } from './get-most-recent-email-ver
 type SendConfirmationTokenOptions = { email: string; force?: boolean };
 
 export const sendConfirmationToken = async ({ email, force = false }: SendConfirmationTokenOptions) => {
-  const token = crypto.randomBytes(20).toString('hex');
-
   const user = await prisma.user.findFirst({
     where: {
       email: email,
@@ -37,11 +35,17 @@ export const sendConfirmationToken = async ({ email, force = false }: SendConfir
     // return;
   }
 
+  // A 6-digit OTP entered by the user on the verify screen. Codes are stored
+  // prefixed with the user id (`<userId>:<code>`) so the unique constraint on
+  // `token` cannot collide across users and verification is scoped per user.
+  const code = crypto.randomInt(100_000, 1_000_000).toString();
+  const token = `${user.id}:${code}`;
+
   const createdToken = await prisma.verificationToken.create({
     data: {
       identifier: USER_SIGNUP_VERIFICATION_TOKEN_IDENTIFIER,
       token: token,
-      expires: new Date(Date.now() + ONE_HOUR),
+      expires: new Date(Date.now() + ONE_HOUR / 4),
       user: {
         connect: {
           id: user.id,
