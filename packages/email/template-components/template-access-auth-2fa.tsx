@@ -24,36 +24,34 @@ export const TemplateAccessAuth2FA = ({
 
   return (
     <div>
-      <Img src={getAssetUrl('/static/document.png')} alt="Document" className="mx-auto h-12 w-12" />
+      <Img src={getAssetUrl('/static/mail-open.png')} alt="" className="mx-auto mt-2 h-12 w-12" />
 
-      <Section className="mt-8">
-        <Heading className="text-center font-semibold text-foreground text-lg">
-          <Trans>Verification Code Required</Trans>
+      <Section className="mt-6">
+        <Heading className="mb-0 text-center font-semibold text-foreground text-lg">
+          <Trans>Your verification code</Trans>
         </Heading>
 
-        <Text className="mt-2 text-center text-foreground">
+        <Text className="mx-auto mt-2 mb-0 max-w-[85%] text-center text-base text-muted-foreground">
           <Trans>
-            Hi {userName}, you need to enter a verification code to complete the document "{documentTitle}".
+            Hi {userName}, enter this code to continue with
+            <br />"{documentTitle}"
           </Trans>
         </Text>
 
-        <Section className="mt-6 rounded-lg bg-muted p-6 text-center">
-          <Text className="mb-2 font-medium text-muted-foreground text-sm">
-            <Trans>Your verification code:</Trans>
-          </Text>
-          <Text className="font-bold text-2xl text-foreground tracking-wider">{code}</Text>
+        <Section className="mx-auto mt-6 max-w-[300px] rounded-xl border border-border border-solid bg-muted px-6 py-5 text-center">
+          <Text className="my-0 font-bold text-4xl text-foreground tracking-widest">{code}</Text>
         </Section>
 
-        <Text className="mt-4 text-center text-muted-foreground text-sm">
+        <Text className="mt-5 mb-0 text-center text-muted-foreground text-sm">
           <Plural
             value={expiresInMinutes}
-            one="This code will expire in # minute."
-            other="This code will expire in # minutes."
+            one="This code expires in # minute."
+            other="This code expires in # minutes."
           />
         </Text>
 
-        <Text className="mt-4 text-center text-muted-foreground text-sm">
-          <Trans>If you didn't request this verification code, you can safely ignore this email.</Trans>
+        <Text className="mt-2 text-center text-muted-foreground text-xs">
+          <Trans>Didn't request this code? You can safely ignore this email.</Trans>
         </Text>
       </Section>
     </div>
