@@ -262,11 +262,11 @@ export const createEnvelope = async ({
     );
   }
 
-  // Documents are locked down by default: recipients must be signed in with
-  // the recipient email (ACCOUNT) and pass 2FA to view, so a leaked signing
-  // link exposes nothing. Authors can still opt out per document in settings.
+  // No access auth by default (Dylan's call, 2026-08-18): requiring signup or
+  // 2FA to sign was judged too much friction for recipients. Authors can still
+  // enable "Require account" / "Require 2FA" per document in its settings.
   const authOptions = createDocumentAuthOptions({
-    globalAccessAuth: globalAccessAuth?.length ? globalAccessAuth : ['ACCOUNT', 'TWO_FACTOR_AUTH'],
+    globalAccessAuth: globalAccessAuth || [],
     globalActionAuth: globalActionAuth || [],
   });
 
