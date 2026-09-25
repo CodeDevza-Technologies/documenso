@@ -351,7 +351,7 @@ export const EnvelopeDistributeDialog = ({
                                             </SelectItem>
                                           ))}
 
-                                          <SelectItem value={'-1'}>Codedevza AI Sign</SelectItem>
+                                          <SelectItem value={'-1'}>OperifyAI Sign</SelectItem>
                                         </SelectContent>
                                       </Select>
                                     </FormControl>

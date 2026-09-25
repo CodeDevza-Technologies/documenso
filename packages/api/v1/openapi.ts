@@ -8,10 +8,9 @@ export const OpenAPIV1 = Object.assign(
     ApiContractV1,
     {
       info: {
-        title: 'Codedevza AI Sign API',
+        title: 'OperifyAI Sign API',
         version: '1.0.0',
-        description:
-          'The Codedevza AI Sign API for retrieving, creating, updating and deleting documents.',
+        description: 'The OperifyAI Sign API for retrieving, creating, updating and deleting documents.',
       },
       servers: [
         {

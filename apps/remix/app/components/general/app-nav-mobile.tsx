@@ -118,7 +118,7 @@ export const AppNavMobile = ({ isMenuOpen, onMenuOpenChange }: AppNavMobileProps
           </div>
 
           <p className="text-muted-foreground text-sm">
-            © {new Date().getFullYear()} Codedevza AI
+            © {new Date().getFullYear()} OperifyAI
             <br />
             <Trans>All rights reserved.</Trans>
           </p>

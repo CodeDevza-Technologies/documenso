@@ -12,15 +12,15 @@ export function meta({ params: { slug } }: Route.MetaArgs) {
   }
 
   return [
-    { title: 'Codedevza AI - Share' },
-    { description: 'I just signed a document in style with Codedevza AI!' },
+    { title: 'OperifyAI - Share' },
+    { description: 'I just signed a document in style with OperifyAI!' },
     {
       property: 'og:title',
-      content: 'Codedevza AI - Join the open source signing revolution',
+      content: 'OperifyAI - Join the open source signing revolution',
     },
     {
       property: 'og:description',
-      content: 'I just signed with Codedevza AI!',
+      content: 'I just signed with OperifyAI!',
     },
     {
       property: 'og:type',
@@ -40,7 +40,7 @@ export function meta({ params: { slug } }: Route.MetaArgs) {
     },
     {
       name: 'twitter:description',
-      content: 'I just signed with Codedevza AI!',
+      content: 'I just signed with OperifyAI!',
     },
   ];
 }

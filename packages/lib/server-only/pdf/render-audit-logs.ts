@@ -452,18 +452,18 @@ const renderBranding = () => {
     width: brandingHeight * (img.width / img.height),
   });
 
-  // Full wordmark next to the icon: "Codedevza" regular, "AI Sign" bold.
+  // Full wordmark next to the icon: "Operify" regular, "AI Sign" bold, one word.
   const wordmarkRegular = new Konva.Text({
     x: brandingImage.width() + 6,
     verticalAlign: 'middle',
-    text: 'Codedevza',
+    text: 'Operify',
     fontFamily: 'Inter',
     fontSize: 11,
     height: brandingHeight,
   });
 
   const wordmarkBold = new Konva.Text({
-    x: wordmarkRegular.x() + wordmarkRegular.width() + 3,
+    x: wordmarkRegular.x() + wordmarkRegular.width(),
     verticalAlign: 'middle',
     text: 'AI Sign',
     fontStyle: 'bold',

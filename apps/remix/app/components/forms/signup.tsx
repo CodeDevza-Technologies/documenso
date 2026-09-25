@@ -208,7 +208,7 @@ export const SignUpForm = ({
       </h1>
 
       <p className="mt-2 text-muted-foreground text-sm">
-        <Trans>Sign up to view and sign documents securely with Codedevza AI Sign.</Trans>
+        <Trans>Sign up to view and sign documents securely with OperifyAI Sign.</Trans>
       </p>
 
       <div className="mt-8">

@@ -26,7 +26,7 @@ export const OrganisationJoinEmailTemplate = ({
 }: OrganisationJoinEmailProps) => {
   const { _ } = useLingui();
 
-  const previewText = msg`A member has joined your organisation on Codedevza AI`;
+  const previewText = msg`A member has joined your organisation on OperifyAI`;
 
   return (
     <Html>

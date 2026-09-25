@@ -1,3 +1,4 @@
+import OperifyIcon from '@documenso/assets/operify-icon.png';
 import { DOCUMENT_STATUS } from '@documenso/lib/constants/document';
 import { APP_I18N_OPTIONS, ZSupportedLanguageCodeSchema } from '@documenso/lib/constants/i18n';
 import { RECIPIENT_ROLES_DESCRIPTION } from '@documenso/lib/constants/recipient-roles';
@@ -13,9 +14,7 @@ import { useLingui } from '@lingui/react';
 import { EnvelopeType } from '@prisma/client';
 import { DateTime } from 'luxon';
 import { redirect } from 'react-router';
-
 import appStylesheet from '~/app.css?url';
-import CodedevzaIcon from '@documenso/assets/codedevza-icon-black.png';
 import { InternalAuditLogTable } from '~/components/tables/internal-audit-log-table';
 
 import type { Route } from './+types/audit-log';
@@ -191,16 +190,12 @@ export default function AuditLog({ loaderData }: Route.ComponentProps) {
         <div className="my-8 flex-row-reverse">
           <div className="flex items-end justify-end gap-x-4">
             <span className="inline-flex flex-shrink-0 items-center gap-2 align-middle">
-              <img
-                src={CodedevzaIcon}
-                alt="Codedevza AI Sign"
-                className="h-6 w-auto object-contain print:h-4"
-              />
+              <img src={OperifyIcon} alt="OperifyAI Sign" className="h-6 w-auto object-contain print:h-4" />
               <span
                 className="whitespace-nowrap text-lg leading-none tracking-tight print:text-sm"
                 style={{ color: '#111111' }}
               >
-                Codedevza <span className="font-bold">AI Sign</span>
+                Operify<span className="font-bold">AI Sign</span>
               </span>
             </span>
           </div>

@@ -3,11 +3,11 @@ import { i18n, type MessageDescriptor } from '@lingui/core';
 
 export const appMetaTags = (title?: MessageDescriptor) => {
   const description =
-    'Codedevza AI — secure, effortless document signing. Send, sign, and manage documents with a fast, modern signing experience.';
+    'OperifyAI — secure, effortless document signing. Send, sign, and manage documents with a fast, modern signing experience.';
 
   return [
     {
-      title: title ? `${i18n._(title)} - Codedevza AI` : 'Codedevza AI',
+      title: title ? `${i18n._(title)} - OperifyAI` : 'OperifyAI',
     },
     {
       name: 'description',
@@ -16,11 +16,11 @@ export const appMetaTags = (title?: MessageDescriptor) => {
     {
       name: 'keywords',
       content:
-        'Codedevza AI, document signing, e-signatures, sign documents online, fast signing, smart templates, secure signing',
+        'OperifyAI, document signing, e-signatures, sign documents online, fast signing, smart templates, secure signing',
     },
     {
       name: 'author',
-      content: 'Codedevza AI',
+      content: 'OperifyAI',
     },
     {
       name: 'robots',
@@ -28,7 +28,7 @@ export const appMetaTags = (title?: MessageDescriptor) => {
     },
     {
       property: 'og:title',
-      content: 'Codedevza AI - Secure, Effortless Document Signing',
+      content: 'OperifyAI - Secure, Effortless Document Signing',
     },
     {
       property: 'og:description',

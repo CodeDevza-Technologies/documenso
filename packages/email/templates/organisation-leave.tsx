@@ -26,7 +26,7 @@ export const OrganisationLeaveEmailTemplate = ({
 }: OrganisationLeaveEmailProps) => {
   const { _ } = useLingui();
 
-  const previewText = msg`A member has left your organisation on Codedevza AI`;
+  const previewText = msg`A member has left your organisation on OperifyAI`;
 
   return (
     <Html>

@@ -33,8 +33,8 @@ export const TemplateFooter = ({ isDocument = true, reportUrl }: TemplateFooterP
         <Text className="my-4 text-base text-muted-foreground">
           <Trans>
             This document was sent using{' '}
-            <Link className="text-primary" href="https://sign.codedevza.co.uk">
-              Codedevza AI Sign
+            <Link className="text-primary" href="https://sign.operifyai.co.uk">
+              OperifyAI Sign
             </Link>
             .
           </Trans>
@@ -62,7 +62,7 @@ export const TemplateFooter = ({ isDocument = true, reportUrl }: TemplateFooterP
         </Text>
       )}
 
-      {!branding.brandingEnabled && <Text className="my-8 text-muted-foreground text-sm">Codedevza AI</Text>}
+      {!branding.brandingEnabled && <Text className="my-8 text-muted-foreground text-sm">OperifyAI</Text>}
     </Section>
   );
 };

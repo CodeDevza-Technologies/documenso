@@ -37,10 +37,11 @@ export const AdminLicenseStatusBanner = ({ license }: AdminLicenseStatusBannerPr
             .with('UNAUTHORIZED', () =>
               license ? (
                 <Trans>
-                  Invalid License Type - Your Codedevza AI Sign instance is using features that are not part of your license.
+                  Invalid License Type - Your OperifyAI Sign instance is using features that are not part of your
+                  license.
                 </Trans>
               ) : (
-                <Trans>Missing License - Your Codedevza AI Sign instance is using features that require a license.</Trans>
+                <Trans>Missing License - Your OperifyAI Sign instance is using features that require a license.</Trans>
               ),
             )
             .otherwise(() => null)}
