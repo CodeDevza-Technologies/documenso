@@ -94,6 +94,12 @@ export const DocumentInviteEmailTemplate = ({
                   </Text>
                 )}
 
+                {customBody && organisationType === OrganisationType.ORGANISATION && teamName && (
+                  // Who the note is from, above it, the way a message is signed:
+                  // the organisation's name, not a footer line under the legal small print.
+                  <Text className="mt-2 mb-0 font-semibold text-base text-foreground">{teamName}</Text>
+                )}
+
                 {customBody && (
                   <Text className="mt-2 text-base text-muted-foreground">
                     <TemplateCustomMessageBody text={customBody} />

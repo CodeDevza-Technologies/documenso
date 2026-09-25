@@ -1,6 +1,7 @@
 import { DEFAULT_BRAND_COLORS } from '@documenso/lib/constants/theme';
 import type { EmailBrandingColors } from '@documenso/lib/utils/email-branding-colors';
 import { resolveEmailBrandingColors } from '@documenso/lib/utils/email-branding-colors';
+import { declareLightColorScheme } from '@documenso/lib/utils/email-color-scheme';
 import type { I18n } from '@lingui/core';
 import { I18nProvider } from '@lingui/react';
 import * as ReactEmail from '@react-email/render';
@@ -62,7 +63,7 @@ export const render = async (element: React.ReactNode, options?: RenderOptions) 
 
   const tailwindColors = buildEmailColors(branding?.brandingColors);
 
-  return ReactEmail.render(
+  const html = await ReactEmail.render(
     <BrandingProvider branding={branding}>
       <Tailwind
         config={{
@@ -78,6 +79,8 @@ export const render = async (element: React.ReactNode, options?: RenderOptions) 
     </BrandingProvider>,
     otherOptions,
   );
+
+  return declareLightColorScheme(html, otherOptions.plainText);
 };
 
 export const renderWithI18N = async (element: React.ReactNode, options?: RenderOptions) => {
@@ -89,7 +92,7 @@ export const renderWithI18N = async (element: React.ReactNode, options?: RenderO
 
   const tailwindColors = buildEmailColors(branding?.brandingColors);
 
-  return ReactEmail.render(
+  const html = await ReactEmail.render(
     <I18nProvider i18n={i18n}>
       <BrandingProvider branding={branding}>
         <Tailwind
@@ -107,4 +110,6 @@ export const renderWithI18N = async (element: React.ReactNode, options?: RenderO
     </I18nProvider>,
     otherOptions,
   );
+
+  return declareLightColorScheme(html, otherOptions.plainText);
 };
