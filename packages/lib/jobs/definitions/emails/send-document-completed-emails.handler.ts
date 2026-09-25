@@ -1,10 +1,8 @@
 import { DocumentCompletedEmailTemplate } from '@documenso/email/templates/document-completed';
 import { prisma } from '@documenso/prisma';
-import { msg } from '@lingui/core/macro';
 import { DocumentSource, EnvelopeType, RecipientRole } from '@prisma/client';
 import { createElement } from 'react';
 
-import { getI18nInstance } from '../../../client-only/providers/i18n-server';
 import { NEXT_PUBLIC_WEBAPP_URL } from '../../../constants/app';
 import { getEmailContext } from '../../../server-only/email/get-email-context';
 import { assertOrganisationRatesAndLimits } from '../../../server-only/rate-limit/assert-organisation-rates-and-limits';
@@ -12,6 +10,7 @@ import { DOCUMENT_AUDIT_LOG_TYPE } from '../../../types/document-audit-logs';
 import { extractDerivedDocumentEmailSettings } from '../../../types/document-email';
 import { getFileServerSide } from '../../../universal/upload/get-file.server';
 import { createDocumentAuditLogData } from '../../../utils/document-audit-logs';
+import { buildDocumentCompletedSubject, completedAttachmentName } from '../../../utils/document-completed-email';
 import { unsafeBuildEnvelopeIdQuery } from '../../../utils/envelope';
 import { isRecipientEmailValidForSending } from '../../../utils/recipients';
 import { renderCustomEmailTemplate } from '../../../utils/render-custom-email-template';
@@ -51,6 +50,7 @@ export const run = async ({ payload, io }: { payload: TSendDocumentCompletedEmai
         select: {
           id: true,
           url: true,
+          name: true,
         },
       },
     },
@@ -88,10 +88,11 @@ export const run = async ({ payload, io }: { payload: TSendDocumentCompletedEmai
       const file = await getFileServerSide(envelopeItem.documentData);
 
       // Use the envelope title for version 1, and the envelope item title for version 2.
-      const fileNameToUse = envelope.internalVersion === 1 ? envelope.title : envelopeItem.title + '.pdf';
+      // An item title that already ends in ".pdf" (an uploaded file's name) must not get a second one.
+      const fileNameToUse = envelope.internalVersion === 1 ? envelope.title : envelopeItem.title;
 
       return {
-        filename: fileNameToUse.endsWith('.pdf') ? fileNameToUse : fileNameToUse + '.pdf',
+        filename: completedAttachmentName(fileNameToUse),
         content: Buffer.from(file),
         contentType: 'application/pdf',
       };
@@ -99,6 +100,14 @@ export const run = async ({ payload, io }: { payload: TSendDocumentCompletedEmai
   );
 
   const assetBaseUrl = NEXT_PUBLIC_WEBAPP_URL() || 'http://localhost:3000';
+
+  // One subject per document, so completion emails do not stack into one
+  // conversation (see buildDocumentCompletedSubject).
+  const completedSubject = buildDocumentCompletedSubject({
+    teamName: envelope.team?.name,
+    title: envelope.title,
+    itemTitles: envelope.envelopeItems.map((item) => item.title),
+  });
 
   let documentOwnerDownloadLink = `${NEXT_PUBLIC_WEBAPP_URL()}${formatDocumentsPath(
     envelope.team?.url,
@@ -136,8 +145,6 @@ export const run = async ({ payload, io }: { payload: TSendDocumentCompletedEmai
       }),
     ]);
 
-    const i18n = await getI18nInstance(emailLanguage);
-
     await emailTransport.sendMail({
       to: [
         {
@@ -147,7 +154,7 @@ export const run = async ({ payload, io }: { payload: TSendDocumentCompletedEmai
       ],
       from: senderEmail,
       replyTo: replyToEmail,
-      subject: i18n._(msg`Signing Complete!`),
+      subject: completedSubject,
       html,
       text,
       attachments: completedDocumentEmailAttachments,
@@ -233,8 +240,6 @@ export const run = async ({ payload, io }: { payload: TSendDocumentCompletedEmai
         }),
       ]);
 
-      const i18n = await getI18nInstance(emailLanguage);
-
       await emailTransport.sendMail({
         to: [
           {
@@ -247,7 +252,7 @@ export const run = async ({ payload, io }: { payload: TSendDocumentCompletedEmai
         subject:
           isDirectTemplate && envelope.documentMeta?.subject
             ? renderCustomEmailTemplate(envelope.documentMeta.subject, customEmailTemplate)
-            : i18n._(msg`Signing Complete!`),
+            : completedSubject,
         html,
         text,
         attachments: completedDocumentEmailAttachments,
