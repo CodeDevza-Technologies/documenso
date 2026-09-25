@@ -37,7 +37,8 @@ export const OPERIFY_WEBHOOK_EVENTS: WebhookTriggerEvents[] = [
   WebhookTriggerEvents.RECIPIENT_EXPIRED,
 ];
 
-const MAX_LOGO_BYTES = 1_500_000;
+// Operify accepts logo uploads up to 2 MiB; this must accept what it stores.
+const MAX_LOGO_BYTES = 2 * 1024 * 1024;
 
 export const ZProvisionOperifyTeamRequestSchema = z.object({
   // The same rule the team settings form applies (ZTeamUrlSchema): 3 to 30
@@ -60,7 +61,7 @@ export const ZProvisionOperifyTeamRequestSchema = z.object({
     companyDetails: z.string().max(1000).default(''),
     colors: ZCssVarsSchema.nullable().default(null),
     /** A base64 image data URL replaces the logo, null removes it, absent leaves it. */
-    logo: z.string().max(2_100_000).nullable().optional(),
+    logo: z.string().max(2_900_000).nullable().optional(),
   }),
 });
 
@@ -145,21 +146,31 @@ export const provisionOperifyTeam = async (
   let created = false;
 
   if (!team) {
-    await createTeam({
-      userId,
-      teamName: input.name,
-      teamUrl: input.teamUrl,
-      organisationId: organisation.id,
-      inheritMembers: true,
-    });
+    // Two Operify tasks can ask for the same new team at once; the loser's
+    // create hits the URL's uniqueness and simply reads the winner's team.
+    try {
+      await createTeam({
+        userId,
+        teamName: input.name,
+        teamUrl: input.teamUrl,
+        organisationId: organisation.id,
+        inheritMembers: true,
+      });
+
+      created = true;
+    } catch (err) {
+      if (!(err instanceof AppError && err.code === AppErrorCode.ALREADY_EXISTS)) {
+        throw err;
+      }
+    }
 
     team = await prisma.team.findFirstOrThrow({
       where: { url: input.teamUrl },
       select: { id: true, name: true, organisationId: true },
     });
+  }
 
-    created = true;
-  } else if (team.organisationId !== organisation.id) {
+  if (team.organisationId !== organisation.id) {
     throw new AppError(AppErrorCode.UNAUTHORIZED, {
       message: `Team ${input.teamUrl} belongs to another organisation`,
     });
@@ -176,9 +187,14 @@ export const provisionOperifyTeam = async (
     select: { id: true },
   });
 
-  if (!existingToken || input.rotateToken) {
+  // A missing token is minted without touching anything; only an explicit
+  // rotation drops what exists, so a caller that merely lost its copy while
+  // another caller is mid-send cannot pull the other's token away.
+  if (input.rotateToken) {
     await prisma.apiToken.deleteMany({ where: { teamId: team.id, name: OPERIFY_TOKEN_NAME } });
+  }
 
+  if (!existingToken || input.rotateToken) {
     const minted = await createApiToken({
       userId,
       teamId: team.id,
