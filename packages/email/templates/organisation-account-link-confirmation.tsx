@@ -25,7 +25,7 @@ export const OrganisationAccountLinkConfirmationTemplate = ({
   const previewText =
     type === 'create'
       ? msg`A request has been made to create an account for you`
-      : msg`A request has been made to link your Codedevza AI account`;
+      : msg`A request has been made to link your OperifyAI account`;
 
   return (
     <Html>
@@ -46,7 +46,7 @@ export const OrganisationAccountLinkConfirmationTemplate = ({
                 {type === 'create' ? (
                   <Trans>Account creation request</Trans>
                 ) : (
-                  <Trans>Link your Codedevza AI account</Trans>
+                  <Trans>Link your OperifyAI account</Trans>
                 )}
               </Text>
 
@@ -58,8 +58,8 @@ export const OrganisationAccountLinkConfirmationTemplate = ({
                   </Trans>
                 ) : (
                   <Trans>
-                    <span className="font-bold">{organisationName}</span> has requested to link your current Codedevza
-                    AI account to their organisation.
+                    <span className="font-bold">{organisationName}</span> has requested to link your current OperifyAI
+                    account to their organisation.
                   </Trans>
                 )}
               </Text>
@@ -87,7 +87,7 @@ export const OrganisationAccountLinkConfirmationTemplate = ({
 
                 <Text className="mt-2 text-sm">
                   <Trans>
-                    You can unlink your account at any time in your security settings on Codedevza AI{' '}
+                    You can unlink your account at any time in your security settings on OperifyAI{' '}
                     <Link href={`${assetBaseUrl}/settings/security/linked-accounts`}>here.</Link>
                   </Trans>
                 </Text>

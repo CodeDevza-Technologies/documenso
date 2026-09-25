@@ -1,3 +1,4 @@
+import OperifyIcon from '@documenso/assets/operify-icon.png';
 import { NEXT_PUBLIC_WEBAPP_URL } from '@documenso/lib/constants/app';
 import { APP_I18N_OPTIONS, ZSupportedLanguageCodeSchema } from '@documenso/lib/constants/i18n';
 import { RECIPIENT_ROLE_SIGNING_REASONS, RECIPIENT_ROLES_DESCRIPTION } from '@documenso/lib/constants/recipient-roles';
@@ -21,8 +22,6 @@ import { prop, sortBy } from 'remeda';
 import { match } from 'ts-pattern';
 import { UAParser } from 'ua-parser-js';
 import { renderSVG } from 'uqr';
-
-import CodedevzaIcon from '@documenso/assets/codedevza-icon-black.png';
 
 import type { Route } from './+types/certificate';
 
@@ -381,16 +380,12 @@ export default function SigningCertificate({ loaderData }: Route.ComponentProps)
               {_(msg`Signing certificate provided by`)}:
             </p>
             <span className="inline-flex flex-shrink-0 items-center gap-2 align-middle">
-              <img
-                src={CodedevzaIcon}
-                alt="Codedevza AI Sign"
-                className="h-6 w-auto object-contain print:h-4"
-              />
+              <img src={OperifyIcon} alt="OperifyAI Sign" className="h-6 w-auto object-contain print:h-4" />
               <span
                 className="whitespace-nowrap text-lg leading-none tracking-tight print:text-sm"
                 style={{ color: '#111111' }}
               >
-                Codedevza <span className="font-bold">AI Sign</span>
+                Operify<span className="font-bold">AI Sign</span>
               </span>
             </span>
           </div>

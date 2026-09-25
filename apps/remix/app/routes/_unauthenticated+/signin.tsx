@@ -132,7 +132,7 @@ export default function SignIn({ loaderData }: Route.ComponentProps) {
       </h1>
 
       <p className="mt-2 text-muted-foreground text-sm">
-        <Trans>Sign in to continue to Codedevza AI Sign.</Trans>
+        <Trans>Sign in to continue to OperifyAI Sign.</Trans>
       </p>
 
       <div className="mt-8">

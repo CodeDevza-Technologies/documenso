@@ -128,7 +128,7 @@ export const OrganisationBillingBanner = () => {
 
                 <DialogDescription>
                   <Trans>
-                    Your plan is no longer valid. Please subscribe to a new plan to continue using Codedevza AI Sign.
+                    Your plan is no longer valid. Please subscribe to a new plan to continue using OperifyAI Sign.
                   </Trans>
                 </DialogDescription>
               </DialogHeader>

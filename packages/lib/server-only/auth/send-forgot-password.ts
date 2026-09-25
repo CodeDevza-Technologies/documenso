@@ -57,7 +57,7 @@ export const sendForgotPassword = async ({ userId }: SendForgotPasswordOptions) 
       name: user.name || '',
     },
     from: {
-      name: env('NEXT_PRIVATE_SMTP_FROM_NAME') || 'Codedevza AI Sign',
+      name: env('NEXT_PRIVATE_SMTP_FROM_NAME') || 'OperifyAI Sign',
       address: env('NEXT_PRIVATE_SMTP_FROM_ADDRESS') || 'hello@codedevza.co.uk',
     },
     subject: i18n._(msg`Forgot Password?`),

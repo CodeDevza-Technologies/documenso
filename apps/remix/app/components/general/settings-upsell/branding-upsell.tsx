@@ -8,7 +8,7 @@ import { useTimedCycle } from './use-timed-cycle';
 
 const DEMO_BRANDS = [
   {
-    name: 'Codedevza AI Sign',
+    name: 'OperifyAI Sign',
     letter: 'C',
     domain: 'hello@codedevza.co.uk',
     accent: '#A2E771',
@@ -17,7 +17,7 @@ const DEMO_BRANDS = [
     sheen: 'rgba(162, 231, 113, 0.32)',
   },
   {
-    name: 'Codedevza AI Sign',
+    name: 'OperifyAI Sign',
     letter: 'C',
     domain: 'hello@codedevza.co.uk',
     accent: '#387BC7',
@@ -26,7 +26,7 @@ const DEMO_BRANDS = [
     sheen: 'rgba(56, 123, 199, 0.28)',
   },
   {
-    name: 'Codedevza AI Sign',
+    name: 'OperifyAI Sign',
     letter: 'C',
     domain: 'hello@codedevza.co.uk',
     accent: '#9747F5',

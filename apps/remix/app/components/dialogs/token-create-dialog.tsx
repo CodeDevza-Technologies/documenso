@@ -171,7 +171,7 @@ export const TokenCreateDialog = ({ trigger, ...props }: TokenCreateDialogProps)
               </DialogTitle>
 
               <DialogDescription>
-                <Trans>Use API tokens to authenticate with the Codedevza AI Sign API.</Trans>
+                <Trans>Use API tokens to authenticate with the OperifyAI Sign API.</Trans>
               </DialogDescription>
             </DialogHeader>
 

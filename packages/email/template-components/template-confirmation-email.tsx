@@ -50,7 +50,7 @@ export const TemplateConfirmationEmail = ({
   return (
     <Section className="flex-row items-center justify-center">
       <Text className="mx-auto mb-0 max-w-[80%] text-center font-semibold text-foreground text-lg">
-        <Trans>Welcome to Codedevza AI!</Trans>
+        <Trans>Welcome to OperifyAI!</Trans>
       </Text>
 
       <Text className="my-1 text-center text-base text-muted-foreground">

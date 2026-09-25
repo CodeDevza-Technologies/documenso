@@ -1,4 +1,4 @@
-import CodedevzaIconWhite from '@documenso/assets/codedevza-icon-white.png';
+import OperifyIcon from '@documenso/assets/operify-icon.png';
 import { CheckIcon, PenLineIcon, UploadIcon } from 'lucide-react';
 import { Fragment, useEffect } from 'react';
 import { Link, Outlet } from 'react-router';
@@ -135,7 +135,7 @@ export default function Layout() {
         <div className="pointer-events-none absolute -bottom-32 -left-40 h-[440px] w-[440px] rounded-full bg-primary/10 blur-[120px]" />
 
         <Link to="/" className="relative z-10 inline-flex flex-shrink-0 items-center gap-2.5">
-          <img src={CodedevzaIconWhite} alt="" className="h-8 w-auto" />
+          <img src={OperifyIcon} alt="" className="h-8 w-auto" />
           <Wordmark className="text-white text-xl tracking-tight" />
         </Link>
 
@@ -154,7 +154,7 @@ export default function Layout() {
           <StepFlow />
         </div>
 
-        <p className="relative z-10 flex-shrink-0 text-sm text-white/40">© Codedevza AI Ltd · Secure e-signatures</p>
+        <p className="relative z-10 flex-shrink-0 text-sm text-white/40">© OperifyAI · Secure e-signatures</p>
       </aside>
 
       {/* Form panel */}

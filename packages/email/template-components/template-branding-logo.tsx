@@ -12,7 +12,7 @@ export type TemplateBrandingLogoProps = {
  *
  * - When custom branding is enabled with a logo, the branding logo is shown.
  *   If a safe (http/https) Brand Website is configured, the logo links to it.
- * - Otherwise the Codedevza AI Sign logo is shown.
+ * - Otherwise the OperifyAI Sign logo is shown.
  */
 export const TemplateBrandingLogo = ({ assetBaseUrl, className = 'mb-4 h-12' }: TemplateBrandingLogoProps) => {
   const branding = useBranding();
@@ -21,7 +21,7 @@ export const TemplateBrandingLogo = ({ assetBaseUrl, className = 'mb-4 h-12' }: 
 
   const logoSrc = hasCustomBrandingLogo ? branding.brandingLogo : new URL('/static/logo.png', assetBaseUrl).toString();
 
-  const logo = <Img src={logoSrc} alt="Codedevza AI Sign" className={`mx-auto ${className}`} />;
+  const logo = <Img src={logoSrc} alt="OperifyAI Sign" className={`mx-auto ${className}`} />;
 
   const safeBrandingUrl = hasCustomBrandingLogo ? getSafeBrandingUrl(branding.brandingUrl) : null;
 

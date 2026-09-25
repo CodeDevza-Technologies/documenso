@@ -4,7 +4,7 @@ import { createTOTPKeyURI } from 'oslo/otp';
 
 import { DOCUMENSO_ENCRYPTION_KEY } from '../../../constants/crypto';
 
-const ISSUER = 'Codedevza AI Sign Email 2FA';
+const ISSUER = 'OperifyAI Sign Email 2FA';
 
 export type GenerateTwoFactorCredentialsFromEmailOptions = {
   envelopeId: string;
