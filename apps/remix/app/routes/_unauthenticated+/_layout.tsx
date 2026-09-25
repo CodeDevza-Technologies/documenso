@@ -7,8 +7,8 @@ import { BrandingLogoIcon } from '~/components/general/branding-logo-icon';
 
 const Wordmark = ({ className }: { className?: string }) => (
   <span className={className}>
-    <span className="font-bold">Code</span>
-    <span className="font-normal">devza</span> <span className="font-bold">AI Sign</span>
+    <span className="font-normal">Operify</span>
+    <span className="font-bold">AI Sign</span>
   </span>
 );
 
