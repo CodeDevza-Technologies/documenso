@@ -95,11 +95,13 @@ export const operifyProvisioningAuthorised = (
 };
 
 export const parseLogoDataUrl = (dataUrl: string): { bytes: Buffer; type: string } => {
-  const match = /^data:(image\/(?:png|jpeg|webp|gif));base64,([A-Za-z0-9+/=\s]+)$/.exec(dataUrl);
+  // sharp rasterises all of these to a 512px PNG in buildBrandingLogoData,
+  // an SVG included, so what is stored is never the bytes that arrived.
+  const match = /^data:(image\/(?:png|jpeg|webp|gif|svg\+xml));base64,([A-Za-z0-9+/=\s]+)$/.exec(dataUrl);
 
   if (!match) {
     throw new AppError(AppErrorCode.INVALID_BODY, {
-      message: 'branding.logo must be a base64 data URL of a png, jpeg, webp or gif image',
+      message: 'branding.logo must be a base64 data URL of a png, jpeg, webp, gif or svg image',
     });
   }
 

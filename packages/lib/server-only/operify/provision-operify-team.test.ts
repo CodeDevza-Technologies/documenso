@@ -34,6 +34,11 @@ describe('parseLogoDataUrl', () => {
     expect(parsed.bytes.equals(png)).toBe(true);
   });
 
+  it('accepts an svg, which sharp rasterises on storage', () => {
+    const svg = Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"/>');
+    expect(parseLogoDataUrl(`data:image/svg+xml;base64,${svg.toString('base64')}`).type).toBe('image/svg+xml');
+  });
+
   it('rejects anything that is not an image data URL', () => {
     expect(() => parseLogoDataUrl('https://example.com/logo.png')).toThrow();
     expect(() => parseLogoDataUrl('data:text/html;base64,PGh0bWw+')).toThrow();
