@@ -3,6 +3,14 @@ import { Button } from '@documenso/ui/primitives/button';
 import { Trans } from '@lingui/react/macro';
 import { Link } from 'react-router';
 
+/**
+ * Where the source of the build that runs sign.operifyai.co.uk lives. The fork is
+ * AGPLv3, which asks a modified version served over a network to offer its source
+ * to the people using it: the signers. This page is linked from every signing page
+ * and is the least visible place that makes that offer.
+ */
+const SOURCE_CODE_URL = 'https://github.com/CodeDevza-Technologies/documenso/tree/operify';
+
 export default function SignatureDisclosure() {
   return (
     <div>
@@ -140,6 +148,20 @@ export default function SignatureDisclosure() {
           <Trans>
             For any questions regarding this disclosure, electronic signatures, or any related process, please contact
             us at: <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>
+          </Trans>
+        </p>
+
+        <h2>
+          <Trans>Open-source software</Trans>
+        </h2>
+        <p>
+          <Trans>
+            OperifyAI Sign is built on Documenso, which is open-source software. You can get the source code of the
+            version we run{' '}
+            <a href={SOURCE_CODE_URL} target="_blank" rel="noreferrer">
+              on GitHub
+            </a>
+            .
           </Trans>
         </p>
       </article>
