@@ -125,9 +125,11 @@ export const run = async ({ payload, io }: { payload: TSendDocumentCancelledEmai
           return;
         }
 
+        // Operify: name the team, as the signing invite does. The owner is the
+        // account whose API token created the envelope, a name the signer never saw.
         const template = createElement(DocumentCancelTemplate, {
           documentName: envelope.title,
-          inviterName: documentOwner.name || undefined,
+          inviterName: envelope.team.name || documentOwner.name || undefined,
           inviterEmail: documentOwner.email,
           assetBaseUrl: NEXT_PUBLIC_WEBAPP_URL(),
           cancellationReason: cancellationReason || 'The document has been cancelled.',
