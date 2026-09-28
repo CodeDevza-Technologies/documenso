@@ -90,19 +90,28 @@ const getTransport = (): Transporter => {
     });
   }
 
-  return createTransport({
-    host: env('NEXT_PRIVATE_SMTP_HOST') ?? '127.0.0.1:2500',
-    port: Number(env('NEXT_PRIVATE_SMTP_PORT')) || 587,
-    secure: env('NEXT_PRIVATE_SMTP_SECURE') === 'true',
-    ignoreTLS: env('NEXT_PRIVATE_SMTP_UNSAFE_IGNORE_TLS') === 'true',
-    auth: env('NEXT_PRIVATE_SMTP_USERNAME')
-      ? {
-          user: env('NEXT_PRIVATE_SMTP_USERNAME'),
-          pass: env('NEXT_PRIVATE_SMTP_PASSWORD') ?? '',
-        }
-      : undefined,
-    ...(env('NEXT_PRIVATE_SMTP_SERVICE') ? { service: env('NEXT_PRIVATE_SMTP_SERVICE') } : {}),
-  });
+  // Amazon SES routes a message's bounce and complaint events by the
+  // configuration set named in this header. Set on every message the SMTP
+  // transport sends, so the events reach whoever asked for them without the
+  // sending identity's default changing for other senders on the domain.
+  const sesConfigurationSet = env('NEXT_PRIVATE_SMTP_SES_CONFIGURATION_SET');
+
+  return createTransport(
+    {
+      host: env('NEXT_PRIVATE_SMTP_HOST') ?? '127.0.0.1:2500',
+      port: Number(env('NEXT_PRIVATE_SMTP_PORT')) || 587,
+      secure: env('NEXT_PRIVATE_SMTP_SECURE') === 'true',
+      ignoreTLS: env('NEXT_PRIVATE_SMTP_UNSAFE_IGNORE_TLS') === 'true',
+      auth: env('NEXT_PRIVATE_SMTP_USERNAME')
+        ? {
+            user: env('NEXT_PRIVATE_SMTP_USERNAME'),
+            pass: env('NEXT_PRIVATE_SMTP_PASSWORD') ?? '',
+          }
+        : undefined,
+      ...(env('NEXT_PRIVATE_SMTP_SERVICE') ? { service: env('NEXT_PRIVATE_SMTP_SERVICE') } : {}),
+    },
+    sesConfigurationSet ? { headers: { 'X-SES-CONFIGURATION-SET': sesConfigurationSet } } : undefined,
+  );
 };
 
 export const mailer = getTransport();
