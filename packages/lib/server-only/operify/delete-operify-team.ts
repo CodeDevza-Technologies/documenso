@@ -1,10 +1,12 @@
 import { prisma } from '@documenso/prisma';
 import { OrganisationType } from '@prisma/client';
-import { z } from 'zod';
 
 import { AppError, AppErrorCode } from '../../errors/app-error';
 import { deleteFile } from '../../universal/upload/delete-file';
 import { deleteTeam } from '../team/delete-team';
+import type { TDeleteOperifyTeamRequest } from './delete-operify-team.schema';
+
+export { type TDeleteOperifyTeamRequest, ZDeleteOperifyTeamRequestSchema } from './delete-operify-team.schema';
 
 /**
  * DELETE /api/operify/teams: Operify removes a tenant's team when the tenant
@@ -17,12 +19,6 @@ import { deleteTeam } from '../team/delete-team';
  * production), and only inside the Operify organisation: the machine
  * account's own teams and anything a person made are out of reach here.
  */
-export const ZDeleteOperifyTeamRequestSchema = z.object({
-  teamUrl: z.string().regex(/^(st|pr)-[a-z0-9-]{1,80}$/, 'Only a tenant team, st-<tenant> or pr-<tenant>'),
-});
-
-export type TDeleteOperifyTeamRequest = z.infer<typeof ZDeleteOperifyTeamRequestSchema>;
-
 export type DeleteOperifyTeamResult = {
   teamUrl: string;
   envelopes: number;

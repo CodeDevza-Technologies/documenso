@@ -1,8 +1,6 @@
 import { AppError, genericErrorCodeToTrpcErrorCodeMap } from '@documenso/lib/errors/app-error';
-import {
-  deleteOperifyTeam,
-  ZDeleteOperifyTeamRequestSchema,
-} from '@documenso/lib/server-only/operify/delete-operify-team';
+import { deleteOperifyTeam } from '@documenso/lib/server-only/operify/delete-operify-team';
+import { ZDeleteOperifyTeamRequestSchema } from '@documenso/lib/server-only/operify/delete-operify-team.schema';
 import {
   operifyProvisioningAuthorised,
   provisionOperifyTeam,
