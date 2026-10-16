@@ -50,7 +50,9 @@ export type RecipientBrandingProps = {
 export const RecipientBranding = ({ branding, cspNonce }: RecipientBrandingProps) => {
   const varsString = toNativeCssVarsString(branding?.colors ?? {});
 
-  const userCss = branding?.css ?? '';
+  // Custom CSS needs custom branding; the colours are always applied, because an unbranded team
+  // still gets its readable default primary from the loader.
+  const userCss = branding?.allowCustomBranding ? (branding?.css ?? '') : '';
 
   const hasVars = varsString.trim().length > 0;
   const hasUserCss = userCss.trim().length > 0;
@@ -59,10 +61,6 @@ export const RecipientBranding = ({ branding, cspNonce }: RecipientBrandingProps
   const css = `.documenso-branded { ${innerBody} }`;
 
   useEffect(() => {
-    if (!branding?.allowCustomBranding) {
-      return;
-    }
-
     if (!hasVars && !hasUserCss) {
       return;
     }
@@ -77,10 +75,6 @@ export const RecipientBranding = ({ branding, cspNonce }: RecipientBrandingProps
       document.head.removeChild(style);
     };
   }, [branding, cspNonce, css, hasUserCss, hasVars]);
-
-  if (!branding?.allowCustomBranding) {
-    return null;
-  }
 
   if (!hasVars && !hasUserCss) {
     return null;

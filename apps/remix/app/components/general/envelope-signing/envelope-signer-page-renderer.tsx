@@ -312,6 +312,14 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
 
     // A tap target of at least 44 px around the drawn box. Only the hit region grows: the box as
     // drawn, and the field's geometry in the sealed PDF, stay as they are.
+    // An empty required question says so beside its hint, so its orange outline reads as a to-do,
+    // not an error. On screen only, and gone once it is answered.
+    const fieldHint = fieldGroup.findOne<Konva.Text>('.field-text');
+
+    if (isValidating && fieldToRender.type !== FieldType.SIGNATURE && fieldHint?.text()) {
+      fieldHint.text(`${fieldHint.text()} · ${t`Required`}`);
+    }
+
     drawFieldFrame(fieldGroup, scale, fieldToRender.type, getFieldStroke(fieldToRender));
 
     const fieldRectForHit = fieldGroup.findOne<Konva.Rect>('.field-rect');
