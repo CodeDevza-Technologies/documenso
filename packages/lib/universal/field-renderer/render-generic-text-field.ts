@@ -142,6 +142,19 @@ const upsertFieldText = (field: FieldToRender, options: RenderFieldElementOption
     height: overflowLayout.height,
   } satisfies Partial<Konva.TextConfig>);
 
+  // On the signing page an empty box's label is one line, cut with an ellipsis. A date question
+  // whose label does not fit shows only its format; its dialog carries the full question.
+  if (mode === 'sign' && isLabel) {
+    fieldText.setAttrs({ wrap: 'none', ellipsis: true });
+
+    const placeholder = fieldMeta?.type === 'text' ? fieldMeta.placeholder : undefined;
+    const isDateQuestion = placeholder?.trim().toLowerCase() === 'dd/mm/yyyy';
+
+    if (placeholder && isDateQuestion && fieldText.measureSize(textToRender).width > fieldText.width()) {
+      fieldText.text(placeholder);
+    }
+  }
+
   return {
     fieldText,
     isLabel,

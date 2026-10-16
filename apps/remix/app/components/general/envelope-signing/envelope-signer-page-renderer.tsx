@@ -42,6 +42,60 @@ import { handleTextFieldClick } from '~/utils/field-signing/text-field';
 import { useRequiredDocumentSigningAuthContext } from '../document-signing/document-signing-auth-provider';
 import { useRequiredEnvelopeSigningContext } from '../document-signing/envelope-signing-provider';
 
+/**
+ * The smallest tap target, in CSS pixels, every field gets whatever its drawn size.
+ */
+const MIN_FIELD_HIT_SIZE_PX = 44;
+
+type FieldBox = { x: number; y: number; width: number; height: number };
+
+const toFieldBox = (
+  field: Pick<Field, 'positionX' | 'positionY' | 'width' | 'height'>,
+  pageWidth: number,
+  pageHeight: number,
+): FieldBox => ({
+  x: (Number(field.positionX) / 100) * pageWidth,
+  y: (Number(field.positionY) / 100) * pageHeight,
+  width: (Number(field.width) / 100) * pageWidth,
+  height: (Number(field.height) / 100) * pageHeight,
+});
+
+/**
+ * How far a field's tap area reaches past each edge of its drawn box, in page units: enough for
+ * a 44 px target, centred on the box, and never more than half the gap to a neighbouring field,
+ * so two grown areas split the space between them instead of overlapping.
+ */
+const getFieldHitMargins = (box: FieldBox, neighbours: FieldBox[], scale: number) => {
+  const minSize = MIN_FIELD_HIT_SIZE_PX / scale;
+  const growX = Math.max(0, (minSize - box.width) / 2);
+  const growY = Math.max(0, (minSize - box.height) / 2);
+
+  const margins = { top: growY, bottom: growY, left: growX, right: growX };
+
+  for (const other of neighbours) {
+    const overlapsColumn = other.x < box.x + box.width && other.x + other.width > box.x;
+    const overlapsRow = other.y < box.y + box.height && other.y + other.height > box.y;
+
+    if (overlapsColumn && other.y >= box.y + box.height) {
+      margins.bottom = Math.min(margins.bottom, (other.y - (box.y + box.height)) / 2);
+    }
+
+    if (overlapsColumn && other.y + other.height <= box.y) {
+      margins.top = Math.min(margins.top, (box.y - (other.y + other.height)) / 2);
+    }
+
+    if (overlapsRow && other.x >= box.x + box.width) {
+      margins.right = Math.min(margins.right, (other.x - (box.x + box.width)) / 2);
+    }
+
+    if (overlapsRow && other.x + other.width <= box.x) {
+      margins.left = Math.min(margins.left, (box.x - (other.x + other.width)) / 2);
+    }
+  }
+
+  return margins;
+};
+
 type GenericLocalField = TEnvelope['fields'][number] & {
   recipient: Pick<Recipient, 'id' | 'name' | 'email' | 'signingStatus'>;
 };
@@ -85,6 +139,9 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
     email.current = emailState;
     signature.current = signatureState;
   }, [fullNameState, emailState, signatureState]);
+
+  // The field the flow is opening, so its handler can tell that from the signer's own tap.
+  const openingFieldId = useRef<number | null>(null);
 
   const cachedRenderFields = useRef<Map<number, Field & { signature?: Signature | null }>>(new Map());
   const prevShowPendingFieldTooltip = useRef(showPendingFieldTooltip);
@@ -178,6 +235,25 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
       fieldCanvasStyleCache,
     });
 
+    // A tap target of at least 44 px around the drawn box. Only the hit region grows: the box as
+    // drawn, and the field's geometry in the sealed PDF, stay as they are.
+    const fieldRectForHit = fieldGroup.findOne<Konva.Rect>('.field-rect');
+
+    if (fieldRectForHit) {
+      const box = toFieldBox(fieldToRender, unscaledViewport.width, unscaledViewport.height);
+      const neighbours = localPageFields
+        .filter((f) => f.id !== fieldToRender.id)
+        .map((f) => toFieldBox(f, unscaledViewport.width, unscaledViewport.height));
+      const { top, bottom, left, right } = getFieldHitMargins(box, neighbours, scale);
+
+      fieldRectForHit.hitFunc((context, shape) => {
+        context.beginPath();
+        context.rect(-left, -top, shape.width() + left + right, shape.height() + top + bottom);
+        context.closePath();
+        context.fillStrokeShape(shape);
+      });
+    }
+
     const handleFieldGroupClick = (e: KonvaEventObject<Event>) => {
       const currentTarget = e.currentTarget as Konva.Group;
       const target = e.target as Konva.Shape;
@@ -223,7 +299,11 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
          * CHECKBOX FIELD.
          */
         .with({ type: FieldType.CHECKBOX }, (field) => {
-          const clickedCheckboxIndex = Number(target.getAttr('internalCheckboxIndex'));
+          // A tap in the grown area around a single tick box ticks it.
+          const clickedCheckboxIndex =
+            target.getAttr('internalCheckboxIndex') === undefined && field.fieldMeta.values?.length === 1
+              ? 0
+              : Number(target.getAttr('internalCheckboxIndex'));
 
           if (Number.isNaN(clickedCheckboxIndex)) {
             return;
@@ -385,10 +465,16 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
          * SIGNATURE FIELD.
          */
         .with({ type: FieldType.SIGNATURE }, (field) => {
+          // Opened by Next: always show the pad, with any signature already made, so Next never
+          // signs on the signer's behalf.
+          const isOpenedByNext = openingFieldId.current === field.id;
+          openingFieldId.current = null;
+
           void handleSignatureFieldClick({
             field,
             fullName: fullName.current,
             signature: signature.current,
+            alwaysAsk: isOpenedByNext,
             typedSignatureEnabled: envelope.documentMeta.typedSignatureEnabled,
             uploadSignatureEnabled: envelope.documentMeta.uploadSignatureEnabled,
             drawSignatureEnabled: envelope.documentMeta.drawSignatureEnabled,
@@ -571,6 +657,7 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
     }
 
     setFocusedField({ ...focusedField, open: false });
+    openingFieldId.current = field.id;
     fieldGroup.fire('pointerdown', { target: fieldGroup, currentTarget: fieldGroup });
   }, [focusedField, localPageFields, pageData.imageLoadingState]);
 

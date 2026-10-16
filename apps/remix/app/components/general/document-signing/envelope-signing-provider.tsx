@@ -28,7 +28,7 @@ export type EnvelopeSigningContextValue = {
 
   focusedField: TFocusedField | null;
   setFocusedField: (_value: TFocusedField | null) => void;
-  focusField: (_field: Field | null, _options?: { allowOpen?: boolean }) => void;
+  focusField: (_field: Field | null, _options?: { allowOpen?: boolean; fromNext?: boolean }) => void;
   getNextFieldToFill: (_afterFieldId: number | null) => Field | null;
   skipField: (_fieldId: number) => void;
 
@@ -387,14 +387,21 @@ export const EnvelopeSigningProvider = ({
     );
   };
 
-  const focusField = (field: Field | null, { allowOpen = true } = {}) => {
+  /**
+   * Take the signer to a field. Text, number and dropdown questions open their dialog. A signature
+   * opens its pad only when the signer pressed Next, never as a side effect of another answer. Tick
+   * boxes are only shown: ticking one stays the signer's own tap.
+   */
+  const focusField = (field: Field | null, { allowOpen = true, fromNext = false } = {}) => {
     if (!field) {
       setFocusedField(null);
       return;
     }
 
     const key = Date.now();
-    const open = allowOpen && FIELD_TYPES_OPENED_FOR_SIGNER.includes(field.type);
+    const open =
+      allowOpen &&
+      (FIELD_TYPES_OPENED_FOR_SIGNER.includes(field.type) || (fromNext && field.type === FieldType.SIGNATURE));
 
     setShowPendingFieldTooltip(true);
     setFocusedField({ id: field.id, open, key });
