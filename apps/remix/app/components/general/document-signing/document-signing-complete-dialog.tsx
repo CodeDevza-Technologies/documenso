@@ -196,6 +196,7 @@ export const DocumentSigningCompleteDialog = ({
           size={buttonSize}
           onClick={fieldsValidated}
           loading={isSubmitting}
+          data-signing-next-step
           disabled={disabled}
         >
           {match({ isComplete, role: recipient.role })

@@ -17,7 +17,7 @@ import { msg } from '@lingui/core/macro';
 import { Plural, Trans, useLingui } from '@lingui/react/macro';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import { DateTime, Info } from 'luxon';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createCallable } from 'react-call';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -130,15 +130,23 @@ const DateQuestionCalendar = ({ month, selected, onMonthChange, onSelect }: Date
 
         {days.map((day) => {
           const isSelected = selected !== null && day.hasSame(selected, 'day');
+          const isToday = day.hasSame(today, 'day');
 
           return (
             <Button
               key={day.day}
               type="button"
-              variant={isSelected ? 'default' : 'ghost'}
-              className={cn('h-11 w-11 p-0 font-normal', day.hasSame(today, 'day') && !isSelected && 'bg-muted')}
+              variant={isSelected ? 'default' : 'none'}
+              // Only the chosen day is filled and only today is marked. Hover fills only where there is
+              // a pointer that hovers (a tap leaves no grey day behind), and focus is the button's ring.
+              className={cn(
+                'h-11 w-11 p-0 font-normal',
+                !isSelected && '[@media(hover:hover)]:hover:bg-accent',
+                isToday && !isSelected && 'font-medium text-primary underline underline-offset-4',
+              )}
               aria-label={day.toFormat('cccc d LLLL yyyy')}
               aria-pressed={isSelected}
+              aria-current={isToday ? 'date' : undefined}
               data-calendar-focus={day === focusDay ? '' : undefined}
               onClick={() => onSelect(day)}
             >
@@ -175,6 +183,20 @@ export const SignFieldTextDialog = createCallable<SignFieldTextDialogProps, Sign
       (typedDate.isValid ? typedDate : DateTime.now()).startOf('month'),
     );
 
+    // The tap that opened this dialog ends with a mousedown on its overlay, which would take focus
+    // out of the dialog to the page. Keep it inside; outside taps still close it (pointerdown).
+    useEffect(() => {
+      const keepFocusInDialog = (event: MouseEvent) => {
+        if (event.target instanceof Element && !event.target.closest('[role="dialog"]')) {
+          event.preventDefault();
+        }
+      };
+
+      document.addEventListener('mousedown', keepFocusInDialog, true);
+
+      return () => document.removeEventListener('mousedown', keepFocusInDialog, true);
+    }, []);
+
     const onSubmit = ({ text }: TSignFieldTextFormSchema) => {
       // Saving an optional question left empty is a skip, unless it clears an earlier answer.
       if (text.trim() === '' && !isEditing) {
@@ -191,19 +213,35 @@ export const SignFieldTextDialog = createCallable<SignFieldTextDialogProps, Sign
           position="center"
           // Only the date question has a description; saying so stops Radix warning about it.
           {...(!isDateQuestion && { 'aria-describedby': undefined })}
-          // A date question opens on the calendar, not the phone keyboard: focus goes to a day.
-          onOpenAutoFocus={
-            isDateQuestion
-              ? (event) => {
-                  event.preventDefault();
+          // A date question opens on the calendar, not the phone keyboard: focus goes to a day. A
+          // changed answer opens with its text selected, ready to retype.
+          onOpenAutoFocus={(event) => {
+            const container = event.currentTarget instanceof HTMLElement ? event.currentTarget : null;
 
-                  const container = event.currentTarget instanceof HTMLElement ? event.currentTarget : null;
-                  const day = container?.querySelector<HTMLElement>('[data-calendar-focus]');
+            if (isDateQuestion) {
+              event.preventDefault();
+              (container?.querySelector<HTMLElement>('[data-calendar-focus]') ?? container)?.focus();
+            } else if (isEditing) {
+              event.preventDefault();
 
-                  (day ?? container)?.focus();
-                }
-              : undefined
-          }
+              const input = container?.querySelector<HTMLTextAreaElement>('#custom-text');
+
+              input?.focus();
+              input?.select();
+            }
+          }}
+          // The field that opened this lives on a canvas and cannot take focus back, so focus goes to
+          // the next step: the Next or Finish button.
+          onCloseAutoFocus={(event) => {
+            const nextStep = Array.from(document.querySelectorAll<HTMLElement>('[data-signing-next-step]')).find(
+              (element) => element.offsetParent !== null,
+            );
+
+            if (nextStep) {
+              event.preventDefault();
+              nextStep.focus();
+            }
+          }}
         >
           <DialogHeader>
             <DialogTitle className="whitespace-normal">{title || <Trans>Enter Text</Trans>}</DialogTitle>
