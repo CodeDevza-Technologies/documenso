@@ -70,12 +70,7 @@ export const EnvelopeSignerHeader = () => {
       {/* Right side - Desktop content */}
       <div className="hidden items-center space-x-2 lg:flex">
         <p className="mr-2 flex-shrink-0 text-muted-foreground text-sm">
-          <Plural
-            _0="All filled in"
-            one="1 left to fill in"
-            other="# left to fill in"
-            value={recipientFieldsRemaining.length}
-          />
+          <Plural one="1 Field Remaining" other="# Fields Remaining" value={recipientFieldsRemaining.length} />
         </p>
 
         <EnvelopeSignerCompleteDialog />
@@ -126,7 +121,7 @@ const MobileDropdownMenu = () => {
               <DropdownMenuItem asChild onSelect={(e) => e.preventDefault()}>
                 <div>
                   <BanIcon className="mr-2 h-4 w-4" />
-                  <Trans>Decline to sign</Trans>
+                  <Trans>Reject</Trans>
                 </div>
               </DropdownMenuItem>
             }

@@ -123,7 +123,7 @@ export const EnvelopeSignerCompleteDialog = () => {
       if (error.code !== AppErrorCode.TWO_FACTOR_AUTH_FAILED) {
         toast({
           title: t`Something went wrong`,
-          description: t`We couldn't send your signature. Try again in a moment.`,
+          description: t`We were unable to submit this document at this time. Please try again later.`,
           variant: 'destructive',
         });
 
@@ -199,7 +199,7 @@ export const EnvelopeSignerCompleteDialog = () => {
       console.log('err', err);
       toast({
         title: t`Something went wrong`,
-        description: t`We couldn't send your signature. Try again in a moment.`,
+        description: t`We were unable to submit this document at this time. Please try again later.`,
         variant: 'destructive',
       });
 

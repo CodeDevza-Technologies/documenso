@@ -62,6 +62,7 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
     showPendingFieldTooltip,
     focusedField,
     setFocusedField,
+    skipField,
     signField: signFieldInternal,
     email: emailState,
     setEmail,
@@ -283,6 +284,11 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
         .with({ type: FieldType.TEXT }, (field) => {
           void handleTextFieldClick({ field, text: null })
             .then(async (payload) => {
+              if (payload === 'skip') {
+                skipField(field.id);
+                return;
+              }
+
               if (payload) {
                 fieldGroup.add(loadingSpinnerGroup);
                 await signField(field.id, payload);
@@ -511,7 +517,7 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
 
       toast({
         title: t`Error`,
-        description: t`We couldn't save that. Try again.`,
+        description: t`An error occurred while signing the field.`,
         variant: 'destructive',
       });
 
@@ -564,7 +570,7 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
       return;
     }
 
-    setFocusedField({ id: field.id, open: false });
+    setFocusedField({ ...focusedField, open: false });
     fieldGroup.fire('pointerdown', { target: fieldGroup, currentTarget: fieldGroup });
   }, [focusedField, localPageFields, pageData.imageLoadingState]);
 
@@ -605,7 +611,7 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
               .with(FieldType.TEXT, FieldType.CHECKBOX, () => null)
               .with(FieldType.SIGNATURE, () => <Trans>Tap to sign</Trans>)
               .otherwise(() => (
-                <Trans>Tap to fill in</Trans>
+                <Trans>Click to insert field</Trans>
               ))}
           </EnvelopeFieldToolTip>
         )}

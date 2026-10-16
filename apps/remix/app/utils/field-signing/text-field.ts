@@ -10,9 +10,13 @@ type HandleTextFieldClickOptions = {
   text: string | null;
 };
 
+/**
+ * The value to sign the text field with, `skip` when the signer leaves an optional question for
+ * now, or null when they cancel. An answered field opens with its answer so it can be changed.
+ */
 export const handleTextFieldClick = async (
   options: HandleTextFieldClickOptions,
-): Promise<Extract<TSignEnvelopeFieldValue, { type: typeof FieldType.TEXT }> | null> => {
+): Promise<Extract<TSignEnvelopeFieldValue, { type: typeof FieldType.TEXT }> | 'skip' | null> => {
   const { field, text } = options;
 
   if (field.type !== FieldType.TEXT) {
@@ -21,27 +25,33 @@ export const handleTextFieldClick = async (
     });
   }
 
-  if (field.inserted) {
+  if (text) {
     return {
       type: FieldType.TEXT,
-      value: null,
+      value: text,
     };
   }
 
-  let textToInsert = text;
+  const result = await SignFieldTextDialog.call({
+    fieldMeta: field.fieldMeta,
+    initialText: field.inserted ? field.customText : '',
+  });
 
-  if (!textToInsert) {
-    textToInsert = await SignFieldTextDialog.call({
-      fieldMeta: field.fieldMeta,
-    });
+  if (!result) {
+    return null;
   }
 
-  if (!textToInsert) {
+  if (result.action === 'skip') {
+    return 'skip';
+  }
+
+  // Unchanged: nothing to save.
+  if (field.inserted && result.text === field.customText) {
     return null;
   }
 
   return {
     type: FieldType.TEXT,
-    value: textToInsert,
+    value: result.text === '' ? null : result.text,
   };
 };

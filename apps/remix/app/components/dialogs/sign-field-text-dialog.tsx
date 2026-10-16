@@ -24,25 +24,49 @@ import { z } from 'zod';
 
 /**
  * A text field with this placeholder is a date question: it gets a calendar, and its answer is
- * stored as the text dd/mm/yyyy.
+ * stored as the text dd/mm/yyyy. This is a contract with Operify, which sends date questions as
+ * TEXT fields with this placeholder, a character limit of 10 and the label "<question> (dd/mm/yyyy)"
+ * (backend-2.0 src/lib/signify/client.ts, questionField and signifyLabel).
  */
 const DATE_QUESTION_PLACEHOLDER = 'dd/mm/yyyy';
 const DATE_QUESTION_FORMAT = 'dd/MM/yyyy';
+const DATE_QUESTION_LABEL_SUFFIX = /\s*\(dd\/mm\/yyyy\)\s*$/i;
 
-const parseDateAnswer = (text: string) => DateTime.fromFormat(text.trim(), DATE_QUESTION_FORMAT);
+/** Takes 1/2/2026 as well as 01/02/2026. */
+const parseDateAnswer = (text: string) => DateTime.fromFormat(text.trim(), 'd/M/yyyy');
 
-const ZSignFieldTextFormSchema = z.object({
-  text: z.string().min(1, { message: msg`Type an answer first`.id }),
-});
+const isDateAnswerOrEmpty = (text: string) => text.trim() === '' || parseDateAnswer(text).isValid;
 
-const ZSignFieldDateFormSchema = z.object({
-  text: z
-    .string()
-    .trim()
-    .refine((text) => parseDateAnswer(text).isValid, { message: msg`Pick a date, or type one as dd/mm/yyyy`.id }),
-});
+const normaliseDateAnswer = (text: string) =>
+  text.trim() === '' ? '' : parseDateAnswer(text).toFormat(DATE_QUESTION_FORMAT);
 
-type TSignFieldTextFormSchema = z.infer<typeof ZSignFieldTextFormSchema>;
+const ZDateAnswerSchema = z
+  .string()
+  .refine(isDateAnswerOrEmpty, { message: msg`Pick a date, or type one as dd/mm/yyyy`.id })
+  .transform(normaliseDateAnswer);
+
+const getFormSchema = ({ isDateQuestion, isRequired }: { isDateQuestion: boolean; isRequired: boolean }) => {
+  const answer = isDateQuestion ? ZDateAnswerSchema : z.string();
+
+  return z.object({
+    text: isRequired ? answer.refine((text) => text.trim() !== '', { message: msg`Text is required`.id }) : answer,
+  });
+};
+
+type TSignFieldTextFormSchema = { text: string };
+
+export type SignFieldTextDialogProps = {
+  fieldMeta?: TTextFieldMeta;
+  /**
+   * The answer already given, when the signer comes back to change it.
+   */
+  initialText?: string;
+};
+
+/**
+ * `save` with an empty text clears an optional answer. `skip` leaves an optional question for now.
+ */
+export type SignFieldTextDialogResult = { action: 'save'; text: string } | { action: 'skip' } | null;
 
 type DateQuestionCalendarProps = {
   month: DateTime;
@@ -61,6 +85,9 @@ const DateQuestionCalendar = ({ month, selected, onMonthChange, onSelect }: Date
   const leadingBlanks = month.weekday - 1;
   const days = Array.from({ length: month.daysInMonth ?? 0 }, (_, index) => month.plus({ days: index }));
   const today = DateTime.now();
+
+  // The day keyboard focus lands on when the dialog opens: the chosen day, else today, else the 1st.
+  const focusDay = days.find((day) => (selected ? day.hasSame(selected, 'day') : day.hasSame(today, 'day'))) ?? days[0];
 
   return (
     <div className="mx-auto w-fit">
@@ -112,6 +139,7 @@ const DateQuestionCalendar = ({ month, selected, onMonthChange, onSelect }: Date
               className={cn('h-11 w-11 p-0 font-normal', day.hasSame(today, 'day') && !isSelected && 'bg-muted')}
               aria-label={day.toFormat('cccc d LLLL yyyy')}
               aria-pressed={isSelected}
+              data-calendar-focus={day === focusDay ? '' : undefined}
               onClick={() => onSelect(day)}
             >
               {day.day}
@@ -123,123 +151,157 @@ const DateQuestionCalendar = ({ month, selected, onMonthChange, onSelect }: Date
   );
 };
 
-export type SignFieldTextDialogProps = {
-  fieldMeta?: TTextFieldMeta;
-};
+export const SignFieldTextDialog = createCallable<SignFieldTextDialogProps, SignFieldTextDialogResult>(
+  ({ call, fieldMeta, initialText = '' }) => {
+    const { t } = useLingui();
 
-export const SignFieldTextDialog = createCallable<SignFieldTextDialogProps, string | null>(({ call, fieldMeta }) => {
-  const { t } = useLingui();
+    const isDateQuestion = fieldMeta?.placeholder?.trim().toLowerCase() === DATE_QUESTION_PLACEHOLDER;
+    const isRequired = fieldMeta?.required === true;
+    const isEditing = initialText !== '';
 
-  const isDateQuestion = fieldMeta?.placeholder?.trim().toLowerCase() === DATE_QUESTION_PLACEHOLDER;
+    // The calendar makes the format plain, so the date question's title drops it.
+    const title = isDateQuestion ? fieldMeta?.label?.replace(DATE_QUESTION_LABEL_SUFFIX, '') : fieldMeta?.label;
 
-  const form = useForm<TSignFieldTextFormSchema>({
-    resolver: zodResolver(isDateQuestion ? ZSignFieldDateFormSchema : ZSignFieldTextFormSchema),
-    defaultValues: {
-      text: '',
-    },
-  });
+    const form = useForm<TSignFieldTextFormSchema>({
+      resolver: zodResolver(getFormSchema({ isDateQuestion, isRequired })),
+      defaultValues: {
+        text: initialText,
+      },
+    });
 
-  const [calendarMonth, setCalendarMonth] = useState(() => DateTime.now().startOf('month'));
+    const typedDate = parseDateAnswer(form.watch('text'));
 
-  const typedDate = parseDateAnswer(form.watch('text'));
+    const [calendarMonth, setCalendarMonth] = useState(() =>
+      (typedDate.isValid ? typedDate : DateTime.now()).startOf('month'),
+    );
 
-  return (
-    <Dialog open={true} onOpenChange={(value) => (!value ? call.end(null) : null)}>
-      <DialogContent
-        position="center"
-        // A date question opens on the calendar, not the phone keyboard.
-        onOpenAutoFocus={isDateQuestion ? (event) => event.preventDefault() : undefined}
-      >
-        <DialogHeader>
-          <DialogTitle className="whitespace-normal">{fieldMeta?.label || <Trans>Your answer</Trans>}</DialogTitle>
+    const onSubmit = ({ text }: TSignFieldTextFormSchema) => {
+      // Saving an optional question left empty is a skip, unless it clears an earlier answer.
+      if (text.trim() === '' && !isEditing) {
+        call.end({ action: 'skip' });
+        return;
+      }
 
-          {isDateQuestion && (
-            <DialogDescription>
-              <Trans>Pick a date, or type it in.</Trans>
-            </DialogDescription>
-          )}
-        </DialogHeader>
+      call.end({ action: 'save', text });
+    };
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit((data) => call.end(data.text))}>
-            <fieldset className="flex h-full flex-col space-y-4" disabled={form.formState.isSubmitting}>
-              <FormField
-                control={form.control}
-                name="text"
-                render={({ field, fieldState }) => (
-                  <FormItem>
-                    <FormControl>
-                      {isDateQuestion ? (
-                        <Input
-                          id="custom-text"
-                          inputMode="numeric"
-                          autoComplete="off"
-                          placeholder={DATE_QUESTION_PLACEHOLDER}
-                          maxLength={10}
-                          {...field}
-                          onChange={(event) => {
-                            field.onChange(event);
+    return (
+      <Dialog open={true} onOpenChange={(value) => (!value ? call.end(null) : null)}>
+        <DialogContent
+          position="center"
+          // Only the date question has a description; saying so stops Radix warning about it.
+          {...(!isDateQuestion && { 'aria-describedby': undefined })}
+          // A date question opens on the calendar, not the phone keyboard: focus goes to a day.
+          onOpenAutoFocus={
+            isDateQuestion
+              ? (event) => {
+                  event.preventDefault();
 
-                            const date = parseDateAnswer(event.target.value);
+                  const container = event.currentTarget instanceof HTMLElement ? event.currentTarget : null;
+                  const day = container?.querySelector<HTMLElement>('[data-calendar-focus]');
 
-                            if (date.isValid) {
-                              setCalendarMonth(date.startOf('month'));
-                            }
-                          }}
-                        />
-                      ) : (
-                        <Textarea
-                          id="custom-text"
-                          placeholder={fieldMeta?.placeholder || t`Type your answer`}
-                          className={cn('w-full rounded-md', {
-                            'border-2 border-red-300 text-left ring-2 ring-red-200 ring-offset-2 ring-offset-red-200 focus-visible:border-red-400 focus-visible:ring-4 focus-visible:ring-red-200 focus-visible:ring-offset-2 focus-visible:ring-offset-red-200':
-                              fieldState.error,
-                          })}
-                          {...field}
-                        />
-                      )}
-                    </FormControl>
-                    <FormMessage />
-                    {!isDateQuestion &&
-                      fieldMeta?.characterLimit !== undefined &&
-                      fieldMeta?.characterLimit > 0 &&
-                      !fieldState.error && (
-                        <div className="text-muted-foreground text-sm">
-                          <Plural
-                            value={fieldMeta?.characterLimit - (field.value?.length ?? 0)}
-                            one="# character left"
-                            other="# characters left"
+                  (day ?? container)?.focus();
+                }
+              : undefined
+          }
+        >
+          <DialogHeader>
+            <DialogTitle className="whitespace-normal">{title || <Trans>Enter Text</Trans>}</DialogTitle>
+
+            {isDateQuestion && (
+              <DialogDescription>
+                <Trans>Pick a date, or type it in.</Trans>
+              </DialogDescription>
+            )}
+          </DialogHeader>
+
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <fieldset className="flex h-full flex-col space-y-4" disabled={form.formState.isSubmitting}>
+                <FormField
+                  control={form.control}
+                  name="text"
+                  render={({ field, fieldState }) => (
+                    <FormItem>
+                      <FormControl>
+                        {isDateQuestion ? (
+                          <Input
+                            id="custom-text"
+                            inputMode="numeric"
+                            autoComplete="off"
+                            placeholder={DATE_QUESTION_PLACEHOLDER}
+                            maxLength={10}
+                            {...field}
+                            onChange={(event) => {
+                              field.onChange(event);
+
+                              const date = parseDateAnswer(event.target.value);
+
+                              if (date.isValid) {
+                                setCalendarMonth(date.startOf('month'));
+                              }
+                            }}
                           />
-                        </div>
-                      )}
-                  </FormItem>
-                )}
-              />
-
-              {isDateQuestion && (
-                <DateQuestionCalendar
-                  month={calendarMonth}
-                  selected={typedDate.isValid ? typedDate : null}
-                  onMonthChange={setCalendarMonth}
-                  onSelect={(date) =>
-                    form.setValue('text', date.toFormat(DATE_QUESTION_FORMAT), { shouldValidate: true })
-                  }
+                        ) : (
+                          <Textarea
+                            id="custom-text"
+                            placeholder={fieldMeta?.placeholder || t`Enter your text here`}
+                            className={cn('w-full rounded-md', {
+                              'border-2 border-red-300 text-left ring-2 ring-red-200 ring-offset-2 ring-offset-red-200 focus-visible:border-red-400 focus-visible:ring-4 focus-visible:ring-red-200 focus-visible:ring-offset-2 focus-visible:ring-offset-red-200':
+                                fieldState.error,
+                            })}
+                            {...field}
+                          />
+                        )}
+                      </FormControl>
+                      <FormMessage />
+                      {!isDateQuestion &&
+                        fieldMeta?.characterLimit !== undefined &&
+                        fieldMeta?.characterLimit > 0 &&
+                        !fieldState.error && (
+                          <div className="text-muted-foreground text-sm">
+                            <Plural
+                              value={fieldMeta?.characterLimit - (field.value?.length ?? 0)}
+                              one="# character remaining"
+                              other="# characters remaining"
+                            />
+                          </div>
+                        )}
+                    </FormItem>
+                  )}
                 />
-              )}
 
-              <DialogFooter>
-                <Button type="button" variant="secondary" onClick={() => call.end(null)}>
-                  <Trans>Cancel</Trans>
-                </Button>
+                {isDateQuestion && (
+                  <DateQuestionCalendar
+                    month={calendarMonth}
+                    selected={typedDate.isValid ? typedDate : null}
+                    onMonthChange={setCalendarMonth}
+                    onSelect={(date) =>
+                      form.setValue('text', date.toFormat(DATE_QUESTION_FORMAT), { shouldValidate: true })
+                    }
+                  />
+                )}
 
-                <Button type="submit">
-                  <Trans>Save</Trans>
-                </Button>
-              </DialogFooter>
-            </fieldset>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
-  );
-});
+                <DialogFooter>
+                  {isRequired || isEditing ? (
+                    <Button type="button" variant="secondary" onClick={() => call.end(null)}>
+                      <Trans>Cancel</Trans>
+                    </Button>
+                  ) : (
+                    <Button type="button" variant="secondary" onClick={() => call.end({ action: 'skip' })}>
+                      <Trans>Skip</Trans>
+                    </Button>
+                  )}
+
+                  <Button type="submit">
+                    <Trans>Enter</Trans>
+                  </Button>
+                </DialogFooter>
+              </fieldset>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+    );
+  },
+);

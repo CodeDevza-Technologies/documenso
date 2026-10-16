@@ -93,7 +93,7 @@ msgstr "{0, plural, one {# character over the limit} other {# characters over th
 #. placeholder {0}: fieldMeta?.characterLimit - (field.value?.length ?? 0)
 #: apps/remix/app/components/dialogs/sign-field-text-dialog.tsx
 msgid "{0, plural, one {# character remaining} other {# characters remaining}}"
-msgstr "{0, plural, one {# character remaining} other {# characters remaining}}"
+msgstr "{0, plural, one {# character left} other {# characters left}}"
 
 #. placeholder {0}: warnings.length
 #: apps/remix/app/routes/_authenticated+/o.$orgUrl.settings.branding.tsx
@@ -189,7 +189,7 @@ msgstr "{0, plural, one {<0>You have <1>1</1> pending invitation</0>} other {<2>
 #: apps/remix/app/components/general/document-signing/document-signing-page-view-v2.tsx
 #: apps/remix/app/components/general/envelope-signing/envelope-signer-header.tsx
 msgid "{0, plural, one {1 Field Remaining} other {# Fields Remaining}}"
-msgstr "{0, plural, one {1 Field Remaining} other {# Fields Remaining}}"
+msgstr "{0, plural, =0 {All filled in} one {1 left to fill in} other {# left to fill in}}"
 
 #. placeholder {0}: fieldsOnExcessPages.length
 #: apps/remix/app/components/dialogs/envelope-item-edit-dialog.tsx
@@ -201,7 +201,7 @@ msgstr "{0, plural, one {1 field will be deleted because the new PDF has fewer p
 #: apps/remix/app/components/general/document-signing/document-signing-page-view-v2.tsx
 #: apps/remix/app/components/general/envelope-editor/envelope-file-selector.tsx
 msgid "{0, plural, one {1 Field} other {# Fields}}"
-msgstr "{0, plural, one {1 Field} other {# Fields}}"
+msgstr "{0, plural, one {1 field} other {# fields}}"
 
 #. placeholder {0}: autoSignableFields.filter((f) => f.type === fieldType).length
 #: apps/remix/app/components/general/document-signing/document-signing-auto-sign.tsx
@@ -1868,7 +1868,7 @@ msgstr "An error occurred while moving the items."
 
 #: apps/remix/app/components/general/document-signing/document-signing-reject-dialog.tsx
 msgid "An error occurred while rejecting the document. Please try again."
-msgstr "An error occurred while rejecting the document. Please try again."
+msgstr "We couldn't decline the document. Try again."
 
 #: apps/remix/app/components/general/document-signing/document-signing-checkbox-field.tsx
 #: apps/remix/app/components/general/document-signing/document-signing-date-field.tsx
@@ -1925,7 +1925,7 @@ msgstr "An error occurred while signing the document."
 
 #: apps/remix/app/components/general/envelope-signing/envelope-signer-page-renderer.tsx
 msgid "An error occurred while signing the field."
-msgstr "An error occurred while signing the field."
+msgstr "We couldn't save that. Try again."
 
 #: apps/remix/app/components/general/billing-plans.tsx
 #: apps/remix/app/components/general/billing-plans.tsx
@@ -2121,7 +2121,7 @@ msgstr "Approve"
 #: apps/remix/app/components/general/document-signing/document-signing-page-view-v2.tsx
 #: packages/email/template-components/template-document-reminder.tsx
 msgid "Approve Document"
-msgstr "Approve Document"
+msgstr "Approve the document"
 
 #: apps/remix/app/components/general/document/document-page-view-recipients.tsx
 msgid "Approved"
@@ -2169,7 +2169,7 @@ msgstr "Are you sure you want to delete this folder?"
 
 #: apps/remix/app/components/general/document-signing/document-signing-reject-dialog.tsx
 msgid "Are you sure you want to reject this document? This action cannot be undone."
-msgstr "Are you sure you want to reject this document? This action cannot be undone."
+msgstr "You can't undo this."
 
 #: apps/remix/app/components/tables/settings-security-passkey-table-actions.tsx
 msgid "Are you sure you want to remove the <0>{passkeyName}</0> passkey?"
@@ -2218,7 +2218,7 @@ msgstr "Assist"
 #: apps/remix/app/components/general/document-signing/document-signing-page-view-v2.tsx
 #: packages/email/template-components/template-document-reminder.tsx
 msgid "Assist Document"
-msgstr "Assist Document"
+msgstr "Assist with the document"
 
 #: apps/remix/app/components/embed/embed-document-signing-page-v1.tsx
 msgid "Assist with signing"
@@ -2922,7 +2922,7 @@ msgstr "Click to copy signing link for sending to recipient"
 #: apps/remix/app/components/general/document-signing/document-signing-form.tsx
 #: apps/remix/app/components/general/envelope-signing/envelope-signer-page-renderer.tsx
 msgid "Click to insert field"
-msgstr "Click to insert field"
+msgstr "Tap to fill in"
 
 #: apps/remix/app/routes/_authenticated+/o.$orgUrl.settings.sso.tsx
 msgid "Client ID"
@@ -2995,7 +2995,7 @@ msgstr "Compare all plans and features in detail"
 #: apps/remix/app/components/general/document-signing/document-signing-complete-dialog.tsx
 #: apps/remix/app/components/general/document-signing/document-signing-complete-dialog.tsx
 msgid "Complete"
-msgstr "Complete"
+msgstr "Finish"
 
 #: apps/remix/app/components/dialogs/assistant-confirmation-dialog.tsx
 msgid "Complete Document"
@@ -5394,7 +5394,7 @@ msgstr "Ensure that you are using the embedding token, not the API token"
 #: apps/remix/app/components/dialogs/sign-field-number-dialog.tsx
 #: apps/remix/app/components/dialogs/sign-field-text-dialog.tsx
 msgid "Enter"
-msgstr "Enter"
+msgstr "Save"
 
 #: apps/remix/app/components/general/rate-limit-array-input.tsx
 msgid "Enter a max request count greater than 0"
@@ -5434,7 +5434,7 @@ msgstr "Enter Number"
 
 #: apps/remix/app/components/dialogs/sign-field-text-dialog.tsx
 msgid "Enter Text"
-msgstr "Enter Text"
+msgstr "Your answer"
 
 #: apps/remix/app/components/dialogs/organisation-email-domain-create-dialog.tsx
 msgid "Enter the domain you want to use for sending emails (without http:// or www)"
@@ -5488,7 +5488,7 @@ msgstr "Enter your password"
 #: apps/remix/app/components/dialogs/sign-field-text-dialog.tsx
 #: apps/remix/app/components/general/document-signing/document-signing-text-field.tsx
 msgid "Enter your text here"
-msgstr "Enter your text here"
+msgstr "Type your answer"
 
 #: apps/remix/app/components/dialogs/organisation-create-dialog.tsx
 msgid "Enterprise"
@@ -6110,7 +6110,7 @@ msgstr "From name"
 #: apps/remix/app/components/general/document-signing/document-signing-name-field.tsx
 #: apps/remix/app/components/general/envelope-signing/envelope-signer-form.tsx
 msgid "Full Name"
-msgstr "Full Name"
+msgstr "Full name"
 
 #: apps/remix/app/components/embed/authoring/configure-document-advanced-settings.tsx
 #: apps/remix/app/components/general/direct-template/direct-template-page.tsx
@@ -7273,7 +7273,7 @@ msgstr "Mark as viewed"
 #: apps/remix/app/components/general/document-signing/document-signing-complete-dialog.tsx
 #: apps/remix/app/components/general/document-signing/document-signing-complete-dialog.tsx
 msgid "Mark as Viewed"
-msgstr "Mark as Viewed"
+msgstr "Mark as viewed"
 
 #: apps/remix/app/routes/_authenticated+/admin+/stats.tsx
 msgid "MAU (created document)"
@@ -7588,15 +7588,15 @@ msgstr "Next"
 
 #: apps/remix/app/components/general/document-signing/document-signing-complete-dialog.tsx
 msgid "Next Field"
-msgstr "Next Field"
+msgstr "Next"
 
 #: apps/remix/app/components/general/document-signing/document-signing-complete-dialog.tsx
 msgid "Next Recipient Email"
-msgstr "Next Recipient Email"
+msgstr "Next recipient's email"
 
 #: apps/remix/app/components/general/document-signing/document-signing-complete-dialog.tsx
 msgid "Next Recipient Name"
-msgstr "Next Recipient Name"
+msgstr "Next recipient's name"
 
 #: apps/remix/app/components/forms/branding-preferences-form.tsx
 #: apps/remix/app/components/forms/certificate-preferences-form.tsx
@@ -8532,7 +8532,7 @@ msgstr "Please complete the CAPTCHA challenge before signing in."
 #: apps/remix/app/components/general/document-signing/document-signing-mobile-widget.tsx
 #: apps/remix/app/components/general/document-signing/document-signing-mobile-widget.tsx
 msgid "Please complete the document once reviewed"
-msgstr "Please complete the document once reviewed"
+msgstr "All filled in. Check it over, then finish."
 
 #: apps/remix/app/routes/embed+/v1+/authoring+/document.edit.$id.tsx
 #: apps/remix/app/routes/embed+/v1+/authoring+/template.edit.$id.tsx
@@ -8593,7 +8593,7 @@ msgstr "Please enter your initials"
 
 #: apps/remix/app/components/general/document-signing/document-signing-mobile-widget.tsx
 msgid "Please mark as viewed to complete"
-msgstr "Please mark as viewed to complete"
+msgstr "Mark it as viewed when you've read it"
 
 #: apps/remix/app/components/general/document-signing/document-signing-page-view-v1.tsx
 msgid "Please mark as viewed to complete."
@@ -8638,7 +8638,7 @@ msgstr "Please open your authenticator app and enter the 6-digit code for this d
 
 #: apps/remix/app/components/general/document-signing/document-signing-reject-dialog.tsx
 msgid "Please provide a reason for rejecting this document"
-msgstr "Please provide a reason for rejecting this document"
+msgstr "Tell the sender why (optional)"
 
 #: apps/remix/app/components/forms/2fa/disable-authenticator-app-dialog.tsx
 msgid "Please provide a token from the authenticator, or a backup code. If you do not have a backup code available, please contact support."
@@ -8943,7 +8943,7 @@ msgstr "Reason for rejection: {rejectionReason}"
 
 #: apps/remix/app/components/general/document-signing/document-signing-reject-dialog.tsx
 msgid "Reason must be less than 500 characters"
-msgstr "Reason must be less than 500 characters"
+msgstr "Keep the reason under 500 characters"
 
 #: apps/remix/app/components/general/document-signing/document-signing-auth-dialog.tsx
 msgid "Reauthentication is required to sign this field"
@@ -9189,14 +9189,14 @@ msgstr "Registration Successful"
 
 #: apps/remix/app/components/general/envelope-signing/envelope-signer-header.tsx
 msgid "Reject"
-msgstr "Reject"
+msgstr "Decline to sign"
 
 #: apps/remix/app/components/general/document-signing/document-signing-page-view-v2.tsx
 #: apps/remix/app/components/general/document-signing/document-signing-reject-dialog.tsx
 #: apps/remix/app/components/general/document-signing/document-signing-reject-dialog.tsx
 #: apps/remix/app/components/general/document-signing/document-signing-reject-dialog.tsx
 msgid "Reject Document"
-msgstr "Reject Document"
+msgstr "Decline to sign"
 
 #: apps/remix/app/components/dialogs/envelopes-bulk-download-dialog.tsx
 #: apps/remix/app/components/embed/multisign/multi-sign-document-list.tsx
@@ -9943,7 +9943,7 @@ msgstr "Select Option"
 
 #: apps/remix/app/components/dialogs/sign-field-checkbox-dialog.tsx
 msgid "Select Options"
-msgstr "Select Options"
+msgstr "Choose your answers"
 
 #: apps/remix/app/components/general/default-recipients-multiselect-combobox.tsx
 msgid "Select or add recipients"
@@ -10282,7 +10282,7 @@ msgstr "Sign document"
 #: apps/remix/app/components/general/document-signing/document-signing-page-view-v2.tsx
 #: packages/email/template-components/template-document-reminder.tsx
 msgid "Sign Document"
-msgstr "Sign Document"
+msgstr "Sign the document"
 
 #: apps/remix/app/routes/_recipient+/_layout.tsx
 msgid "Sign Document - Documenso"
@@ -10323,7 +10323,7 @@ msgstr "Sign Out"
 
 #: apps/remix/app/components/dialogs/sign-field-signature-dialog.tsx
 msgid "Sign Signature Field"
-msgstr "Sign Signature Field"
+msgstr "Sign here"
 
 #: apps/remix/app/components/embed/embed-direct-template-client-page.tsx
 #: apps/remix/app/components/embed/embed-document-signing-page-v1.tsx
@@ -11330,7 +11330,7 @@ msgstr "Text colour on primary buttons."
 
 #: apps/remix/app/components/dialogs/sign-field-text-dialog.tsx
 msgid "Text is required"
-msgstr "Text is required"
+msgstr "Type an answer first"
 
 #: apps/remix/app/components/general/envelope-editor/envelope-editor-fields-page.tsx
 msgid "Text Settings"
@@ -11413,7 +11413,7 @@ msgstr "The Document has been deleted successfully."
 
 #: apps/remix/app/components/general/document-signing/document-signing-reject-dialog.tsx
 msgid "The document has been successfully rejected."
-msgstr "The document has been successfully rejected."
+msgstr "You've declined to sign this document."
 
 #: apps/remix/app/components/embed/authoring/configure-document-upload.tsx
 msgid "The document is already saved and cannot be changed."
@@ -13216,7 +13216,7 @@ msgstr "View document"
 #: packages/ui/primitives/document-flow/add-subject.tsx
 #: packages/ui/primitives/document-flow/add-subject.tsx
 msgid "View Document"
-msgstr "View Document"
+msgstr "View the document"
 
 #: packages/email/template-components/template-document-invite.tsx
 msgid "View Document to approve"
@@ -13662,7 +13662,7 @@ msgstr "We were unable to setup two-factor authentication for your account. Plea
 #: apps/remix/app/components/general/envelope-signing/envelope-signing-complete-dialog.tsx
 #: apps/remix/app/utils/toast-error-messages.ts
 msgid "We were unable to submit this document at this time. Please try again later."
-msgstr "We were unable to submit this document at this time. Please try again later."
+msgstr "We couldn't send this document. Try again in a moment."
 
 #: apps/remix/app/routes/_authenticated+/o.$orgUrl.settings.branding.tsx
 #: apps/remix/app/routes/_authenticated+/t.$teamUrl+/settings.branding.tsx
@@ -13943,19 +13943,19 @@ msgstr "You are about to cancel <0>\"{title}\"</0>"
 
 #: apps/remix/app/components/general/document-signing/document-signing-complete-dialog.tsx
 msgid "You are about to complete approving the following document"
-msgstr "You are about to complete approving the following document"
+msgstr "You're about to approve this document."
 
 #: apps/remix/app/components/general/document-signing/document-signing-complete-dialog.tsx
 msgid "You are about to complete assisting the following document"
-msgstr "You are about to complete assisting the following document"
+msgstr "You're about to finish filling in this document."
 
 #: apps/remix/app/components/general/document-signing/document-signing-complete-dialog.tsx
 msgid "You are about to complete signing the following document"
-msgstr "You are about to complete signing the following document"
+msgstr "You're about to sign this document."
 
 #: apps/remix/app/components/general/document-signing/document-signing-complete-dialog.tsx
 msgid "You are about to complete viewing the following document"
-msgstr "You are about to complete viewing the following document"
+msgstr "You're about to mark this document as viewed."
 
 #: apps/remix/app/components/dialogs/envelope-delete-dialog.tsx
 msgid "You are about to delete <0>\"{title}\"</0>"
@@ -14890,7 +14890,7 @@ msgstr "Your document preferences have been updated"
 
 #: apps/remix/app/components/general/document-signing/document-signing-complete-dialog.tsx
 msgid "Your Email"
-msgstr "Your Email"
+msgstr "Your email"
 
 #: apps/remix/app/routes/_unauthenticated+/verify-email.$token.tsx
 msgid "Your email has already been confirmed. You can now use all features of Documenso."
@@ -14921,7 +14921,7 @@ msgstr "Your envelope has been resent successfully."
 
 #: apps/remix/app/components/general/document-signing/document-signing-complete-dialog.tsx
 msgid "Your Name"
-msgstr "Your Name"
+msgstr "Your name"
 
 #: apps/remix/app/components/dialogs/token-create-dialog.tsx
 msgid "Your new API token"

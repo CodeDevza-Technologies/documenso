@@ -30,6 +30,7 @@ export type EnvelopeSigningContextValue = {
   setFocusedField: (_value: TFocusedField | null) => void;
   focusField: (_field: Field | null, _options?: { allowOpen?: boolean }) => void;
   getNextFieldToFill: (_afterFieldId: number | null) => Field | null;
+  skipField: (_fieldId: number) => void;
 
   envelopeData: EnvelopeForSigningResponse;
   envelope: EnvelopeForSigningResponse['envelope'];
@@ -56,12 +57,20 @@ export type EnvelopeSigningContextValue = {
 };
 
 /**
- * The field the signer is being taken to. `open` asks the page that holds it to open its dialog.
+ * The field the signer is being taken to. `open` asks the page that holds it to open its dialog;
+ * `key` changes on every move, so moving to the same field again still scrolls to it.
  */
 export type TFocusedField = {
   id: number;
   open: boolean;
+  key: number;
 };
+
+/**
+ * How long a page that is not drawn yet has to draw before the open request lapses, so a dialog
+ * never pops up later when the signer scrolls past that page.
+ */
+const OPEN_REQUEST_TIMEOUT_MS = 2500;
 
 /**
  * Fields whose tap always opens a dialog and never fills the field by itself, so they can be
@@ -165,6 +174,9 @@ export const EnvelopeSigningProvider = ({
   // Konva field handlers keep the closure they were bound with, so read the fields from a ref.
   const latestRecipientFields = useRef(envelopeData.recipient.fields);
   latestRecipientFields.current = envelopeData.recipient.fields;
+
+  // Optional questions the signer chose to skip: never opened for them again.
+  const skippedFieldIds = useRef(new Set<number>());
 
   const isDirectTemplate = envelope.type === EnvelopeType.TEMPLATE;
 
@@ -349,8 +361,8 @@ export const EnvelopeSigningProvider = ({
   }, [envelope.documentMeta?.signingOrder, envelope.recipients, recipient.id]);
 
   /**
-   * The next empty field after the given one in reading order, so the signer can answer one
-   * question after another. Falls back to the first required field still empty.
+   * Where to take the signer after the given field: the next empty required field in reading
+   * order (wrapping round), then the next optional question they have not skipped.
    */
   const getNextFieldToFill = (afterFieldId: number | null): Field | null => {
     const itemOrder = new Map(envelope.envelopeItems.map((item) => [item.id, item.order]));
@@ -363,12 +375,14 @@ export const EnvelopeSigningProvider = ({
       [(field) => Number(field.positionX), 'asc'],
     );
 
-    const isEmpty = (field: Field) => field.id !== afterFieldId && !field.inserted && !isReadOnlyField(field);
     const afterIndex = fields.findIndex((field) => field.id === afterFieldId);
+    const inOrderAfter = [...fields.slice(afterIndex + 1), ...fields.slice(0, afterIndex + 1)];
+
+    const isEmpty = (field: Field) => field.id !== afterFieldId && !field.inserted && !isReadOnlyField(field);
 
     return (
-      fields.find((field, index) => index > afterIndex && isEmpty(field)) ??
-      fields.find((field) => isEmpty(field) && isRequiredField(field)) ??
+      inOrderAfter.find((field) => isEmpty(field) && isRequiredField(field)) ??
+      inOrderAfter.find((field) => isEmpty(field) && !skippedFieldIds.current.has(field.id)) ??
       null
     );
   };
@@ -379,22 +393,46 @@ export const EnvelopeSigningProvider = ({
       return;
     }
 
+    const key = Date.now();
+    const open = allowOpen && FIELD_TYPES_OPENED_FOR_SIGNER.includes(field.type);
+
     setShowPendingFieldTooltip(true);
-    setFocusedField({ id: field.id, open: allowOpen && FIELD_TYPES_OPENED_FOR_SIGNER.includes(field.type) });
+    setFocusedField({ id: field.id, open, key });
+
+    if (open) {
+      setTimeout(() => {
+        setFocusedField((current) => (current?.key === key && current.open ? { ...current, open: false } : current));
+      }, OPEN_REQUEST_TIMEOUT_MS);
+    }
   };
 
   /**
-   * Once a field is filled, take the signer to the next empty one. A tick box or radio is saved
-   * on every tap, so after one the next field is only shown, leaving room to tick another option.
+   * Leave an optional question for now and move on.
    */
-  const focusNextFieldAfter = (signedField: Pick<Field, 'id' | 'inserted' | 'type'>) => {
+  const skipField = (fieldId: number) => {
+    skippedFieldIds.current.add(fieldId);
+    focusField(getNextFieldToFill(fieldId));
+  };
+
+  /**
+   * Once a field is filled, take the signer to the next one. After changing an earlier answer they
+   * are only taken on if a required field is still empty. A tick box or radio is saved on every
+   * tap, so after one the next field is only shown, leaving room to tick another option.
+   */
+  const focusNextFieldAfter = (signedField: Pick<Field, 'id' | 'inserted' | 'type'>, wasEdit: boolean) => {
     if (!signedField.inserted || recipient.role === RecipientRole.ASSISTANT) {
+      return;
+    }
+
+    const next = getNextFieldToFill(signedField.id);
+
+    if (wasEdit && next && !isRequiredField(next)) {
       return;
     }
 
     const isMultiTap = signedField.type === FieldType.CHECKBOX || signedField.type === FieldType.RADIO;
 
-    focusField(getNextFieldToFill(signedField.id), { allowOpen: !isMultiTap });
+    focusField(next, { allowOpen: !isMultiTap });
   };
 
   const signField = async (
@@ -402,11 +440,13 @@ export const EnvelopeSigningProvider = ({
     fieldValue: TSignEnvelopeFieldValue,
     authOptions?: TRecipientActionAuth,
   ) => {
+    const wasEdit = latestRecipientFields.current.some((field) => field.id === fieldId && field.inserted);
+
     // Set the field locally for direct templates.
     if (isDirectTemplate) {
       const signedField = handleDirectTemplateFieldInsertion(fieldId, fieldValue);
 
-      focusNextFieldAfter(signedField);
+      focusNextFieldAfter(signedField, wasEdit);
 
       return signedField;
     }
@@ -418,7 +458,7 @@ export const EnvelopeSigningProvider = ({
       authOptions,
     });
 
-    focusNextFieldAfter(signedField);
+    focusNextFieldAfter(signedField, wasEdit);
 
     return signedField;
   };
@@ -498,6 +538,7 @@ export const EnvelopeSigningProvider = ({
         setFocusedField,
         focusField,
         getNextFieldToFill,
+        skipField,
 
         recipient,
         recipientFieldsRemaining,
