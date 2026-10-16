@@ -172,20 +172,29 @@ export const SignaturePad = ({
         <SignaturePadDraw onChange={onDrawSignatureChange} value={drawSignature} />
       </TabsContent>
 
-      <TabsContent
-        value="text"
-        className="relative flex aspect-signature-pad items-center justify-center rounded-md border border-border bg-muted/25 text-center"
-      >
-        <SignaturePadType value={typedSignature} defaultValue={fullName} onChange={onTypedSignatureChange} />
+      <TabsContent value="text">
+        <div className="relative flex aspect-signature-pad items-center justify-center rounded-md border border-muted-foreground bg-muted/25 text-center">
+          <SignaturePadType value={typedSignature} defaultValue={fullName} onChange={onTypedSignatureChange} />
+        </div>
+
+        {/* Sign stays off until there is a name: say so, in the space kept for it. */}
+        <p className={cn('mt-2 text-muted-foreground text-xs', typedSignature && 'invisible')}>
+          <Trans>Type your name to continue</Trans>
+        </p>
       </TabsContent>
 
-      <TabsContent
-        value="image"
-        className={cn('relative aspect-signature-pad rounded-md border border-border bg-muted/25', {
-          'bg-background': imageSignature,
-        })}
-      >
-        <SignaturePadUpload value={imageSignature} onChange={onImageSignatureChange} />
+      <TabsContent value="image">
+        <div
+          className={cn('relative aspect-signature-pad rounded-md border border-muted-foreground bg-muted/25', {
+            'bg-background': imageSignature,
+          })}
+        >
+          <SignaturePadUpload value={imageSignature} onChange={onImageSignatureChange} />
+        </div>
+
+        <p className={cn('mt-2 text-muted-foreground text-xs', imageSignature && 'invisible')}>
+          <Trans>Upload a signature to continue</Trans>
+        </p>
       </TabsContent>
     </Tabs>
   );

@@ -386,6 +386,11 @@ export const SignaturePadDraw = ({ className, value, onChange, ...props }: Signa
           )}
         </div>
       </div>
+
+      {/* Sign stays off until something is drawn: say so, in a line kept for it. */}
+      <p className={cn('mt-1 text-muted-foreground text-xs', hasDrawing && 'invisible')}>
+        <Trans>Draw your signature to continue</Trans>
+      </p>
     </div>
   );
 };

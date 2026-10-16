@@ -52,3 +52,28 @@ export const ensureReadableBrandButton = ({
 
   return { fill: darker.toHex(), foreground: WHITE };
 };
+
+/**
+ * A colour darkened in 1-point HSL lightness steps until it reaches the given contrast against
+ * white, for borders and outlines (WCAG asks 3:1 of UI components). Already readable colours come
+ * back unchanged.
+ */
+export const darkenForContrast = (color: string, minContrast = 3): string => {
+  const base = colord(color);
+
+  if (!base.isValid() || colord(WHITE).contrast(base) >= minContrast) {
+    return color;
+  }
+
+  const { h, s, l, a } = base.toHsl();
+
+  let points = 0;
+  let darker = base;
+
+  while (colord(WHITE).contrast(darker) < minContrast && l - points > 0) {
+    points += 1;
+    darker = colord({ h, s, l: Math.max(0, l - points), a });
+  }
+
+  return darker.toHex();
+};

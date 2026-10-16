@@ -16,11 +16,13 @@ import {
 import { createSpinner } from '@documenso/lib/universal/field-renderer/field-generic-items';
 import { renderField } from '@documenso/lib/universal/field-renderer/render-field';
 import { isFieldUnsignedAndRequired, isRequiredField } from '@documenso/lib/utils/advanced-fields-helpers';
+import { darkenForContrast } from '@documenso/lib/utils/brand-button-contrast';
 import { getClientSideFieldTranslations } from '@documenso/lib/utils/fields';
 import { extractInitials } from '@documenso/lib/utils/recipient-formatter';
 import type { TSignEnvelopeFieldValue } from '@documenso/trpc/server/envelope-router/sign-envelope-field.types';
 import { EnvelopeRecipientFieldTooltip } from '@documenso/ui/components/document/envelope-recipient-field-tooltip';
 import { EnvelopeFieldToolTip } from '@documenso/ui/components/field/envelope-field-tooltip';
+import { getRecipientColorStyles } from '@documenso/ui/lib/recipient-colors';
 import { useToast } from '@documenso/ui/primitives/use-toast';
 import { Trans, useLingui } from '@lingui/react/macro';
 import { type Field, FieldType, type Recipient, RecipientRole, type Signature, SigningStatus } from '@prisma/client';
@@ -60,8 +62,10 @@ const FIELD_OUTLINE_INSET_PX = 3;
  * content (answers, hints, tick boxes) moves in by the same amount so it keeps its gap from the
  * outline. Only the screen changes: the sealed PDF draws the field from its own geometry.
  */
-const drawFieldFrame = (fieldGroup: Konva.Group, scale: number, fieldType: FieldType) => {
+const drawFieldFrame = (fieldGroup: Konva.Group, scale: number, fieldType: FieldType, stroke: string) => {
   const fieldRect = fieldGroup.findOne<Konva.Rect>('.field-rect');
+
+  fieldRect?.stroke(stroke);
 
   if (fieldType !== FieldType.SIGNATURE) {
     for (const child of fieldGroup.getChildren()) {
@@ -90,6 +94,31 @@ const drawFieldFrame = (fieldGroup: Konva.Group, scale: number, fieldType: Field
     context.closePath();
     context.strokeShape(shape);
   });
+};
+
+/** The outline of a field still empty and optional, and of a read-only one: slate, 4.7:1 on white. */
+const NEUTRAL_FIELD_STROKE = '#64748b';
+
+/**
+ * A field outline's colour, at least 3.5:1 on white so it reads as a border: green once filled,
+ * orange while required and empty, neutral otherwise.
+ */
+const getFieldStroke = (field: Pick<Field, 'inserted' | 'type' | 'fieldMeta'>) => {
+  const fieldMeta = field.fieldMeta as { readOnly?: boolean } | null;
+
+  if (fieldMeta?.readOnly) {
+    return NEUTRAL_FIELD_STROKE;
+  }
+
+  if (field.inserted) {
+    return darkenForContrast(getRecipientColorStyles('green').baseRing, 3.5);
+  }
+
+  if (isRequiredField(field as Field)) {
+    return darkenForContrast(getRecipientColorStyles('orange').baseRing, 3.5);
+  }
+
+  return NEUTRAL_FIELD_STROKE;
 };
 
 type FieldBox = { x: number; y: number; width: number; height: number };
@@ -255,7 +284,8 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
 
     const fieldToRender = ZFullFieldSchema.parse(unparsedField);
 
-    const isValidating = showPendingFieldTooltip && isFieldUnsignedAndRequired(fieldToRender);
+    // A required field still empty is marked from the start, not only once the signer presses Next.
+    const isValidating = isFieldUnsignedAndRequired(fieldToRender);
 
     const color = fieldToRender.fieldMeta?.readOnly ? 'readOnly' : isValidating ? 'orange' : 'green';
 
@@ -282,7 +312,7 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
 
     // A tap target of at least 44 px around the drawn box. Only the hit region grows: the box as
     // drawn, and the field's geometry in the sealed PDF, stay as they are.
-    drawFieldFrame(fieldGroup, scale, fieldToRender.type);
+    drawFieldFrame(fieldGroup, scale, fieldToRender.type, getFieldStroke(fieldToRender));
 
     const fieldRectForHit = fieldGroup.findOne<Konva.Rect>('.field-rect');
 
@@ -623,7 +653,7 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
         // and shouldn't intercept events meant for the current recipient's
         // fields. Disable hit detection on the entire group.
         fieldGroup.listening(false);
-        drawFieldFrame(fieldGroup, scale, field.type);
+        drawFieldFrame(fieldGroup, scale, field.type, NEUTRAL_FIELD_STROKE);
       } catch (err) {
         console.error('Unable to render one or more fields belonging to other recipients.');
         console.error(err);
@@ -748,6 +778,7 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
             color="warning"
             placement="inside"
             className={isRequiredField(highlightedField) ? undefined : 'outline-transparent'}
+            outlineColor={getFieldStroke(highlightedField)}
           >
             {match(highlightedField.type)
               .with(FieldType.TEXT, FieldType.CHECKBOX, () => null)

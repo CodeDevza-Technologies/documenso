@@ -30,6 +30,8 @@ interface EnvelopeFieldToolTipProps extends VariantProps<typeof tooltipVariants>
    * that can cover the field above.
    */
   placement?: 'top' | 'inside';
+  /** With `inside`: the outline's colour, to match the field's own. */
+  outlineColor?: string;
 }
 
 /**
@@ -41,6 +43,7 @@ export function EnvelopeFieldToolTip({
   className = '',
   field,
   placement = 'top',
+  outlineColor,
 }: EnvelopeFieldToolTipProps) {
   const [coords, setCoords] = useState({
     x: 0,
@@ -124,7 +127,7 @@ export function EnvelopeFieldToolTip({
           children && 'bg-orange-100 text-orange-900',
           className,
         )}
-        style={style}
+        style={outlineColor ? { ...style, outlineColor } : style}
       >
         {children && <span className="truncate px-1 font-medium text-xs">{children}</span>}
       </div>
