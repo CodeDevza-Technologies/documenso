@@ -295,7 +295,7 @@ export const SignaturePadDraw = ({ className, value, onChange, ...props }: Signa
         <div className="absolute right-2 bottom-2 flex gap-2">
           <button
             type="button"
-            className="flex h-11 items-center rounded-md border border-border bg-background px-3 text-muted-foreground text-xs ring-offset-background hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="flex h-11 items-center rounded-md border border-muted-foreground bg-background px-3 text-muted-foreground text-xs ring-offset-background hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             onClick={() => onClearClick()}
           >
             <Trans>Clear Signature</Trans>
@@ -312,11 +312,11 @@ export const SignaturePadDraw = ({ className, value, onChange, ...props }: Signa
       )}
 
       {isSignatureValid && lines.length > 0 && (
-        <div className="absolute bottom-4 left-4 flex gap-2">
+        <div className="absolute bottom-2 left-2 flex gap-2">
           <button
             type="button"
             title="undo"
-            className="-mb-3 -ml-3 flex h-11 w-11 items-center justify-center rounded-full text-muted-foreground ring-offset-background hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="flex h-11 w-11 items-center justify-center rounded-full text-muted-foreground ring-offset-background hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             onClick={onUndoClick}
           >
             <Undo2 className="h-4 w-4" />

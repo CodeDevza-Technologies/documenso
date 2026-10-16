@@ -42,7 +42,7 @@ export const DocumentSigningMobileWidget = () => {
                   <Button
                     variant="outline"
                     onClick={() => setIsExpanded(!isExpanded)}
-                    className="flex h-8 w-8 items-center justify-center"
+                    className="flex h-11 w-11 items-center justify-center"
                     aria-label={isExpanded ? 'Collapse' : 'Expand'}
                   >
                     {isExpanded ? (
@@ -90,7 +90,7 @@ export const DocumentSigningMobileWidget = () => {
             </div>
 
             <div>
-              <EnvelopeSignerCompleteDialog />
+              <EnvelopeSignerCompleteDialog buttonClassName="h-11" />
             </div>
           </div>
 

@@ -118,9 +118,9 @@ export function EnvelopeFieldToolTip({
       <div
         id="field-tooltip"
         className={cn(
-          // A 2px outline centred on the box edge, exactly over the field's own outline, so the two
+          // A 2px outline 3px inside the box edge, exactly over the field's own outline, so the two
           // read as one rectangle.
-          'pointer-events-none absolute z-20 flex items-center justify-center overflow-hidden rounded-sm outline outline-2 outline-orange-400 -outline-offset-1',
+          'pointer-events-none absolute z-20 flex items-center justify-center overflow-hidden rounded-sm outline outline-2 outline-orange-400 -outline-offset-4',
           children && 'bg-orange-100 text-orange-900',
           className,
         )}

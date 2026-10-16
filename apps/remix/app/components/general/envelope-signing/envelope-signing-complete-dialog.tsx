@@ -15,7 +15,7 @@ import { useEmbedSigningContext } from '~/components/embed/embed-signing-context
 import { DocumentSigningCompleteDialog } from '../document-signing/document-signing-complete-dialog';
 import { useRequiredEnvelopeSigningContext } from '../document-signing/envelope-signing-provider';
 
-export const EnvelopeSignerCompleteDialog = () => {
+export const EnvelopeSignerCompleteDialog = ({ buttonClassName }: { buttonClassName?: string } = {}) => {
   const navigate = useNavigate();
   const analytics = useAnalytics();
 
@@ -244,6 +244,7 @@ export const EnvelopeSignerCompleteDialog = () => {
       disableNameInput={!isDirectTemplate && recipient.name !== ''}
       defaultNextSigner={nextRecipient ? { name: nextRecipient.name, email: nextRecipient.email } : undefined}
       buttonSize="sm"
+      buttonClassName={buttonClassName}
       position="center"
     />
   );

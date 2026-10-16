@@ -47,6 +47,46 @@ import { useRequiredEnvelopeSigningContext } from '../document-signing/envelope-
  */
 const MIN_FIELD_HIT_SIZE_PX = 44;
 
+/**
+ * How far inside the field's box its outline is drawn, in CSS pixels, so the outline keeps clear
+ * of the caption printed just above the box. The box itself, its fill and the sealed PDF keep the
+ * field's own geometry.
+ */
+const FIELD_OUTLINE_INSET_PX = 3;
+
+/**
+ * Draws a field's box on the signing page: the fill over the whole box, reaching 1 px past its edge
+ * so the PDF's own thin box line never shows, and the outline drawn inside the box. Left-aligned
+ * content (answers, hints, tick boxes) moves in by the same amount so it keeps its gap from the
+ * outline. Only the screen changes: the sealed PDF draws the field from its own geometry.
+ */
+const drawFieldFrame = (fieldGroup: Konva.Group, scale: number, fieldType: FieldType) => {
+  const fieldRect = fieldGroup.findOne<Konva.Rect>('.field-rect');
+
+  if (fieldType !== FieldType.SIGNATURE) {
+    for (const child of fieldGroup.getChildren()) {
+      if (child !== fieldRect && !child.hasName('loading-spinner-group')) {
+        child.x(child.x() + FIELD_OUTLINE_INSET_PX / scale);
+      }
+    }
+  }
+
+  fieldRect?.sceneFunc((context, shape) => {
+    const cover = 1 / scale;
+    const inset = FIELD_OUTLINE_INSET_PX / scale;
+
+    context.beginPath();
+    context.rect(-cover, -cover, shape.width() + cover * 2, shape.height() + cover * 2);
+    context.closePath();
+    context.fillShape(shape);
+
+    context.beginPath();
+    context.rect(inset, inset, shape.width() - inset * 2, shape.height() - inset * 2);
+    context.closePath();
+    context.strokeShape(shape);
+  });
+};
+
 type FieldBox = { x: number; y: number; width: number; height: number };
 
 const toFieldBox = (
@@ -237,6 +277,8 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
 
     // A tap target of at least 44 px around the drawn box. Only the hit region grows: the box as
     // drawn, and the field's geometry in the sealed PDF, stay as they are.
+    drawFieldFrame(fieldGroup, scale, fieldToRender.type);
+
     const fieldRectForHit = fieldGroup.findOne<Konva.Rect>('.field-rect');
 
     if (fieldRectForHit) {
@@ -576,6 +618,7 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
         // and shouldn't intercept events meant for the current recipient's
         // fields. Disable hit detection on the entire group.
         fieldGroup.listening(false);
+        drawFieldFrame(fieldGroup, scale, field.type);
       } catch (err) {
         console.error('Unable to render one or more fields belonging to other recipients.');
         console.error(err);
