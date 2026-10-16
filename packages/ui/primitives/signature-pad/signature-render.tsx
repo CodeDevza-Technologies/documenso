@@ -81,6 +81,11 @@ export const SignatureRender = ({ className, value }: SignatureRenderProps) => {
 
     const { width, height } = $el.current;
 
+    // A hidden preview (the desktop sidebar on a phone) has no size to draw into.
+    if (width === 0 || height === 0) {
+      return;
+    }
+
     const img = new Image();
 
     img.onload = () => {

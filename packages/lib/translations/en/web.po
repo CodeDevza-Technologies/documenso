@@ -18,6 +18,11 @@ msgctxt "Recipient signing confirmation"
 msgid "Are you sure?"
 msgstr "Ready to finish?"
 
+#: apps/remix/app/components/general/document-signing/document-signing-complete-dialog.tsx
+msgctxt "Recipient signing confirmation button"
+msgid "Sign"
+msgstr "Finish and send"
+
 #: apps/remix/app/components/general/document-signing/document-signing-reject-dialog.tsx
 msgctxt "Recipient signing toast"
 msgid "Document rejected"

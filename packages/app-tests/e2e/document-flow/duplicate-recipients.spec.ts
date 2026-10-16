@@ -209,7 +209,7 @@ test.describe('[DOCUMENT_FLOW]: Duplicate Recipients', () => {
       await page.locator('[data-field-type="SIGNATURE"]:not([data-readonly="true"])').first().click();
 
       await page.getByRole('button', { name: 'Finish' }).click();
-      await page.getByRole('button', { name: 'Sign' }).click();
+      await page.getByRole('button', { name: 'Finish and send' }).click();
 
       // Verify completion
       await page.waitForURL(`/sign/${recipient?.token}/complete`);

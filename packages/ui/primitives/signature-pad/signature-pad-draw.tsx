@@ -259,8 +259,20 @@ export const SignaturePadDraw = ({ className, value, onChange, ...props }: Signa
     }
   });
 
+  const hasDrawing = isPressed || lines.length > 0 || currentLine.length > 0 || Boolean(value);
+
   return (
     <div className={cn('h-full w-full', className)}>
+      {/* An empty pad shows where to sign: a light line and a muted hint, gone once drawing starts. */}
+      {!hasDrawing && (
+        <div aria-hidden="true" className="pointer-events-none absolute inset-x-6 bottom-[30%]">
+          <span className="mb-1 block text-muted-foreground text-sm">
+            <Trans>Sign here</Trans>
+          </span>
+          <div className="h-px w-full bg-border" />
+        </div>
+      )}
+
       <canvas
         data-testid="signature-pad-draw"
         ref={$el}
@@ -278,15 +290,18 @@ export const SignaturePadDraw = ({ className, value, onChange, ...props }: Signa
 
       <SignaturePadColorPicker selectedColor={selectedColor} setSelectedColor={setSelectedColor} />
 
-      <div className="absolute right-3 bottom-3 flex gap-2">
-        <button
-          type="button"
-          className="-mr-3 -mb-3 flex min-h-11 items-center rounded-full px-3 text-[0.688rem] text-muted-foreground ring-offset-background hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          onClick={() => onClearClick()}
-        >
-          <Trans>Clear Signature</Trans>
-        </button>
-      </div>
+      {/* Only when there is something to clear, as an outlined 44 px button. */}
+      {hasDrawing && (
+        <div className="absolute right-2 bottom-2 flex gap-2">
+          <button
+            type="button"
+            className="flex h-11 items-center rounded-md border border-border bg-background px-3 text-muted-foreground text-xs ring-offset-background hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            onClick={() => onClearClick()}
+          >
+            <Trans>Clear Signature</Trans>
+          </button>
+        </div>
+      )}
 
       {isSignatureValid === false && (
         <div className="absolute bottom-4 left-4 flex gap-2">

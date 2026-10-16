@@ -211,7 +211,7 @@ test('[DIRECT_TEMPLATES]: V1 direct template link auth access', async ({ page })
 
   await page.getByRole('button', { name: 'Finish' }).click();
 
-  await page.getByRole('button', { name: 'Sign' }).click();
+  await page.getByRole('button', { name: 'Finish and send' }).click();
   await page.waitForURL(/\/sign/);
   await expect(page.getByRole('heading', { name: 'Document Signed' })).toBeVisible();
 });
@@ -280,7 +280,7 @@ test('[DIRECT_TEMPLATES]: V2 direct template link auth access', async ({ page })
   await page.getByRole('button', { name: 'Finish' }).click();
   await expect(page.getByLabel('Your email')).not.toBeVisible();
 
-  await page.getByRole('button', { name: 'Sign' }).click();
+  await page.getByRole('button', { name: 'Finish and send' }).click();
   await page.waitForURL(/\/sign/);
   await expect(page.getByRole('heading', { name: 'Document Signed' })).toBeVisible();
 });
@@ -319,7 +319,7 @@ test('[DIRECT_TEMPLATES]: use direct template link with 1 recipient', async ({ p
   await expect(page.locator(`#field-${directSignatureField.id}`)).toHaveAttribute('data-inserted', 'true');
 
   await page.getByRole('button', { name: 'Finish' }).click();
-  await page.getByRole('button', { name: 'Sign' }).click();
+  await page.getByRole('button', { name: 'Finish and send' }).click();
   await page.waitForURL(/\/sign/);
   await expect(page.getByRole('heading', { name: 'Document Signed' })).toBeVisible();
 
@@ -409,7 +409,7 @@ test('[DIRECT_TEMPLATES]: V1 use direct template link with 2 recipients with nex
   await page.getByLabel('Next recipient’s email').fill(newSecondSignerEmail);
   await page.getByLabel('Next recipient’s name').fill(newName);
 
-  await page.getByRole('button', { name: 'Sign' }).click();
+  await page.getByRole('button', { name: 'Finish and send' }).click();
   await page.waitForURL(/\/sign/);
   await expect(page.getByRole('heading', { name: 'Document Signed' })).toBeVisible();
 
@@ -537,7 +537,7 @@ test('[DIRECT_TEMPLATES]: V2 use direct template link with 2 recipients with nex
   await page.getByLabel('Next recipient’s email').fill(newSecondSignerEmail);
   await page.getByLabel('Next recipient’s name').fill(newName);
 
-  await page.getByRole('button', { name: 'Sign' }).click();
+  await page.getByRole('button', { name: 'Finish and send' }).click();
   await page.waitForURL(/\/sign/);
   await expect(page.getByRole('heading', { name: 'Document Signed' })).toBeVisible();
 

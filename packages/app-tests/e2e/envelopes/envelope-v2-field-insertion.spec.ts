@@ -68,7 +68,7 @@ test.describe('V2 envelope field insertion during signing', () => {
 
     await page.getByRole('button', { name: 'Finish' }).click();
     await expect(page.getByRole('heading', { name: 'Ready to finish?' })).toBeVisible();
-    await page.getByRole('button', { name: 'Sign' }).click();
+    await page.getByRole('button', { name: 'Finish and send' }).click();
 
     await page.waitForURL(`/sign/${token}/complete`);
     await expect(page.getByText('Document Signed')).toBeVisible();
@@ -201,7 +201,7 @@ test.describe('V2 envelope field insertion during signing', () => {
 
     await page.getByRole('button', { name: 'Finish' }).click();
     await expect(page.getByRole('heading', { name: 'Ready to finish?' })).toBeVisible();
-    await page.getByRole('button', { name: 'Sign' }).click();
+    await page.getByRole('button', { name: 'Finish and send' }).click();
 
     await page.waitForURL(`/sign/${token}/complete`);
     await expect(page.getByText('Document Signed')).toBeVisible();

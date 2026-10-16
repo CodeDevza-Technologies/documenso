@@ -280,7 +280,7 @@ test('field placement visual regression', async ({ page, request }, testInfo) =>
   await expect(page.getByRole('heading', { name: 'Sign the document' })).toBeVisible();
 
   await page.getByRole('button', { name: 'Finish' }).click();
-  await page.getByRole('button', { name: 'Sign' }).click();
+  await page.getByRole('button', { name: 'Finish and send' }).click();
   await page.waitForURL(`${signUrl}/complete`);
 
   await expect(async () => {
@@ -420,7 +420,7 @@ test.skip('download envelope images', async ({ page, request }) => {
   await expect(page.getByRole('heading', { name: 'Sign the document' })).toBeVisible();
 
   await page.getByRole('button', { name: 'Finish' }).click();
-  await page.getByRole('button', { name: 'Sign' }).click();
+  await page.getByRole('button', { name: 'Finish and send' }).click();
   await page.waitForURL(`${signUrl}/complete`);
 
   await expect(async () => {

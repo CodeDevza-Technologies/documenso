@@ -75,7 +75,7 @@ test('[NEXT_RECIPIENT_DICTATION]: should allow updating next recipient when dict
   await dialog.getByLabel('Email').fill('new.recipient@example.com');
 
   // Submit and verify completion
-  await page.getByRole('button', { name: 'Sign' }).click();
+  await page.getByRole('button', { name: 'Finish and send' }).click();
   await page.waitForURL(`${signUrl}/complete`);
 
   // Verify document and recipient states
@@ -159,7 +159,7 @@ test('[NEXT_RECIPIENT_DICTATION]: should not show dictation UI when disabled', a
   await expect(page.getByRole('button', { name: 'Update Recipient' })).not.toBeVisible();
 
   // Submit and verify completion
-  await page.getByRole('button', { name: 'Sign' }).click();
+  await page.getByRole('button', { name: 'Finish and send' }).click();
   await page.waitForURL(`${signUrl}/complete`);
 
   // Verify document and recipient states
@@ -243,7 +243,7 @@ test('[NEXT_RECIPIENT_DICTATION]: should work with parallel signing flow', async
     await expect(page.getByRole('button', { name: 'Update Recipient' })).not.toBeVisible();
 
     // Submit and verify completion
-    await page.getByRole('button', { name: 'Sign' }).click();
+    await page.getByRole('button', { name: 'Finish and send' }).click();
     await page.waitForURL(`${signUrl}/complete`);
   }
 
@@ -462,7 +462,7 @@ test('[NEXT_RECIPIENT_DICTATION]: should skip CC recipient when dictating next s
   await expect(dialog.getByLabel('Email')).toHaveValue(secondSigner.email);
 
   // Submit and verify completion
-  await page.getByRole('button', { name: 'Sign' }).click();
+  await page.getByRole('button', { name: 'Finish and send' }).click();
   await page.waitForURL(`${signUrl}/complete`);
 
   // Verify document and recipient states
@@ -577,7 +577,7 @@ test('[NEXT_RECIPIENT_DICTATION]: should not offer dictation when CC recipient i
     }
 
     // Submit and verify completion
-    await page.getByRole('button', { name: 'Sign' }).click();
+    await page.getByRole('button', { name: 'Finish and send' }).click();
     await page.waitForURL(`${signUrl}/complete`);
   }
 

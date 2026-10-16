@@ -614,7 +614,7 @@ test.describe('Document API', () => {
       await page.locator(`#field-${signerField.id}`).getByRole('button').click();
 
       await page.getByRole('button', { name: 'Finish' }).click();
-      await page.getByRole('button', { name: 'Sign' }).click();
+      await page.getByRole('button', { name: 'Finish and send' }).click();
       await page.waitForURL(`/sign/${signer.token}/complete`);
     }
 

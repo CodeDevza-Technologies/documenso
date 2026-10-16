@@ -486,7 +486,7 @@ test('[DOCUMENT_FLOW]: should be able to sign a document with custom date', asyn
 
   await page.getByRole('button', { name: 'Finish' }).click();
   await expect(page.getByRole('dialog').getByText('Complete Signing').first()).toBeVisible();
-  await page.getByRole('button', { name: 'Sign' }).click();
+  await page.getByRole('button', { name: 'Finish and send' }).click();
 
   await page.waitForURL(`/sign/${token}/complete`);
   await expect(page.getByText('Document Signed')).toBeVisible();
@@ -616,7 +616,7 @@ test('[DOCUMENT_FLOW]: should be able to create and sign a document with 3 recip
     await page.locator(`#field-${recipientField.id}`).getByRole('button').click();
 
     await page.getByRole('button', { name: 'Finish' }).click();
-    await page.getByRole('button', { name: 'Sign' }).click();
+    await page.getByRole('button', { name: 'Finish and send' }).click();
 
     await page.waitForURL(`/sign/${recipient?.token}/complete`);
     await expect(page.getByText('Document Signed')).toBeVisible();
@@ -729,7 +729,7 @@ test('[DOCUMENT_FLOW]: should skip CC recipients in sequential signing order', a
   await page.locator(`#field-${firstSignerField.id}`).getByRole('button').click();
 
   await page.getByRole('button', { name: 'Finish' }).click();
-  await page.getByRole('button', { name: 'Sign' }).click();
+  await page.getByRole('button', { name: 'Finish and send' }).click();
   await page.waitForURL(`/sign/${firstSigner?.token}/complete`);
 
   // The CC recipient at order 2 must not block the last signer at order 3.
@@ -746,7 +746,7 @@ test('[DOCUMENT_FLOW]: should skip CC recipients in sequential signing order', a
   await page.locator(`#field-${lastSignerField.id}`).getByRole('button').click();
 
   await page.getByRole('button', { name: 'Finish' }).click();
-  await page.getByRole('button', { name: 'Sign' }).click();
+  await page.getByRole('button', { name: 'Finish and send' }).click();
   await page.waitForURL(`/sign/${lastSigner?.token}/complete`);
 
   // The document completes without any action from the CC recipient.
@@ -816,7 +816,7 @@ test('[DOCUMENT_FLOW]: should skip unsigned CC recipients in sequential signing 
   await page.locator(`#field-${firstSignerField.id}`).getByRole('button').click();
 
   await page.getByRole('button', { name: 'Finish' }).click();
-  await page.getByRole('button', { name: 'Sign' }).click();
+  await page.getByRole('button', { name: 'Finish and send' }).click();
   await page.waitForURL(`/sign/${firstSigner?.token}/complete`);
 
   // The unsigned CC recipient at order 2 must not block the last signer at order 3.
@@ -833,7 +833,7 @@ test('[DOCUMENT_FLOW]: should skip unsigned CC recipients in sequential signing 
   await page.locator(`#field-${lastSignerField.id}`).getByRole('button').click();
 
   await page.getByRole('button', { name: 'Finish' }).click();
-  await page.getByRole('button', { name: 'Sign' }).click();
+  await page.getByRole('button', { name: 'Finish and send' }).click();
   await page.waitForURL(`/sign/${lastSigner?.token}/complete`);
 
   // The document completes without any action from the CC recipient.

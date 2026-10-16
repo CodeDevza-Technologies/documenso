@@ -15,6 +15,13 @@ import { PdfViewerPageImage } from './pdf-viewer-page-image';
 import { PdfViewerErrorState, PdfViewerLoadingState } from './pdf-viewer-states';
 import { useScrollToPage } from './use-scroll-to-page';
 
+/**
+ * The page frame's border, 1px each side. The page image sits inside it, so the page and its
+ * field layer are scaled to the width inside the border; scaling to the outer width drew every
+ * field up to a few pixels off the page's own lines.
+ */
+const PAGE_BORDER_WIDTH = 2;
+
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 type PageMeta = {
@@ -242,7 +249,7 @@ const VirtualizedPageList = ({
 
       // Calculate height based on aspect ratio and available width
       const aspectRatio = pageMeta.height / pageMeta.width;
-      const scaledHeight = width * aspectRatio;
+      const scaledHeight = (width - PAGE_BORDER_WIDTH) * aspectRatio;
 
       // Add 32px for the page number text and margins (my-2 = 8px * 2 + text height ~16px)
       // Add additional 2px for the top and bottom borders.
@@ -271,7 +278,7 @@ const VirtualizedPageList = ({
         const pageNumber = index + 1;
 
         // Calculate scale based on constraint width
-        const scale = constraintWidth / pageMeta.width;
+        const scale = (constraintWidth - PAGE_BORDER_WIDTH) / pageMeta.width;
 
         const scaledWidth = Math.floor(pageMeta.width * scale);
         const scaledHeight = Math.floor(pageMeta.height * scale);
@@ -343,7 +350,10 @@ const PdfViewerPage = ({
   });
 
   return (
-    <div className="relative w-full rounded border border-border" style={{ width: scaledWidth, height: scaledHeight }}>
+    <div
+      className="relative w-full rounded border border-border"
+      style={{ width: scaledWidth + PAGE_BORDER_WIDTH, height: scaledHeight + PAGE_BORDER_WIDTH }}
+    >
       {CustomPageRenderer && imageLoadingState === 'loaded' && (
         <CustomPageRenderer
           pageData={{

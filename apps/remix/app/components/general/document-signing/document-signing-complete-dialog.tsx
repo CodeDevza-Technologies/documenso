@@ -361,7 +361,10 @@ export const DocumentSigningCompleteDialog = ({
                   <Button type="submit" disabled={!isComplete} loading={form.formState.isSubmitting}>
                     {match(recipient.role)
                       .with(RecipientRole.VIEWER, () => <Trans>Mark as Viewed</Trans>)
-                      .with(RecipientRole.SIGNER, () => <Trans>Sign</Trans>)
+                      .with(RecipientRole.SIGNER, () => (
+                        // Its own id: "Sign" is shared with many other buttons.
+                        <Trans context="Recipient signing confirmation button">Sign</Trans>
+                      ))
                       .with(RecipientRole.APPROVER, () => <Trans>Approve</Trans>)
                       .with(RecipientRole.CC, () => <Trans>Mark as Viewed</Trans>)
                       .with(RecipientRole.ASSISTANT, () => <Trans>Complete</Trans>)

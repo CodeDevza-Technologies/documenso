@@ -57,7 +57,13 @@ export const DocumentSigningMobileWidget = () => {
                   <h2 className="font-medium text-foreground text-lg">
                     {match(recipient.role)
                       .with(RecipientRole.VIEWER, () => <Trans>View Document</Trans>)
-                      .with(RecipientRole.SIGNER, () => <Trans>Sign Document</Trans>)
+                      .with(RecipientRole.SIGNER, () =>
+                        recipientFieldsRemaining.length === 0 ? (
+                          <Trans>Ready to finish</Trans>
+                        ) : (
+                          <Trans>Sign Document</Trans>
+                        ),
+                      )
                       .with(RecipientRole.APPROVER, () => <Trans>Approve Document</Trans>)
                       .with(RecipientRole.ASSISTANT, () => <Trans>Assist Document</Trans>)
                       .otherwise(() => null)}
