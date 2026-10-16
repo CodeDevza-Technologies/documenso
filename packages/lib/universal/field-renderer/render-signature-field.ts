@@ -25,11 +25,21 @@ void (async () => {
   }
 })();
 
+/**
+ * The clear space kept round a drawn signature inside its field, as a share of the field's smaller
+ * side, so the drawing never touches the box.
+ */
+const SIGNATURE_IMAGE_PADDING = 0.12;
+
 const getImageDimensions = (img: HTMLImageElement, fieldWidth: number, fieldHeight: number) => {
   let imageWidth = img.width;
   let imageHeight = img.height;
 
-  const scalingFactor = Math.min(fieldWidth / imageWidth, fieldHeight / imageHeight, 1);
+  const padding = Math.min(fieldWidth, fieldHeight) * SIGNATURE_IMAGE_PADDING;
+  const availableWidth = fieldWidth - padding * 2;
+  const availableHeight = fieldHeight - padding * 2;
+
+  const scalingFactor = Math.min(availableWidth / imageWidth, availableHeight / imageHeight, 1);
 
   imageWidth = imageWidth * scalingFactor;
   imageHeight = imageHeight * scalingFactor;

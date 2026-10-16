@@ -15,7 +15,7 @@ import {
 } from '@documenso/lib/universal/field-renderer/field-canvas-style';
 import { createSpinner } from '@documenso/lib/universal/field-renderer/field-generic-items';
 import { renderField } from '@documenso/lib/universal/field-renderer/render-field';
-import { isFieldUnsignedAndRequired } from '@documenso/lib/utils/advanced-fields-helpers';
+import { isFieldUnsignedAndRequired, isRequiredField } from '@documenso/lib/utils/advanced-fields-helpers';
 import { getClientSideFieldTranslations } from '@documenso/lib/utils/fields';
 import { extractInitials } from '@documenso/lib/utils/recipient-formatter';
 import type { TSignEnvelopeFieldValue } from '@documenso/trpc/server/envelope-router/sign-envelope-field.types';
@@ -74,6 +74,11 @@ const drawFieldFrame = (fieldGroup: Konva.Group, scale: number, fieldType: Field
   fieldRect?.sceneFunc((context, shape) => {
     const cover = 1 / scale;
     const inset = FIELD_OUTLINE_INSET_PX / scale;
+
+    // Opaque under the field's own fill (which is 95% white), so the PDF's box line beneath, and
+    // anything else printed there, never shows through.
+    context.setAttr('fillStyle', '#ffffff');
+    context.fillRect(-cover, -cover, shape.width() + cover * 2, shape.height() + cover * 2);
 
     context.beginPath();
     context.rect(-cover, -cover, shape.width() + cover * 2, shape.height() + cover * 2);
@@ -736,7 +741,14 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
         highlightedField.page === pageNumber && (
           // Drawn inside the field so it never covers the question above it. Text and tick-box
           // fields only get the outline, so their own label stays readable.
-          <EnvelopeFieldToolTip key={highlightedField.id} field={highlightedField} color="warning" placement="inside">
+          // An optional question keeps its neutral outline: only a required field still empty is orange.
+          <EnvelopeFieldToolTip
+            key={highlightedField.id}
+            field={highlightedField}
+            color="warning"
+            placement="inside"
+            className={isRequiredField(highlightedField) ? undefined : 'outline-transparent'}
+          >
             {match(highlightedField.type)
               .with(FieldType.TEXT, FieldType.CHECKBOX, () => null)
               .with(FieldType.SIGNATURE, () => <Trans>Tap to sign</Trans>)

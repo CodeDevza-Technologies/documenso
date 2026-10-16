@@ -1,6 +1,7 @@
 import { IS_BILLING_ENABLED } from '../../constants/app';
 import type { TCssVarsSchema } from '../../types/css-vars';
 import { ZCssVarsSchema } from '../../types/css-vars';
+import { ensureReadableBrandButton } from '../../utils/brand-button-contrast';
 import { getOrganisationClaimByTeamId } from '../organisation/get-organisation-claims';
 import { getTeamSettings } from '../team/get-team-settings';
 
@@ -49,11 +50,23 @@ export const loadRecipientBrandingByTeamId = async ({
 
   // brandingColors is stored as JSON; parse defensively. Drop unknown keys via Zod.
   const parsedColors = settings.brandingColors ? ZCssVarsSchema.safeParse(settings.brandingColors) : null;
+  const colors = parsedColors?.success ? parsedColors.data : null;
+
+  // The tenant's colour fills the primary buttons: keep their labels readable whatever it is.
+  if (colors?.primary) {
+    const { fill, foreground } = ensureReadableBrandButton({
+      fill: colors.primary,
+      foreground: colors.primaryForeground,
+    });
+
+    colors.primary = fill;
+    colors.primaryForeground = foreground;
+  }
 
   return {
     allowCustomBranding: true,
     hidePoweredBy,
-    colors: parsedColors?.success ? parsedColors.data : null,
+    colors,
     css: settings.brandingCss && settings.brandingCss.length > 0 ? settings.brandingCss : null,
   };
 };

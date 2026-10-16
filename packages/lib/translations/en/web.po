@@ -10338,7 +10338,7 @@ msgstr "Sign Out"
 
 #: apps/remix/app/components/dialogs/sign-field-signature-dialog.tsx
 msgid "Sign Signature Field"
-msgstr "Sign here"
+msgstr "Add your signature"
 
 #: apps/remix/app/components/embed/embed-direct-template-client-page.tsx
 #: apps/remix/app/components/embed/embed-document-signing-page-v1.tsx
