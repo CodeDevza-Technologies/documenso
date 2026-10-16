@@ -13,6 +13,16 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#: apps/remix/app/components/general/document-signing/document-signing-complete-dialog.tsx
+msgctxt "Recipient signing confirmation"
+msgid "Are you sure?"
+msgstr "Ready to finish?"
+
+#: apps/remix/app/components/general/document-signing/document-signing-reject-dialog.tsx
+msgctxt "Recipient signing toast"
+msgid "Document rejected"
+msgstr "Document declined"
+
 #: apps/remix/app/components/embed/authoring/configure-document-upload.tsx
 msgid ".PDF documents accepted (max {APP_DOCUMENT_UPLOAD_SIZE_LIMIT}MB)"
 msgstr ".PDF documents accepted (max {APP_DOCUMENT_UPLOAD_SIZE_LIMIT}MB)"

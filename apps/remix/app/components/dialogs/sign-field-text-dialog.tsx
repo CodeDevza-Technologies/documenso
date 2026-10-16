@@ -11,7 +11,6 @@ import {
 } from '@documenso/ui/primitives/dialog';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@documenso/ui/primitives/form/form';
 import { Input } from '@documenso/ui/primitives/input';
-import { Textarea } from '@documenso/ui/primitives/textarea';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { msg } from '@lingui/core/macro';
 import { Plural, Trans, useLingui } from '@lingui/react/macro';
@@ -166,6 +165,8 @@ export const SignFieldTextDialog = createCallable<SignFieldTextDialogProps, Sign
     const isDateQuestion = fieldMeta?.placeholder?.trim().toLowerCase() === DATE_QUESTION_PLACEHOLDER;
     const isRequired = fieldMeta?.required === true;
     const isEditing = initialText !== '';
+    const characterLimit =
+      fieldMeta?.characterLimit && fieldMeta.characterLimit > 0 ? fieldMeta.characterLimit : undefined;
 
     // The calendar makes the format plain, so the date question's title drops it.
     const title = isDateQuestion ? fieldMeta?.label?.replace(DATE_QUESTION_LABEL_SUFFIX, '') : fieldMeta?.label;
@@ -224,7 +225,7 @@ export const SignFieldTextDialog = createCallable<SignFieldTextDialogProps, Sign
             } else if (isEditing) {
               event.preventDefault();
 
-              const input = container?.querySelector<HTMLTextAreaElement>('#custom-text');
+              const input = container?.querySelector<HTMLInputElement>('#custom-text');
 
               input?.focus();
               input?.select();
@@ -267,8 +268,9 @@ export const SignFieldTextDialog = createCallable<SignFieldTextDialogProps, Sign
                             id="custom-text"
                             inputMode="numeric"
                             autoComplete="off"
+                            enterKeyHint="done"
                             placeholder={DATE_QUESTION_PLACEHOLDER}
-                            maxLength={10}
+                            maxLength={characterLimit ?? DATE_QUESTION_PLACEHOLDER.length}
                             {...field}
                             onChange={(event) => {
                               field.onChange(event);
@@ -281,10 +283,14 @@ export const SignFieldTextDialog = createCallable<SignFieldTextDialogProps, Sign
                             }}
                           />
                         ) : (
-                          <Textarea
+                          // One line: answers are short (a PO number, a name), and Enter saves.
+                          <Input
                             id="custom-text"
+                            autoComplete="off"
+                            enterKeyHint="done"
+                            maxLength={characterLimit}
                             placeholder={fieldMeta?.placeholder || t`Enter your text here`}
-                            className={cn('w-full rounded-md', {
+                            className={cn({
                               'border-2 border-red-300 text-left ring-2 ring-red-200 ring-offset-2 ring-offset-red-200 focus-visible:border-red-400 focus-visible:ring-4 focus-visible:ring-red-200 focus-visible:ring-offset-2 focus-visible:ring-offset-red-200':
                                 fieldState.error,
                             })}
@@ -293,18 +299,15 @@ export const SignFieldTextDialog = createCallable<SignFieldTextDialogProps, Sign
                         )}
                       </FormControl>
                       <FormMessage />
-                      {!isDateQuestion &&
-                        fieldMeta?.characterLimit !== undefined &&
-                        fieldMeta?.characterLimit > 0 &&
-                        !fieldState.error && (
-                          <div className="text-muted-foreground text-sm">
-                            <Plural
-                              value={fieldMeta?.characterLimit - (field.value?.length ?? 0)}
-                              one="# character remaining"
-                              other="# characters remaining"
-                            />
-                          </div>
-                        )}
+                      {!isDateQuestion && characterLimit !== undefined && !fieldState.error && (
+                        <div className="text-muted-foreground text-sm">
+                          <Plural
+                            value={characterLimit - (field.value?.length ?? 0)}
+                            one="# character remaining"
+                            other="# characters remaining"
+                          />
+                        </div>
+                      )}
                     </FormItem>
                   )}
                 />
