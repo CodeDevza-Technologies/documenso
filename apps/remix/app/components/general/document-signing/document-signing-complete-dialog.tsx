@@ -199,10 +199,10 @@ export const DocumentSigningCompleteDialog = ({
           disabled={disabled}
         >
           {match({ isComplete, role: recipient.role })
-            .with({ isComplete: false }, () => <Trans>Next Field</Trans>)
+            .with({ isComplete: false }, () => <Trans>Next</Trans>)
             .with({ isComplete: true, role: RecipientRole.APPROVER }, () => <Trans>Approve</Trans>)
             .with({ isComplete: true, role: RecipientRole.VIEWER }, () => <Trans>Mark as viewed</Trans>)
-            .with({ isComplete: true }, () => <Trans>Complete</Trans>)
+            .with({ isComplete: true }, () => <Trans>Finish</Trans>)
             .exhaustive()}
         </Button>
       </DialogTrigger>
@@ -210,29 +210,29 @@ export const DocumentSigningCompleteDialog = ({
       <DialogContent position={position}>
         <DialogHeader>
           <DialogTitle>
-            <Trans>Are you sure?</Trans>
+            <Trans>Ready to finish?</Trans>
           </DialogTitle>
           <DialogDescription>
             <div className="max-w-[50ch] text-muted-foreground">
               {match(recipient.role)
                 .with(RecipientRole.VIEWER, () => (
                   <span className="inline-flex flex-wrap">
-                    <Trans>You are about to complete viewing the following document</Trans>
+                    <Trans>You're about to mark this document as viewed.</Trans>
                   </span>
                 ))
                 .with(RecipientRole.SIGNER, () => (
                   <span className="inline-flex flex-wrap">
-                    <Trans>You are about to complete signing the following document</Trans>
+                    <Trans>You're about to sign this document.</Trans>
                   </span>
                 ))
                 .with(RecipientRole.APPROVER, () => (
                   <span className="inline-flex flex-wrap">
-                    <Trans>You are about to complete approving the following document</Trans>
+                    <Trans>You're about to approve this document.</Trans>
                   </span>
                 ))
                 .with(RecipientRole.ASSISTANT, () => (
                   <span className="inline-flex flex-wrap">
-                    <Trans>You are about to complete assisting the following document</Trans>
+                    <Trans>You're about to finish filling in this document.</Trans>
                   </span>
                 ))
                 .with(RecipientRole.CC, () => null)
@@ -257,7 +257,7 @@ export const DocumentSigningCompleteDialog = ({
                       render={({ field }) => (
                         <FormItem className="flex-1">
                           <FormLabel>
-                            <Trans>Your Name</Trans>
+                            <Trans>Your name</Trans>
                           </FormLabel>
                           <FormControl>
                             <Input
@@ -279,7 +279,7 @@ export const DocumentSigningCompleteDialog = ({
                       render={({ field }) => (
                         <FormItem className="flex-1">
                           <FormLabel>
-                            <Trans>Your Email</Trans>
+                            <Trans>Your email</Trans>
                           </FormLabel>
                           <FormControl>
                             <Input
@@ -310,7 +310,7 @@ export const DocumentSigningCompleteDialog = ({
                         render={({ field }) => (
                           <FormItem className="flex-1">
                             <FormLabel>
-                              <Trans>Next Recipient Name</Trans>
+                              <Trans>Next recipient's name</Trans>
                             </FormLabel>
                             <FormControl>
                               <Input {...field} className="mt-2" placeholder={t`Enter the next signer's name`} />
@@ -327,7 +327,7 @@ export const DocumentSigningCompleteDialog = ({
                         render={({ field }) => (
                           <FormItem className="flex-1">
                             <FormLabel>
-                              <Trans>Next Recipient Email</Trans>
+                              <Trans>Next recipient's email</Trans>
                             </FormLabel>
                             <FormControl>
                               <Input
@@ -359,11 +359,11 @@ export const DocumentSigningCompleteDialog = ({
 
                   <Button type="submit" disabled={!isComplete} loading={form.formState.isSubmitting}>
                     {match(recipient.role)
-                      .with(RecipientRole.VIEWER, () => <Trans>Mark as Viewed</Trans>)
+                      .with(RecipientRole.VIEWER, () => <Trans>Mark as viewed</Trans>)
                       .with(RecipientRole.SIGNER, () => <Trans>Sign</Trans>)
                       .with(RecipientRole.APPROVER, () => <Trans>Approve</Trans>)
-                      .with(RecipientRole.CC, () => <Trans>Mark as Viewed</Trans>)
-                      .with(RecipientRole.ASSISTANT, () => <Trans>Complete</Trans>)
+                      .with(RecipientRole.CC, () => <Trans>Mark as viewed</Trans>)
+                      .with(RecipientRole.ASSISTANT, () => <Trans>Finish</Trans>)
                       .exhaustive()}
                   </Button>
                 </DialogFooter>

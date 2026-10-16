@@ -56,26 +56,26 @@ export const DocumentSigningMobileWidget = () => {
                 <div>
                   <h2 className="font-semibold text-foreground text-lg">
                     {match(recipient.role)
-                      .with(RecipientRole.VIEWER, () => <Trans>View Document</Trans>)
-                      .with(RecipientRole.SIGNER, () => <Trans>Sign Document</Trans>)
-                      .with(RecipientRole.APPROVER, () => <Trans>Approve Document</Trans>)
-                      .with(RecipientRole.ASSISTANT, () => <Trans>Assist Document</Trans>)
+                      .with(RecipientRole.VIEWER, () => <Trans>View the document</Trans>)
+                      .with(RecipientRole.SIGNER, () => <Trans>Sign the document</Trans>)
+                      .with(RecipientRole.APPROVER, () => <Trans>Approve the document</Trans>)
+                      .with(RecipientRole.ASSISTANT, () => <Trans>Fill in for others</Trans>)
                       .otherwise(() => null)}
                   </h2>
 
                   <p className="-mt-0.5 text-muted-foreground text-sm">
                     {recipientFieldsRemaining.length === 0 ? (
                       match(recipient.role)
-                        .with(RecipientRole.VIEWER, () => <Trans>Please mark as viewed to complete</Trans>)
-                        .with(RecipientRole.SIGNER, () => <Trans>Please complete the document once reviewed</Trans>)
-                        .with(RecipientRole.APPROVER, () => <Trans>Please complete the document once reviewed</Trans>)
-                        .with(RecipientRole.ASSISTANT, () => <Trans>Please complete the document once reviewed</Trans>)
+                        .with(RecipientRole.VIEWER, () => <Trans>Mark it as viewed when you've read it</Trans>)
+                        .with(RecipientRole.SIGNER, () => <Trans>All done. Tap Finish to sign.</Trans>)
+                        .with(RecipientRole.APPROVER, () => <Trans>All done. Tap Approve to finish.</Trans>)
+                        .with(RecipientRole.ASSISTANT, () => <Trans>All done. Tap Finish to send it on.</Trans>)
                         .otherwise(() => null)
                     ) : (
                       <Plural
                         value={recipientFieldsRemaining.length}
-                        one="1 Field Remaining"
-                        other="# Fields Remaining"
+                        one="1 left to fill in"
+                        other="# left to fill in"
                       />
                     )}
                   </p>

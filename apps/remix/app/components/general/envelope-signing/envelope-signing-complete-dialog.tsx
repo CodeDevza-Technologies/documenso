@@ -1,6 +1,4 @@
 import { useAnalytics } from '@documenso/lib/client-only/hooks/use-analytics';
-import { useCurrentEnvelopeRender } from '@documenso/lib/client-only/providers/envelope-render-provider';
-import { PDF_VIEWER_CONTENT_SELECTOR } from '@documenso/lib/constants/pdf-viewer';
 import { isBase64Image } from '@documenso/lib/constants/signatures';
 import { AppError, AppErrorCode } from '@documenso/lib/errors/app-error';
 import type { TRecipientAccessAuth } from '@documenso/lib/types/document-auth';
@@ -31,14 +29,15 @@ export const EnvelopeSignerCompleteDialog = () => {
     isDirectTemplate,
     envelope,
     setShowPendingFieldTooltip,
+    focusedField,
+    focusField,
+    getNextFieldToFill,
     recipientFieldsRemaining,
     recipient,
     nextRecipient,
     email,
     fullName,
   } = useRequiredEnvelopeSigningContext();
-
-  const { currentEnvelopeItem, setCurrentEnvelopeItem } = useCurrentEnvelopeRender();
 
   const { onDocumentCompleted, onDocumentError } = useEmbedSigningContext() || {};
 
@@ -52,39 +51,12 @@ export const EnvelopeSignerCompleteDialog = () => {
     trpc.template.createDocumentFromDirectTemplate.useMutation();
 
   const handleOnNextFieldClick = () => {
-    const nextField = recipientFieldsRemaining[0];
-
-    if (!nextField) {
+    if (recipientFieldsRemaining.length === 0) {
       setShowPendingFieldTooltip(false);
       return;
     }
 
-    const isEnvelopeItemSwitch = nextField.envelopeItemId !== currentEnvelopeItem?.id;
-
-    if (isEnvelopeItemSwitch) {
-      setCurrentEnvelopeItem(nextField.envelopeItemId);
-    }
-
-    setShowPendingFieldTooltip(true);
-
-    setTimeout(
-      () => {
-        const fieldTooltip = document.querySelector(`#field-tooltip`);
-
-        if (fieldTooltip) {
-          fieldTooltip.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } else {
-          // Tooltip not in DOM (page virtualized away) — signal the PDF viewer
-          // to scroll to the correct page via the data attribute.
-          const pdfContent = document.querySelector(PDF_VIEWER_CONTENT_SELECTOR);
-
-          if (pdfContent) {
-            pdfContent.setAttribute('data-scroll-to-page', String(nextField.page));
-          }
-        }
-      },
-      isEnvelopeItemSwitch ? 150 : 50,
-    );
+    focusField(getNextFieldToFill(focusedField?.id ?? null));
   };
 
   const handleOnCompleteClick = async (
@@ -150,7 +122,7 @@ export const EnvelopeSignerCompleteDialog = () => {
       if (error.code !== AppErrorCode.TWO_FACTOR_AUTH_FAILED) {
         toast({
           title: t`Something went wrong`,
-          description: t`We were unable to submit this document at this time. Please try again later.`,
+          description: t`We couldn't send your signature. Try again in a moment.`,
           variant: 'destructive',
         });
 
@@ -226,7 +198,7 @@ export const EnvelopeSignerCompleteDialog = () => {
       console.log('err', err);
       toast({
         title: t`Something went wrong`,
-        description: t`We were unable to submit this document at this time. Please try again later.`,
+        description: t`We couldn't send your signature. Try again in a moment.`,
         variant: 'destructive',
       });
 

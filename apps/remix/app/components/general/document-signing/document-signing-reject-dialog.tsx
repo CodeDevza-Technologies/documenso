@@ -21,7 +21,7 @@ import { useSearchParams } from 'react-router';
 import { z } from 'zod';
 
 const ZRejectDocumentFormSchema = z.object({
-  reason: z.string().max(500, msg`Reason must be less than 500 characters`),
+  reason: z.string().max(500, msg`Keep the reason under 500 characters`),
 });
 
 type TRejectDocumentFormSchema = z.infer<typeof ZRejectDocumentFormSchema>;
@@ -63,8 +63,8 @@ export function DocumentSigningRejectDialog({
       });
 
       toast({
-        title: t`Document rejected`,
-        description: t`The document has been successfully rejected.`,
+        title: t`Document declined`,
+        description: t`You've declined to sign this document.`,
         duration: 5000,
       });
 
@@ -78,7 +78,7 @@ export function DocumentSigningRejectDialog({
     } catch (err) {
       toast({
         title: t`Error`,
-        description: t`An error occurred while rejecting the document. Please try again.`,
+        description: t`We couldn't decline the document. Try again.`,
         variant: 'destructive',
         duration: 5000,
       });
@@ -102,7 +102,7 @@ export function DocumentSigningRejectDialog({
       <DialogTrigger asChild>
         {trigger ?? (
           <Button variant="outline">
-            <Trans>Reject Document</Trans>
+            <Trans>Decline to sign</Trans>
           </Button>
         )}
       </DialogTrigger>
@@ -110,11 +110,11 @@ export function DocumentSigningRejectDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            <Trans>Reject Document</Trans>
+            <Trans>Decline to sign</Trans>
           </DialogTitle>
 
           <DialogDescription>
-            <Trans>Are you sure you want to reject this document? This action cannot be undone.</Trans>
+            <Trans>You can't undo this.</Trans>
           </DialogDescription>
         </DialogHeader>
 
@@ -129,7 +129,7 @@ export function DocumentSigningRejectDialog({
                     <Textarea
                       {...field}
                       rows={4}
-                      placeholder={t`Please provide a reason for rejecting this document`}
+                      placeholder={t`Tell the sender why (optional)`}
                       disabled={form.formState.isSubmitting}
                     />
                   </FormControl>
@@ -154,7 +154,7 @@ export function DocumentSigningRejectDialog({
                 loading={form.formState.isSubmitting}
                 disabled={!form.formState.isValid}
               >
-                <Trans>Reject Document</Trans>
+                <Trans>Decline to sign</Trans>
               </Button>
             </DialogFooter>
           </form>

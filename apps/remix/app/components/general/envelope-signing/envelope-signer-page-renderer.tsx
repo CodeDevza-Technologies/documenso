@@ -60,6 +60,8 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
     recipientFields,
     recipientFieldsRemaining,
     showPendingFieldTooltip,
+    focusedField,
+    setFocusedField,
     signField: signFieldInternal,
     email: emailState,
     setEmail,
@@ -509,7 +511,7 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
 
       toast({
         title: t`Error`,
-        description: t`An error occurred while signing the field.`,
+        description: t`We couldn't save that. Try again.`,
         variant: 'destructive',
       });
 
@@ -548,6 +550,25 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
   }, [localPageFields, showPendingFieldTooltip]);
 
   /**
+   * Open the dialog of the field the signer is being taken to, once its page has rendered.
+   */
+  useEffect(() => {
+    if (!focusedField?.open || !pageLayer.current) {
+      return;
+    }
+
+    const field = localPageFields.find((f) => f.id === focusedField.id);
+    const fieldGroup = pageLayer.current.findOne(`#${focusedField.id}`);
+
+    if (!field || field.inserted || !fieldGroup) {
+      return;
+    }
+
+    setFocusedField({ id: field.id, open: false });
+    fieldGroup.fire('pointerdown', { target: fieldGroup, currentTarget: fieldGroup });
+  }, [focusedField, localPageFields, pageData.imageLoadingState]);
+
+  /**
    * Rerender the whole page if the selected assistant recipient changes.
    */
   useEffect(() => {
@@ -568,18 +589,24 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
     return null;
   }
 
+  // The field the signer is being taken to, else the first required field still empty.
+  const highlightedField =
+    recipientFields.find((field) => field.id === focusedField?.id && !field.inserted) ?? recipientFieldsRemaining[0];
+
   return (
     <>
       {showPendingFieldTooltip &&
-        recipientFieldsRemaining.length > 0 &&
-        recipientFieldsRemaining[0]?.envelopeItemId === currentEnvelopeItem?.id &&
-        recipientFieldsRemaining[0]?.page === pageNumber && (
-          <EnvelopeFieldToolTip
-            key={recipientFieldsRemaining[0].id}
-            field={recipientFieldsRemaining[0]}
-            color="warning"
-          >
-            <Trans>Click to insert field</Trans>
+        highlightedField?.envelopeItemId === currentEnvelopeItem.id &&
+        highlightedField.page === pageNumber && (
+          // Drawn inside the field so it never covers the question above it. Text and tick-box
+          // fields only get the outline, so their own label stays readable.
+          <EnvelopeFieldToolTip key={highlightedField.id} field={highlightedField} color="warning" placement="inside">
+            {match(highlightedField.type)
+              .with(FieldType.TEXT, FieldType.CHECKBOX, () => null)
+              .with(FieldType.SIGNATURE, () => <Trans>Tap to sign</Trans>)
+              .otherwise(() => (
+                <Trans>Tap to fill in</Trans>
+              ))}
           </EnvelopeFieldToolTip>
         )}
 

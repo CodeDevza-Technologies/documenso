@@ -25,12 +25,23 @@ interface EnvelopeFieldToolTipProps extends VariantProps<typeof tooltipVariants>
   children: React.ReactNode;
   className?: string;
   field: Pick<Field, 'id' | 'inserted' | 'fieldMeta' | 'positionX' | 'positionY' | 'width' | 'height' | 'page'>;
+  /**
+   * `inside` draws an outline on the field with the text inside it, instead of a bubble above
+   * that can cover the field above.
+   */
+  placement?: 'top' | 'inside';
 }
 
 /**
  * Renders a tooltip for a given field.
  */
-export function EnvelopeFieldToolTip({ children, color, className = '', field }: EnvelopeFieldToolTipProps) {
+export function EnvelopeFieldToolTip({
+  children,
+  color,
+  className = '',
+  field,
+  placement = 'top',
+}: EnvelopeFieldToolTipProps) {
   const [coords, setCoords] = useState({
     x: 0,
     y: 0,
@@ -95,17 +106,31 @@ export function EnvelopeFieldToolTip({ children, color, className = '', field }:
     };
   }, [calculateCoords, field.page]);
 
+  const style = {
+    top: `${coords.y}px`,
+    left: `${coords.x}px`,
+    height: `${coords.height}px`,
+    width: `${coords.width}px`,
+  };
+
+  if (placement === 'inside') {
+    return (
+      <div
+        id="field-tooltip"
+        className={cn(
+          'pointer-events-none absolute z-20 flex items-center justify-center overflow-hidden rounded-sm ring-2 ring-orange-400 ring-inset',
+          children && 'bg-orange-100 text-orange-900',
+          className,
+        )}
+        style={style}
+      >
+        {children && <span className="truncate px-1 font-medium text-xs">{children}</span>}
+      </div>
+    );
+  }
+
   return (
-    <div
-      id="field-tooltip"
-      className={cn('pointer-events-none absolute')}
-      style={{
-        top: `${coords.y}px`,
-        left: `${coords.x}px`,
-        height: `${coords.height}px`,
-        width: `${coords.width}px`,
-      }}
-    >
+    <div id="field-tooltip" className={cn('pointer-events-none absolute')} style={style}>
       <TooltipProvider>
         <Tooltip delayDuration={0} open={!field.inserted || !field.fieldMeta}>
           <TooltipTrigger className="absolute inset-0 w-full"></TooltipTrigger>

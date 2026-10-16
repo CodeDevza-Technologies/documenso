@@ -75,7 +75,7 @@ export const SignFieldCheckboxDialog = createCallable<SignFieldCheckboxDialogPro
       <Dialog open={true} onOpenChange={(value) => (!value ? call.end(null) : null)}>
         <DialogContent position="center">
           <DialogHeader>
-            <DialogTitle>{fieldMeta.label || <Trans>Select Options</Trans>}</DialogTitle>
+            <DialogTitle>{fieldMeta.label || <Trans>Choose your answers</Trans>}</DialogTitle>
 
             <DialogDescription
               className={cn('mt-4', {

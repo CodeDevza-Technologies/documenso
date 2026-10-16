@@ -10,7 +10,7 @@ import { trpc } from '@documenso/trpc/react';
 import type { TSignEnvelopeFieldValue } from '@documenso/trpc/server/envelope-router/sign-envelope-field.types';
 import { EnvelopeType, type Field, FieldType, type Recipient, RecipientRole, SigningStatus } from '@prisma/client';
 import { DateTime } from 'luxon';
-import { createContext, useContext, useMemo, useState } from 'react';
+import { createContext, useContext, useMemo, useRef, useState } from 'react';
 import { prop, sortBy } from 'remeda';
 
 export type EnvelopeSigningContextValue = {
@@ -25,6 +25,11 @@ export type EnvelopeSigningContextValue = {
 
   showPendingFieldTooltip: boolean;
   setShowPendingFieldTooltip: (_value: boolean) => void;
+
+  focusedField: TFocusedField | null;
+  setFocusedField: (_value: TFocusedField | null) => void;
+  focusField: (_field: Field | null) => void;
+  getNextFieldToFill: (_afterFieldId: number | null) => Field | null;
 
   envelopeData: EnvelopeForSigningResponse;
   envelope: EnvelopeForSigningResponse['envelope'];
@@ -49,6 +54,26 @@ export type EnvelopeSigningContextValue = {
     authOptions?: TRecipientActionAuth,
   ) => Promise<Pick<Field, 'id' | 'inserted'>>;
 };
+
+/**
+ * The field the signer is being taken to. `open` asks the page that holds it to open its dialog.
+ */
+export type TFocusedField = {
+  id: number;
+  open: boolean;
+};
+
+/**
+ * Fields whose tap always opens a dialog and never fills the field by itself, so they can be
+ * opened for the signer without filling anything on their behalf.
+ */
+const FIELD_TYPES_OPENED_FOR_SIGNER: FieldType[] = [FieldType.TEXT, FieldType.NUMBER, FieldType.DROPDOWN];
+
+const isReadOnlyField = (field: Field) =>
+  typeof field.fieldMeta === 'object' &&
+  field.fieldMeta !== null &&
+  'readOnly' in field.fieldMeta &&
+  field.fieldMeta.readOnly === true;
 
 const EnvelopeSigningContext = createContext<EnvelopeSigningContextValue | null>(null);
 
@@ -135,6 +160,11 @@ export const EnvelopeSigningProvider = ({
   const [email, setEmail] = useState(initialEmail || '');
 
   const [showPendingFieldTooltip, setShowPendingFieldTooltip] = useState(false);
+  const [focusedField, setFocusedField] = useState<TFocusedField | null>(null);
+
+  // Konva field handlers keep the closure they were bound with, so read the fields from a ref.
+  const latestRecipientFields = useRef(envelopeData.recipient.fields);
+  latestRecipientFields.current = envelopeData.recipient.fields;
 
   const isDirectTemplate = envelope.type === EnvelopeType.TEMPLATE;
 
@@ -318,6 +348,50 @@ export const EnvelopeSigningProvider = ({
       : null;
   }, [envelope.documentMeta?.signingOrder, envelope.recipients, recipient.id]);
 
+  /**
+   * The next empty field after the given one in reading order, so the signer can answer one
+   * question after another. Falls back to the first required field still empty.
+   */
+  const getNextFieldToFill = (afterFieldId: number | null): Field | null => {
+    const itemOrder = new Map(envelope.envelopeItems.map((item) => [item.id, item.order]));
+
+    const fields = sortBy(
+      latestRecipientFields.current,
+      [(field) => itemOrder.get(field.envelopeItemId) ?? 0, 'asc'],
+      [prop('page'), 'asc'],
+      [(field) => Number(field.positionY), 'asc'],
+      [(field) => Number(field.positionX), 'asc'],
+    );
+
+    const isEmpty = (field: Field) => field.id !== afterFieldId && !field.inserted && !isReadOnlyField(field);
+    const afterIndex = fields.findIndex((field) => field.id === afterFieldId);
+
+    return (
+      fields.find((field, index) => index > afterIndex && isEmpty(field)) ??
+      fields.find((field) => isEmpty(field) && isRequiredField(field)) ??
+      null
+    );
+  };
+
+  const focusField = (field: Field | null) => {
+    if (!field) {
+      setFocusedField(null);
+      return;
+    }
+
+    setShowPendingFieldTooltip(true);
+    setFocusedField({ id: field.id, open: FIELD_TYPES_OPENED_FOR_SIGNER.includes(field.type) });
+  };
+
+  /**
+   * Once a field is filled, take the signer to the next empty one.
+   */
+  const focusNextFieldAfter = (signedField: Pick<Field, 'id' | 'inserted'>) => {
+    if (signedField.inserted && recipient.role !== RecipientRole.ASSISTANT) {
+      focusField(getNextFieldToFill(signedField.id));
+    }
+  };
+
   const signField = async (
     fieldId: number,
     fieldValue: TSignEnvelopeFieldValue,
@@ -326,6 +400,8 @@ export const EnvelopeSigningProvider = ({
     // Set the field locally for direct templates.
     if (isDirectTemplate) {
       const signedField = handleDirectTemplateFieldInsertion(fieldId, fieldValue);
+
+      focusNextFieldAfter(signedField);
 
       return signedField;
     }
@@ -336,6 +412,8 @@ export const EnvelopeSigningProvider = ({
       fieldValue,
       authOptions,
     });
+
+    focusNextFieldAfter(signedField);
 
     return signedField;
   };
@@ -411,6 +489,10 @@ export const EnvelopeSigningProvider = ({
 
         showPendingFieldTooltip,
         setShowPendingFieldTooltip,
+        focusedField,
+        setFocusedField,
+        focusField,
+        getNextFieldToFill,
 
         recipient,
         recipientFieldsRemaining,

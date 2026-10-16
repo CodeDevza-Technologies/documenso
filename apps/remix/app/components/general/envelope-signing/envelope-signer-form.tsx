@@ -93,7 +93,7 @@ export default function EnvelopeSignerForm() {
       <div className="flex flex-1 flex-col gap-y-4">
         <div>
           <Label htmlFor="full-name">
-            <Trans>Full Name</Trans>
+            <Trans>Full name</Trans>
           </Label>
 
           <Input

@@ -1,4 +1,5 @@
 import { useCurrentEnvelopeRender } from '@documenso/lib/client-only/providers/envelope-render-provider';
+import { PDF_VIEWER_CONTENT_SELECTOR } from '@documenso/lib/constants/pdf-viewer';
 import { PDF_VIEWER_ERROR_MESSAGES } from '@documenso/lib/constants/pdf-viewer-i18n';
 import { mapSecondaryIdToDocumentId } from '@documenso/lib/utils/envelope';
 import { cn } from '@documenso/ui/lib/utils';
@@ -15,7 +16,7 @@ import {
   PanelLeftOpenIcon,
   PaperclipIcon,
 } from 'lucide-react';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router';
 import { match } from 'ts-pattern';
 
@@ -54,6 +55,7 @@ export const DocumentSigningPageViewV2 = () => {
     recipientFieldsRemaining,
     requiredRecipientFields,
     selectedAssistantRecipientFields,
+    focusedField,
   } = useRequiredEnvelopeSigningContext();
 
   const {
@@ -78,6 +80,40 @@ export const DocumentSigningPageViewV2 = () => {
 
     return recipientFields.filter((field) => !field.inserted);
   }, [recipientFieldsRemaining, selectedAssistantRecipientFields, currentEnvelopeItem]);
+
+  /**
+   * Scroll to the field the signer is being taken to, switching document if it is in another.
+   */
+  useEffect(() => {
+    const field = recipientFields.find((f) => f.id === focusedField?.id);
+
+    if (!field) {
+      return;
+    }
+
+    const isEnvelopeItemSwitch = field.envelopeItemId !== currentEnvelopeItem?.id;
+
+    if (isEnvelopeItemSwitch) {
+      setCurrentEnvelopeItem(field.envelopeItemId);
+    }
+
+    const timeout = setTimeout(
+      () => {
+        const fieldTooltip = document.querySelector(`#field-tooltip`);
+
+        if (fieldTooltip) {
+          fieldTooltip.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          // Tooltip not in DOM (page virtualized away) — signal the PDF viewer
+          // to scroll to the correct page via the data attribute.
+          document.querySelector(PDF_VIEWER_CONTENT_SELECTOR)?.setAttribute('data-scroll-to-page', String(field.page));
+        }
+      },
+      isEnvelopeItemSwitch ? 150 : 50,
+    );
+
+    return () => clearTimeout(timeout);
+  }, [focusedField]);
 
   return (
     <div className="min-h-screen w-screen bg-gray-50 dark:bg-background">
@@ -118,18 +154,19 @@ export const DocumentSigningPageViewV2 = () => {
             <div className="px-4">
               <h3 className="flex items-end justify-between font-semibold text-foreground text-sm">
                 {match(recipient.role)
-                  .with(RecipientRole.VIEWER, () => <Trans>View Document</Trans>)
-                  .with(RecipientRole.SIGNER, () => <Trans>Sign Document</Trans>)
-                  .with(RecipientRole.APPROVER, () => <Trans>Approve Document</Trans>)
-                  .with(RecipientRole.ASSISTANT, () => <Trans>Assist Document</Trans>)
+                  .with(RecipientRole.VIEWER, () => <Trans>View the document</Trans>)
+                  .with(RecipientRole.SIGNER, () => <Trans>Sign the document</Trans>)
+                  .with(RecipientRole.APPROVER, () => <Trans>Approve the document</Trans>)
+                  .with(RecipientRole.ASSISTANT, () => <Trans>Fill in for others</Trans>)
                   .otherwise(() => null)}
 
                 <div className="ml-2 flex items-center gap-1">
                   <span className="rounded border bg-muted/50 px-2 py-0.5 text-muted-foreground text-xs">
                     <Plural
                       value={recipientFieldsRemaining.length}
-                      one="1 Field Remaining"
-                      other="# Fields Remaining"
+                      _0="All filled in"
+                      one="1 left to fill in"
+                      other="# left to fill in"
                     />
                   </span>
 
@@ -211,7 +248,7 @@ export const DocumentSigningPageViewV2 = () => {
                     trigger={
                       <Button variant="ghost" size="sm" className="w-full justify-start hover:text-destructive">
                         <BanIcon className="mr-2 h-4 w-4" />
-                        <Trans>Reject Document</Trans>
+                        <Trans>Decline to sign</Trans>
                       </Button>
                     }
                   />
@@ -247,8 +284,8 @@ export const DocumentSigningPageViewV2 = () => {
                     primaryText={doc.title}
                     secondaryText={
                       <Plural
-                        one="1 Field"
-                        other="# Fields"
+                        one="1 field"
+                        other="# fields"
                         value={remainingFields.filter((field) => field.envelopeItemId === doc.id).length}
                       />
                     }

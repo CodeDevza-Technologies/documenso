@@ -25,7 +25,7 @@ export const SignFieldSignatureDialog = createCallable<SignFieldSignatureDialogP
           <div>
             <DialogHeader>
               <DialogTitle>
-                <Trans>Sign Signature Field</Trans>
+                <Trans>Sign here</Trans>
               </DialogTitle>
             </DialogHeader>
 
