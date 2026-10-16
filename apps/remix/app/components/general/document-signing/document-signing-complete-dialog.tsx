@@ -210,7 +210,7 @@ export const DocumentSigningCompleteDialog = ({
 
       <DialogContent position={position}>
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="font-medium">
             {/* Its own id, so the signer's wording does not change the other "Are you sure?" dialogs. */}
             <Trans context="Recipient signing confirmation">Are you sure?</Trans>
           </DialogTitle>

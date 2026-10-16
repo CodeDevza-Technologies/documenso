@@ -306,7 +306,7 @@ test('[DIRECT_TEMPLATES]: use direct template link with 1 recipient', async ({ p
 
   await page.getByRole('button', { name: 'Continue' }).click();
 
-  await expect(page.getByText("Next recipient's name")).not.toBeVisible();
+  await expect(page.getByText('Next recipient’s name')).not.toBeVisible();
 
   const directSignatureField = template.fields[0];
 
@@ -395,19 +395,19 @@ test('[DIRECT_TEMPLATES]: V1 use direct template link with 2 recipients with nex
 
   await page.getByRole('button', { name: 'Finish' }).click();
 
-  await expect(page.getByText("Next recipient's name")).toBeVisible();
+  await expect(page.getByText('Next recipient’s name')).toBeVisible();
 
-  const nextRecipientNameInputValue = await page.getByLabel("Next recipient's name").inputValue();
+  const nextRecipientNameInputValue = await page.getByLabel('Next recipient’s name').inputValue();
   expect(nextRecipientNameInputValue).toBe(originalName);
 
-  const nextRecipientEmailInputValue = await page.getByLabel("Next recipient's email").inputValue();
+  const nextRecipientEmailInputValue = await page.getByLabel('Next recipient’s email').inputValue();
   expect(nextRecipientEmailInputValue).toBe(originalSecondSignerEmail);
 
   const newName = 'Hello';
   const newSecondSignerEmail = seedTestEmail();
 
-  await page.getByLabel("Next recipient's email").fill(newSecondSignerEmail);
-  await page.getByLabel("Next recipient's name").fill(newName);
+  await page.getByLabel('Next recipient’s email').fill(newSecondSignerEmail);
+  await page.getByLabel('Next recipient’s name').fill(newName);
 
   await page.getByRole('button', { name: 'Sign' }).click();
   await page.waitForURL(/\/sign/);
@@ -523,19 +523,19 @@ test('[DIRECT_TEMPLATES]: V2 use direct template link with 2 recipients with nex
   await page.getByPlaceholder('Enter Your Name').fill(currentName);
   await page.getByPlaceholder('Enter Your Email').fill(currentEmail);
 
-  await expect(page.getByText("Next recipient's name")).toBeVisible();
+  await expect(page.getByText('Next recipient’s name')).toBeVisible();
 
-  const nextRecipientNameInputValue = await page.getByLabel("Next recipient's name").inputValue();
+  const nextRecipientNameInputValue = await page.getByLabel('Next recipient’s name').inputValue();
   expect(nextRecipientNameInputValue).toBe(originalName);
 
-  const nextRecipientEmailInputValue = await page.getByLabel("Next recipient's email").inputValue();
+  const nextRecipientEmailInputValue = await page.getByLabel('Next recipient’s email').inputValue();
   expect(nextRecipientEmailInputValue).toBe(originalSecondSignerEmail);
 
   const newName = 'Hello';
   const newSecondSignerEmail = seedTestEmail();
 
-  await page.getByLabel("Next recipient's email").fill(newSecondSignerEmail);
-  await page.getByLabel("Next recipient's name").fill(newName);
+  await page.getByLabel('Next recipient’s email').fill(newSecondSignerEmail);
+  await page.getByLabel('Next recipient’s name').fill(newName);
 
   await page.getByRole('button', { name: 'Sign' }).click();
   await page.waitForURL(/\/sign/);

@@ -451,7 +451,7 @@ test('[DOCUMENT_FLOW]: should be able to create, send with redirect url, sign a 
   expect(status).toBe(DocumentStatus.PENDING);
 
   await page.getByRole('button', { name: 'Approve' }).click();
-  await expect(page.getByRole('dialog').getByText("You're about to approve this document.").first()).toBeVisible();
+  await expect(page.getByRole('dialog').getByText('You’re about to approve this document.').first()).toBeVisible();
   await page.getByRole('button', { name: 'Approve' }).click();
 
   await page.waitForURL('https://documenso.com');

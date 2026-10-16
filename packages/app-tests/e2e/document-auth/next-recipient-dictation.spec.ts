@@ -67,7 +67,7 @@ test('[NEXT_RECIPIENT_DICTATION]: should allow updating next recipient when dict
 
   // Verify next recipient info is shown
   await expect(page.getByRole('dialog')).toBeVisible();
-  await expect(page.getByText("Next recipient's name")).toBeVisible();
+  await expect(page.getByText('Next recipient’s name')).toBeVisible();
 
   // Use dialog context to ensure we're targeting the correct form fields
   const dialog = page.getByRole('dialog');
@@ -454,7 +454,7 @@ test('[NEXT_RECIPIENT_DICTATION]: should skip CC recipient when dictating next s
   await page.getByRole('button', { name: 'Finish' }).click();
 
   await expect(page.getByRole('dialog')).toBeVisible();
-  await expect(page.getByText("Next recipient's name")).toBeVisible();
+  await expect(page.getByText('Next recipient’s name')).toBeVisible();
 
   // The dictation dialog must offer the second signer, not the CC recipient.
   const dialog = page.getByRole('dialog');
@@ -573,7 +573,7 @@ test('[NEXT_RECIPIENT_DICTATION]: should not offer dictation when CC recipient i
 
     if (recipient.id === secondRecipient.id) {
       // The last actionable signer must not be offered the CC recipient.
-      await expect(page.getByText("Next recipient's name")).not.toBeVisible();
+      await expect(page.getByText('Next recipient’s name')).not.toBeVisible();
     }
 
     // Submit and verify completion

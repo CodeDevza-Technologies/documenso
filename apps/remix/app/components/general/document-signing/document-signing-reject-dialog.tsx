@@ -110,7 +110,7 @@ export function DocumentSigningRejectDialog({
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="font-medium">
             <Trans>Reject Document</Trans>
           </DialogTitle>
 

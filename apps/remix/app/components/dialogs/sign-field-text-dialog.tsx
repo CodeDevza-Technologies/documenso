@@ -29,6 +29,8 @@ import { z } from 'zod';
  */
 const DATE_QUESTION_PLACEHOLDER = 'dd/mm/yyyy';
 const DATE_QUESTION_FORMAT = 'dd/MM/yyyy';
+/** The characters-left count shows once this many or fewer remain. */
+const CHARACTER_COUNT_SHOWN_FROM = 20;
 const DATE_QUESTION_LABEL_SUFFIX = /\s*\(dd\/mm\/yyyy\)\s*$/i;
 
 /** Takes 1/2/2026 as well as 01/02/2026. */
@@ -245,7 +247,7 @@ export const SignFieldTextDialog = createCallable<SignFieldTextDialogProps, Sign
           }}
         >
           <DialogHeader>
-            <DialogTitle className="whitespace-normal">{title || <Trans>Enter Text</Trans>}</DialogTitle>
+            <DialogTitle className="whitespace-normal font-medium">{title || <Trans>Enter Text</Trans>}</DialogTitle>
 
             {isDateQuestion && (
               <DialogDescription>
@@ -299,15 +301,19 @@ export const SignFieldTextDialog = createCallable<SignFieldTextDialogProps, Sign
                         )}
                       </FormControl>
                       <FormMessage />
-                      {!isDateQuestion && characterLimit !== undefined && !fieldState.error && (
-                        <div className="text-muted-foreground text-sm">
-                          <Plural
-                            value={characterLimit - (field.value?.length ?? 0)}
-                            one="# character remaining"
-                            other="# characters remaining"
-                          />
-                        </div>
-                      )}
+                      {/* Only near the limit, so a short answer box carries no counter. */}
+                      {!isDateQuestion &&
+                        characterLimit !== undefined &&
+                        characterLimit - (field.value?.length ?? 0) <= CHARACTER_COUNT_SHOWN_FROM &&
+                        !fieldState.error && (
+                          <div className="text-muted-foreground text-sm">
+                            <Plural
+                              value={characterLimit - (field.value?.length ?? 0)}
+                              one="# character remaining"
+                              other="# characters remaining"
+                            />
+                          </div>
+                        )}
                     </FormItem>
                   )}
                 />
