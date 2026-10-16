@@ -243,9 +243,8 @@ export const DocumentSigningCompleteDialog = ({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="rounded-lg border border-border bg-muted/50 p-4 text-center">
-          <p className="font-medium text-muted-foreground text-sm">{documentTitle}</p>
-        </div>
+        {/* The document's name as plain text: a filled box here read like an input. */}
+        <p className="text-center font-medium text-foreground">{documentTitle}</p>
 
         {!showTwoFactorForm && (
           <fieldset disabled={form.formState.isSubmitting} className="border-none p-0">

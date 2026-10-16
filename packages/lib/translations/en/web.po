@@ -8542,7 +8542,7 @@ msgstr "Please complete the CAPTCHA challenge before signing in."
 #: apps/remix/app/components/general/document-signing/document-signing-mobile-widget.tsx
 #: apps/remix/app/components/general/document-signing/document-signing-mobile-widget.tsx
 msgid "Please complete the document once reviewed"
-msgstr "All filled in. Check it over, then finish."
+msgstr "All filled in."
 
 #: apps/remix/app/routes/embed+/v1+/authoring+/document.edit.$id.tsx
 #: apps/remix/app/routes/embed+/v1+/authoring+/template.edit.$id.tsx

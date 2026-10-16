@@ -29,6 +29,12 @@ import { z } from 'zod';
  */
 const DATE_QUESTION_PLACEHOLDER = 'dd/mm/yyyy';
 const DATE_QUESTION_FORMAT = 'dd/MM/yyyy';
+/**
+ * The answer box: a placeholder dark enough to read (4.7:1) and one focus line, not a ring with a gap.
+ */
+const ANSWER_INPUT_CLASS_NAME =
+  'placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-offset-0';
+
 /** The characters-left count shows once this many or fewer remain. */
 const CHARACTER_COUNT_SHOWN_FROM = 20;
 const DATE_QUESTION_LABEL_SUFFIX = /\s*\(dd\/mm\/yyyy\)\s*$/i;
@@ -143,7 +149,8 @@ const DateQuestionCalendar = ({ month, selected, onMonthChange, onSelect }: Date
               className={cn(
                 'h-11 w-11 p-0 font-normal',
                 !isSelected && '[@media(hover:hover)]:hover:bg-accent',
-                isToday && !isSelected && 'font-medium text-primary underline underline-offset-4',
+                // Darker than the brand green so today reads at 5:1, still underlined.
+                isToday && !isSelected && 'font-medium text-emerald-700 underline underline-offset-4',
               )}
               aria-label={day.toFormat('cccc d LLLL yyyy')}
               aria-pressed={isSelected}
@@ -273,6 +280,7 @@ export const SignFieldTextDialog = createCallable<SignFieldTextDialogProps, Sign
                             enterKeyHint="done"
                             placeholder={DATE_QUESTION_PLACEHOLDER}
                             maxLength={characterLimit ?? DATE_QUESTION_PLACEHOLDER.length}
+                            className={ANSWER_INPUT_CLASS_NAME}
                             {...field}
                             onChange={(event) => {
                               field.onChange(event);
@@ -292,7 +300,7 @@ export const SignFieldTextDialog = createCallable<SignFieldTextDialogProps, Sign
                             enterKeyHint="done"
                             maxLength={characterLimit}
                             placeholder={fieldMeta?.placeholder || t`Enter your text here`}
-                            className={cn({
+                            className={cn(ANSWER_INPUT_CLASS_NAME, {
                               'border-2 border-red-300 text-left ring-2 ring-red-200 ring-offset-2 ring-offset-red-200 focus-visible:border-red-400 focus-visible:ring-4 focus-visible:ring-red-200 focus-visible:ring-offset-2 focus-visible:ring-offset-red-200':
                                 fieldState.error,
                             })}
@@ -340,7 +348,8 @@ export const SignFieldTextDialog = createCallable<SignFieldTextDialogProps, Sign
                     </Button>
                   )}
 
-                  <Button type="submit">
+                  {/* An empty date is a Skip (optional) or not yet an answer (required). */}
+                  <Button type="submit" disabled={isDateQuestion && !isEditing && form.watch('text').trim() === ''}>
                     <Trans>Enter</Trans>
                   </Button>
                 </DialogFooter>

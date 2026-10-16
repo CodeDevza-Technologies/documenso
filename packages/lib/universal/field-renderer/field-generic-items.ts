@@ -8,6 +8,12 @@ export const konvaTextFontFamily =
   '"Noto Sans", "Noto Sans Japanese", "Noto Sans Chinese", "Noto Sans Korean", sans-serif';
 export const konvaTextFill = 'black';
 
+/**
+ * An empty box's hint on the signing page: slate, about 4.7:1 on white, so it never reads as an
+ * answer, which is drawn in full ink.
+ */
+export const konvaHintTextFill = '#64748b';
+
 export const upsertFieldGroup = (field: FieldToRender, options: RenderFieldElementOptions): Konva.Group => {
   const { pageWidth, pageHeight, pageLayer, editable, scale } = options;
 

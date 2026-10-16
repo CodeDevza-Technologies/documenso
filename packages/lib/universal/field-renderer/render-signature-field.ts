@@ -5,7 +5,13 @@ import { AppError } from '../../errors/app-error';
 import type { TSignatureFieldMeta } from '../../types/field-meta';
 import { resolveFieldOverflowMode } from '../../types/field-meta';
 import { calculateOverflowLayout } from './calculate-overflow-layout';
-import { createFieldHoverInteraction, upsertFieldGroup, upsertFieldRect } from './field-generic-items';
+import {
+  createFieldHoverInteraction,
+  konvaHintTextFill,
+  konvaTextFill,
+  upsertFieldGroup,
+  upsertFieldRect,
+} from './field-generic-items';
 import type { FieldToRender, RenderFieldElementOptions } from './field-renderer';
 import { calculateFieldPosition } from './field-renderer';
 
@@ -213,6 +219,8 @@ const createFieldSignature = (field: FieldToRender, options: RenderFieldElementO
     align: overflowLayout.textAlign,
     width: overflowLayout.width,
     height: overflowLayout.height,
+    // On the signing page the empty box's "Signature" is a hint, muted so it never reads as signed.
+    fill: mode === 'sign' && isLabel ? konvaHintTextFill : konvaTextFill,
   } satisfies Partial<Konva.TextConfig>);
 
   return { node: fieldText, isImageSignature: false, isLabel };

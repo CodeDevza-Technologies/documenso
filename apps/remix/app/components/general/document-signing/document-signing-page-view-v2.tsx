@@ -152,7 +152,7 @@ export const DocumentSigningPageViewV2 = () => {
 
           <div className={cn('flex flex-1 flex-col overflow-hidden py-4', isSidebarCollapsed && 'invisible w-0')}>
             <div className="px-4">
-              <h3 className="flex items-end justify-between font-semibold text-foreground text-sm">
+              <h3 className="flex items-end justify-between font-medium text-foreground text-sm">
                 {match(recipient.role)
                   .with(RecipientRole.VIEWER, () => <Trans>View Document</Trans>)
                   .with(RecipientRole.SIGNER, () => <Trans>Sign Document</Trans>)
@@ -201,7 +201,7 @@ export const DocumentSigningPageViewV2 = () => {
             {/* Quick Actions. */}
             {!isDirectTemplate && (
               <div className="embed--Actions space-y-3 px-4">
-                <h4 className="font-semibold text-foreground text-sm">
+                <h4 className="font-medium text-foreground text-sm">
                   <Trans>Actions</Trans>
                 </h4>
 
