@@ -167,11 +167,9 @@ export const SignaturePad = ({
         )}
       </TabsList>
 
-      <TabsContent
-        value="draw"
-        className="relative flex aspect-signature-pad items-center justify-center rounded-md border border-border bg-muted/25 text-center"
-      >
-        <SignaturePadDraw className="h-full w-full" onChange={onDrawSignatureChange} value={drawSignature} />
+      {/* The draw pad draws its own frame, with its controls in a row under it. */}
+      <TabsContent value="draw">
+        <SignaturePadDraw onChange={onDrawSignatureChange} value={drawSignature} />
       </TabsContent>
 
       <TabsContent

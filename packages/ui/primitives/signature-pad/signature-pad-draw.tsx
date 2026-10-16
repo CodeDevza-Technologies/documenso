@@ -262,70 +262,79 @@ export const SignaturePadDraw = ({ className, value, onChange, ...props }: Signa
   const hasDrawing = isPressed || lines.length > 0 || currentLine.length > 0 || Boolean(value);
 
   return (
-    <div className={cn('h-full w-full', className)}>
-      {/* An empty pad shows where to sign: a light line and a muted hint, gone once drawing starts. */}
-      {!hasDrawing && (
-        <div aria-hidden="true" className="pointer-events-none absolute inset-x-6 bottom-[30%]">
-          <span className="mb-1 block text-muted-foreground text-sm">
-            <Trans>Sign here</Trans>
-          </span>
-          <div className="h-px w-full bg-border" />
-        </div>
-      )}
-
-      <canvas
-        data-testid="signature-pad-draw"
-        ref={$el}
-        className={cn('h-full w-full', {
-          'dark:hue-rotate-180 dark:invert': selectedColor === 'black',
-        })}
-        style={{ touchAction: 'none' }}
-        onPointerMove={(event) => onMouseMove(event)}
-        onPointerDown={(event) => onMouseDown(event)}
-        onPointerUp={(event) => onMouseUp(event)}
-        onPointerLeave={(event) => onMouseLeave(event)}
-        onPointerEnter={(event) => onMouseEnter(event)}
-        {...props}
-      />
-
-      <SignaturePadColorPicker selectedColor={selectedColor} setSelectedColor={setSelectedColor} />
-
-      {/* Only when there is something to clear, as an outlined 44 px button. */}
-      {hasDrawing && (
-        <div className="absolute right-2 bottom-2 flex gap-2">
-          <button
-            type="button"
-            className="flex h-11 items-center rounded-md border border-muted-foreground bg-background px-3 text-muted-foreground text-xs ring-offset-background hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            onClick={() => onClearClick()}
-          >
-            <Trans>Clear Signature</Trans>
-          </button>
-        </div>
-      )}
-
-      {isSignatureValid === false && (
-        <div className="absolute bottom-4 left-4 flex gap-2">
-          <span className="text-destructive text-xs">
-            <Trans>Signature is too small</Trans>
-          </span>
-        </div>
-      )}
-
-      {isSignatureValid && lines.length > 0 && (
-        <div className="absolute bottom-2 left-2 flex gap-2">
-          <button
-            type="button"
-            title="undo"
-            className="flex h-11 w-11 items-center justify-center rounded-full text-muted-foreground ring-offset-background hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            onClick={onUndoClick}
-          >
-            <Undo2 className="h-4 w-4" />
-            <span className="sr-only">
-              <Trans>Undo</Trans>
+    <div className={cn('flex w-full flex-col', className)}>
+      {/* The drawing area spans the whole pad: no control sits over it, so no stroke is broken. */}
+      <div className="relative flex aspect-signature-pad items-center justify-center rounded-md border border-border bg-muted/25 text-center">
+        {/* An empty pad shows where to sign: a light line and a muted hint, gone once drawing starts. */}
+        {!hasDrawing && (
+          <div aria-hidden="true" className="pointer-events-none absolute inset-x-6 bottom-[30%]">
+            <span className="mb-1 block text-muted-foreground text-sm">
+              <Trans>Sign here</Trans>
             </span>
-          </button>
+            <div className="h-px w-full bg-border" />
+          </div>
+        )}
+
+        <canvas
+          data-testid="signature-pad-draw"
+          ref={$el}
+          className={cn('h-full w-full', {
+            'dark:hue-rotate-180 dark:invert': selectedColor === 'black',
+          })}
+          style={{ touchAction: 'none' }}
+          onPointerMove={(event) => onMouseMove(event)}
+          onPointerDown={(event) => onMouseDown(event)}
+          onPointerUp={(event) => onMouseUp(event)}
+          onPointerLeave={(event) => onMouseLeave(event)}
+          onPointerEnter={(event) => onMouseEnter(event)}
+          {...props}
+        />
+      </div>
+
+      {/* The pad's controls, in a row under it whose height is kept from the start, so the dialog
+          never jumps when undo and Clear signature appear. */}
+      <div className="mt-2 grid h-11 grid-cols-[1fr_auto_1fr] items-center gap-2">
+        <div className="flex items-center gap-2">
+          {lines.length > 0 && (
+            <button
+              type="button"
+              title="undo"
+              className="flex h-11 w-11 items-center justify-center rounded-full text-muted-foreground ring-offset-background hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              onClick={onUndoClick}
+            >
+              <Undo2 className="h-4 w-4" />
+              <span className="sr-only">
+                <Trans>Undo</Trans>
+              </span>
+            </button>
+          )}
+
+          {isSignatureValid === false && (
+            <span className="text-destructive text-xs">
+              <Trans>Signature is too small</Trans>
+            </span>
+          )}
         </div>
-      )}
+
+        {/* Centred, so it stays put when undo and Clear signature appear. */}
+        <SignaturePadColorPicker
+          className="static [&>button]:m-0"
+          selectedColor={selectedColor}
+          setSelectedColor={setSelectedColor}
+        />
+
+        <div className="flex justify-end">
+          {hasDrawing && (
+            <button
+              type="button"
+              className="flex h-11 items-center rounded-md border border-muted-foreground bg-background px-3 text-muted-foreground text-xs ring-offset-background hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              onClick={() => onClearClick()}
+            >
+              <Trans>Clear Signature</Trans>
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
