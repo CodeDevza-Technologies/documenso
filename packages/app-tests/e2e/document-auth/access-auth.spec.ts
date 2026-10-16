@@ -26,7 +26,7 @@ test('[DOCUMENT_AUTH]: should grant access when not required', async ({ page }) 
 
   for (const token of tokens) {
     await page.goto(`/sign/${token}`);
-    await expect(page.getByRole('heading', { name: 'Sign Document' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Sign the document' })).toBeVisible();
   }
 });
 
@@ -77,7 +77,7 @@ test('[DOCUMENT_AUTH]: should allow or deny access when required', async ({ page
 
     // Recipient should be granted access.
     if (recipient.email === recipientWithAccount.email) {
-      await expect(page.getByRole('heading', { name: 'Sign Document' })).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Sign the document' })).toBeVisible();
     }
 
     // Recipient should still be denied.

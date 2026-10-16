@@ -10,7 +10,7 @@ test('[USER] update full name', async ({ page }) => {
 
   await apiSignin({ page, email: user.email, redirectPath: '/settings/profile' });
 
-  await page.getByLabel('Full Name').fill('John Doe');
+  await page.getByLabel('Full name').fill('John Doe');
 
   await signSignaturePad(page);
 

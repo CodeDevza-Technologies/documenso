@@ -46,7 +46,7 @@ test('[NEXT_RECIPIENT_DICTATION]: should allow updating next recipient when dict
   const signUrl = `/sign/${token}`;
 
   await page.goto(signUrl);
-  await expect(page.getByRole('heading', { name: 'Sign Document' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Sign the document' })).toBeVisible();
 
   await signSignaturePad(page);
 
@@ -63,11 +63,11 @@ test('[NEXT_RECIPIENT_DICTATION]: should allow updating next recipient when dict
   }
 
   // Complete signing and update next recipient
-  await page.getByRole('button', { name: 'Complete' }).click();
+  await page.getByRole('button', { name: 'Finish' }).click();
 
   // Verify next recipient info is shown
   await expect(page.getByRole('dialog')).toBeVisible();
-  await expect(page.getByText('Next Recipient Name')).toBeVisible();
+  await expect(page.getByText("Next recipient's name")).toBeVisible();
 
   // Use dialog context to ensure we're targeting the correct form fields
   const dialog = page.getByRole('dialog');
@@ -135,7 +135,7 @@ test('[NEXT_RECIPIENT_DICTATION]: should not show dictation UI when disabled', a
   const signUrl = `/sign/${token}`;
 
   await page.goto(signUrl);
-  await expect(page.getByRole('heading', { name: 'Sign Document' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Sign the document' })).toBeVisible();
 
   await signSignaturePad(page);
 
@@ -152,7 +152,7 @@ test('[NEXT_RECIPIENT_DICTATION]: should not show dictation UI when disabled', a
   }
 
   // Complete signing
-  await page.getByRole('button', { name: 'Complete' }).click();
+  await page.getByRole('button', { name: 'Finish' }).click();
 
   // Verify next recipient UI is not shown
   await expect(page.getByText('The next recipient to sign this document will be')).not.toBeVisible();
@@ -219,7 +219,7 @@ test('[NEXT_RECIPIENT_DICTATION]: should work with parallel signing flow', async
     const signUrl = `/sign/${token}`;
 
     await page.goto(signUrl);
-    await expect(page.getByRole('heading', { name: 'Sign Document' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Sign the document' })).toBeVisible();
 
     await signSignaturePad(page);
 
@@ -236,7 +236,7 @@ test('[NEXT_RECIPIENT_DICTATION]: should work with parallel signing flow', async
     }
 
     // Complete signing
-    await page.getByRole('button', { name: 'Complete' }).click();
+    await page.getByRole('button', { name: 'Finish' }).click();
 
     // Verify next recipient UI is not shown in parallel flow
     await expect(page.getByText('The next recipient to sign this document will be')).not.toBeVisible();
@@ -299,7 +299,7 @@ test('[NEXT_RECIPIENT_DICTATION]: should allow assistant to dictate next signer'
   const signUrl = `/sign/${token}`;
 
   await page.goto(signUrl);
-  await expect(page.getByRole('heading', { name: 'Assist Document' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Assist with the document' })).toBeVisible();
 
   await page.waitForTimeout(1000);
 
@@ -434,7 +434,7 @@ test('[NEXT_RECIPIENT_DICTATION]: should skip CC recipient when dictating next s
   const signUrl = `/sign/${token}`;
 
   await page.goto(signUrl);
-  await expect(page.getByRole('heading', { name: 'Sign Document' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Sign the document' })).toBeVisible();
 
   await signSignaturePad(page);
 
@@ -451,10 +451,10 @@ test('[NEXT_RECIPIENT_DICTATION]: should skip CC recipient when dictating next s
   }
 
   // Complete signing and verify the offered next recipient
-  await page.getByRole('button', { name: 'Complete' }).click();
+  await page.getByRole('button', { name: 'Finish' }).click();
 
   await expect(page.getByRole('dialog')).toBeVisible();
-  await expect(page.getByText('Next Recipient Name')).toBeVisible();
+  await expect(page.getByText("Next recipient's name")).toBeVisible();
 
   // The dictation dialog must offer the second signer, not the CC recipient.
   const dialog = page.getByRole('dialog');
@@ -550,7 +550,7 @@ test('[NEXT_RECIPIENT_DICTATION]: should not offer dictation when CC recipient i
     const signUrl = `/sign/${token}`;
 
     await page.goto(signUrl);
-    await expect(page.getByRole('heading', { name: 'Sign Document' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Sign the document' })).toBeVisible();
 
     await signSignaturePad(page);
 
@@ -567,13 +567,13 @@ test('[NEXT_RECIPIENT_DICTATION]: should not offer dictation when CC recipient i
     }
 
     // Complete signing
-    await page.getByRole('button', { name: 'Complete' }).click();
+    await page.getByRole('button', { name: 'Finish' }).click();
 
     await expect(page.getByRole('dialog')).toBeVisible();
 
     if (recipient.id === secondRecipient.id) {
       // The last actionable signer must not be offered the CC recipient.
-      await expect(page.getByText('Next Recipient Name')).not.toBeVisible();
+      await expect(page.getByText("Next recipient's name")).not.toBeVisible();
     }
 
     // Submit and verify completion

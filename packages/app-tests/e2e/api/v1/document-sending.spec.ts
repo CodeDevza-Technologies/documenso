@@ -595,7 +595,7 @@ test.describe('Document API', () => {
     // The CC recipient at order 1 must not block signer A at order 2.
     await page.goto(`/sign/${signerA.token}`);
     await expect(page).not.toHaveURL(`/sign/${signerA.token}/waiting`);
-    await expect(page.getByRole('heading', { name: 'Sign Document' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Sign the document' })).toBeVisible();
 
     // Signer B at order 3 must still wait for signer A.
     await page.goto(`/sign/${signerB.token}`);
@@ -604,7 +604,7 @@ test.describe('Document API', () => {
     // Sign as signer A then signer B.
     for (const signer of [signerA, signerB]) {
       await page.goto(`/sign/${signer.token}`);
-      await expect(page.getByRole('heading', { name: 'Sign Document' })).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Sign the document' })).toBeVisible();
       await signSignaturePad(page);
 
       const signerField = await prisma.field.findFirstOrThrow({
@@ -613,7 +613,7 @@ test.describe('Document API', () => {
 
       await page.locator(`#field-${signerField.id}`).getByRole('button').click();
 
-      await page.getByRole('button', { name: 'Complete' }).click();
+      await page.getByRole('button', { name: 'Finish' }).click();
       await page.getByRole('button', { name: 'Sign' }).click();
       await page.waitForURL(`/sign/${signer.token}/complete`);
     }

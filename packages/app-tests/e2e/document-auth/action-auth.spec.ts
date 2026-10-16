@@ -28,7 +28,7 @@ test('[DOCUMENT_AUTH]: should allow signing when no auth setup', async ({ page }
     const signUrl = `/sign/${token}`;
 
     await page.goto(signUrl);
-    await expect(page.getByRole('heading', { name: 'Sign Document' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Sign the document' })).toBeVisible();
 
     await signSignaturePad(page);
 
@@ -43,7 +43,7 @@ test('[DOCUMENT_AUTH]: should allow signing when no auth setup', async ({ page }
       await expect(page.locator(`#field-${field.id}`)).toHaveAttribute('data-inserted', 'true');
     }
 
-    await page.getByRole('button', { name: 'Complete' }).click();
+    await page.getByRole('button', { name: 'Finish' }).click();
     await page.getByRole('button', { name: 'Sign' }).click();
     await page.waitForURL(`${signUrl}/complete`);
   }
@@ -78,7 +78,7 @@ test('[DOCUMENT_AUTH]: should allow signing with valid global auth', async ({ pa
     redirectPath: signUrl,
   });
 
-  await expect(page.getByRole('heading', { name: 'Sign Document' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Sign the document' })).toBeVisible();
 
   await signSignaturePad(page);
 
@@ -93,7 +93,7 @@ test('[DOCUMENT_AUTH]: should allow signing with valid global auth', async ({ pa
     await expect(page.locator(`#field-${field.id}`)).toHaveAttribute('data-inserted', 'true');
   }
 
-  await page.getByRole('button', { name: 'Complete' }).click();
+  await page.getByRole('button', { name: 'Finish' }).click();
   await page.getByRole('button', { name: 'Sign' }).click();
   await page.waitForURL(`${signUrl}/complete`);
 });
@@ -121,9 +121,9 @@ test.skip('[DOCUMENT_AUTH]: should deny signing document when required for globa
   const { token } = recipient;
 
   await page.goto(`/sign/${token}`);
-  await expect(page.getByRole('heading', { name: 'Sign Document' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Sign the document' })).toBeVisible();
 
-  await page.getByRole('button', { name: 'Complete' }).click();
+  await page.getByRole('button', { name: 'Finish' }).click();
   await expect(page.getByRole('paragraph')).toContainText('Reauthentication is required to sign the document');
 });
 
@@ -149,7 +149,7 @@ test('[DOCUMENT_AUTH]: should deny signing fields when required for global auth'
     const { token, fields } = recipient;
 
     await page.goto(`/sign/${token}`);
-    await expect(page.getByRole('heading', { name: 'Sign Document' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Sign the document' })).toBeVisible();
 
     for (const field of fields) {
       if (field.type !== FieldType.SIGNATURE) {
@@ -207,7 +207,7 @@ test('[DOCUMENT_AUTH]: should allow field signing when required for recipient au
     const signUrl = `/sign/${token}`;
 
     await page.goto(signUrl);
-    await expect(page.getByRole('heading', { name: 'Sign Document' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Sign the document' })).toBeVisible();
 
     if (isAuthRequired) {
       for (const field of fields) {
@@ -245,7 +245,7 @@ test('[DOCUMENT_AUTH]: should allow field signing when required for recipient au
       });
     }
 
-    await page.getByRole('button', { name: 'Complete' }).click();
+    await page.getByRole('button', { name: 'Finish' }).click();
     await page.getByRole('button', { name: 'Sign' }).click();
     await page.waitForURL(`${signUrl}/complete`);
 
@@ -305,7 +305,7 @@ test('[DOCUMENT_AUTH]: should allow field signing when required for recipient an
     const signUrl = `/sign/${token}`;
 
     await page.goto(signUrl);
-    await expect(page.getByRole('heading', { name: 'Sign Document' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Sign the document' })).toBeVisible();
 
     if (isAuthRequired) {
       for (const field of fields) {
@@ -343,7 +343,7 @@ test('[DOCUMENT_AUTH]: should allow field signing when required for recipient an
       });
     }
 
-    await page.getByRole('button', { name: 'Complete' }).click();
+    await page.getByRole('button', { name: 'Finish' }).click();
     await page.getByRole('button', { name: 'Sign' }).click();
     await page.waitForURL(`${signUrl}/complete`);
 

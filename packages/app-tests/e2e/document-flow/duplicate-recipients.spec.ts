@@ -201,14 +201,14 @@ test.describe('[DOCUMENT_FLOW]: Duplicate Recipients', () => {
       expect(await page.locator(`[data-field-type="SIGNATURE"]:not([data-readonly="true"])`).all()).toHaveLength(1);
 
       // Verify recipient name is correct
-      await expect(page.getByLabel('Full Name')).toHaveValue(recipient.name);
+      await expect(page.getByLabel('Full name')).toHaveValue(recipient.name);
 
       // Sign the document
       await signSignaturePad(page);
 
       await page.locator('[data-field-type="SIGNATURE"]:not([data-readonly="true"])').first().click();
 
-      await page.getByRole('button', { name: 'Complete' }).click();
+      await page.getByRole('button', { name: 'Finish' }).click();
       await page.getByRole('button', { name: 'Sign' }).click();
 
       // Verify completion

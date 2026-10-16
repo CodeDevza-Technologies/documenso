@@ -87,7 +87,7 @@ test('[PUBLIC_PROFILE]: create team profile', async ({ page }) => {
   await page.locator(`#field-${directSignatureField.id}`).getByRole('button').click();
   await expect(page.locator(`#field-${directSignatureField.id}`)).toHaveAttribute('data-inserted', 'true');
 
-  await page.getByRole('button', { name: 'Complete' }).click();
+  await page.getByRole('button', { name: 'Finish' }).click();
   await page.getByRole('button', { name: 'Sign' }).click();
 
   await expect(page.getByRole('heading', { name: 'Document Signed' })).toBeVisible();
