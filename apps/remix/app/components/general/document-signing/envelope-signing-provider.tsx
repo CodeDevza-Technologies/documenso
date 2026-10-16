@@ -28,7 +28,7 @@ export type EnvelopeSigningContextValue = {
 
   focusedField: TFocusedField | null;
   setFocusedField: (_value: TFocusedField | null) => void;
-  focusField: (_field: Field | null) => void;
+  focusField: (_field: Field | null, _options?: { allowOpen?: boolean }) => void;
   getNextFieldToFill: (_afterFieldId: number | null) => Field | null;
 
   envelopeData: EnvelopeForSigningResponse;
@@ -373,23 +373,28 @@ export const EnvelopeSigningProvider = ({
     );
   };
 
-  const focusField = (field: Field | null) => {
+  const focusField = (field: Field | null, { allowOpen = true } = {}) => {
     if (!field) {
       setFocusedField(null);
       return;
     }
 
     setShowPendingFieldTooltip(true);
-    setFocusedField({ id: field.id, open: FIELD_TYPES_OPENED_FOR_SIGNER.includes(field.type) });
+    setFocusedField({ id: field.id, open: allowOpen && FIELD_TYPES_OPENED_FOR_SIGNER.includes(field.type) });
   };
 
   /**
-   * Once a field is filled, take the signer to the next empty one.
+   * Once a field is filled, take the signer to the next empty one. A tick box or radio is saved
+   * on every tap, so after one the next field is only shown, leaving room to tick another option.
    */
-  const focusNextFieldAfter = (signedField: Pick<Field, 'id' | 'inserted'>) => {
-    if (signedField.inserted && recipient.role !== RecipientRole.ASSISTANT) {
-      focusField(getNextFieldToFill(signedField.id));
+  const focusNextFieldAfter = (signedField: Pick<Field, 'id' | 'inserted' | 'type'>) => {
+    if (!signedField.inserted || recipient.role === RecipientRole.ASSISTANT) {
+      return;
     }
+
+    const isMultiTap = signedField.type === FieldType.CHECKBOX || signedField.type === FieldType.RADIO;
+
+    focusField(getNextFieldToFill(signedField.id), { allowOpen: !isMultiTap });
   };
 
   const signField = async (

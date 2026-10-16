@@ -56,7 +56,8 @@ export const EnvelopeSignerCompleteDialog = () => {
       return;
     }
 
-    focusField(getNextFieldToFill(focusedField?.id ?? null));
+    // The fallback covers the focused field being the last required one left.
+    focusField(getNextFieldToFill(focusedField?.id ?? null) ?? recipientFieldsRemaining[0]);
   };
 
   const handleOnCompleteClick = async (
