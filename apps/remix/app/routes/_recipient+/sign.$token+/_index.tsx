@@ -30,11 +30,14 @@ import { extractDocumentAuthMethods } from '@documenso/lib/utils/document-auth';
 import { isRecipientExpired } from '@documenso/lib/utils/recipients';
 import { prisma } from '@documenso/prisma';
 import { SigningCard3D } from '@documenso/ui/components/signing-card';
+import { i18n } from '@lingui/core';
+import { msg } from '@lingui/core/macro';
 import { Trans } from '@lingui/react/macro';
 import { DocumentSigningOrder, DocumentStatus, RecipientRole, SigningStatus } from '@prisma/client';
 import { Clock8 } from 'lucide-react';
 import { Link, redirect } from 'react-router';
 import { getOptionalLoaderContext } from 'server/utils/get-loader-session';
+import * as superjson from 'superjson';
 import { match } from 'ts-pattern';
 
 import { Header as AuthenticatedHeader } from '~/components/general/app-header';
@@ -47,10 +50,25 @@ import { DocumentSigningPageViewV2 } from '~/components/general/document-signing
 import { DocumentSigningProvider } from '~/components/general/document-signing/document-signing-provider';
 import { EnvelopeSigningProvider } from '~/components/general/document-signing/envelope-signing-provider';
 import { RecipientBranding } from '~/components/general/recipient-branding';
+import { recipientMetaTags, recipientProviderName } from '~/utils/meta';
 import { useCspNonce } from '~/utils/nonce';
 import { superLoaderJson, useSuperLoaderData } from '~/utils/super-json-loader';
 
 import type { Route } from './+types/_index';
+
+type SigningTab = { title: string | null; teamName: string | null };
+
+export function meta({ data }: Route.MetaArgs) {
+  // The loader's payload is superjson-encoded; the tab reads only its own two strings.
+  const { tab } = data
+    ? superjson.deserialize<{ tab?: SigningTab }>(data as unknown as superjson.SuperJSONResult)
+    : { tab: undefined };
+
+  const provider = recipientProviderName(tab?.teamName);
+  const title = tab?.title;
+
+  return recipientMetaTags(title ? i18n._(msg`Sign ${title} · ${provider}`) : provider);
+}
 
 const handleV1Loader = async ({ params, request }: Route.LoaderArgs) => {
   const { requestMetadata } = getOptionalLoaderContext();
@@ -342,6 +360,8 @@ export async function loader(loaderArgs: Route.LoaderArgs) {
         select: {
           internalVersion: true,
           teamId: true,
+          title: true,
+          team: { select: { name: true } },
         },
       },
     },
@@ -363,6 +383,12 @@ export async function loader(loaderArgs: Route.LoaderArgs) {
     // the `superLoaderJson` response init so the browser actually applies the
     // header. The field stays on the payload — it's just a `Max-Age=0` clear
     // directive, not sensitive — and isn't read by any consumer.
+    const tab: SigningTab = {
+      // The title only once the recipient may see the document.
+      title: payloadV2.isDocumentAccessValid ? foundRecipient.envelope.title : null,
+      teamName: foundRecipient.envelope.team.name,
+    };
+
     const responseHeaders =
       'responseHeaders' in payloadV2 && payloadV2.responseHeaders ? payloadV2.responseHeaders : undefined;
 
@@ -371,6 +397,7 @@ export async function loader(loaderArgs: Route.LoaderArgs) {
         version: 2,
         payload: payloadV2,
         branding,
+        tab,
       } as const,
       responseHeaders ? { headers: responseHeaders } : undefined,
     );
@@ -378,10 +405,16 @@ export async function loader(loaderArgs: Route.LoaderArgs) {
 
   const payloadV1 = await handleV1Loader(loaderArgs);
 
+  const tab: SigningTab = {
+    title: payloadV1.isDocumentAccessValid ? foundRecipient.envelope.title : null,
+    teamName: foundRecipient.envelope.team.name,
+  };
+
   return superLoaderJson({
     version: 1,
     payload: payloadV1,
     branding,
+    tab,
   } as const);
 }
 

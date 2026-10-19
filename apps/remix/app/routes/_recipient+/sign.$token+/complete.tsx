@@ -1,5 +1,6 @@
 import { getOptionalSession } from '@documenso/auth/server/lib/utils/get-session';
-import { downloadPDF } from '@documenso/lib/client-only/download-pdf';
+import { downloadFile } from '@documenso/lib/client-only/download-file';
+import { fetchPDF } from '@documenso/lib/client-only/download-pdf';
 import { useOptionalSession } from '@documenso/lib/client-only/providers/session';
 import { isSignupEnabledForProvider } from '@documenso/lib/constants/auth';
 import { loadRecipientBrandingByTeamId } from '@documenso/lib/server-only/branding/load-recipient-branding';
@@ -18,6 +19,7 @@ import { cn } from '@documenso/ui/lib/utils';
 import { Badge } from '@documenso/ui/primitives/badge';
 import { Button } from '@documenso/ui/primitives/button';
 import { useToast } from '@documenso/ui/primitives/use-toast';
+import { i18n } from '@lingui/core';
 import { msg } from '@lingui/core/macro';
 import { useLingui } from '@lingui/react';
 import { Trans } from '@lingui/react/macro';
@@ -31,9 +33,41 @@ import { EnvelopeDownloadDialog } from '~/components/dialogs/envelope-download-d
 import { ClaimAccount } from '~/components/general/claim-account';
 import { DocumentSigningAuthPageView } from '~/components/general/document-signing/document-signing-auth-page';
 import { RecipientBranding } from '~/components/general/recipient-branding';
+import { recipientMetaTags, recipientProviderName } from '~/utils/meta';
 import { useCspNonce } from '~/utils/nonce';
 
 import type { Route } from './+types/complete';
+
+export function meta({ data }: Route.MetaArgs) {
+  const provider = recipientProviderName(data?.teamName);
+
+  if (!data?.isDocumentAccessValid) {
+    return recipientMetaTags(provider);
+  }
+
+  const { title } = data.document;
+
+  return recipientMetaTags(i18n._(msg`${title} signed · ${provider}`));
+}
+
+/**
+ * The signed copy's file name: the document's title, safe on any filesystem, or the uploaded file's
+ * name when the title is empty.
+ */
+const toSignedCopyFileName = (title: string, uploadedName: string) => {
+  const safe = (name: string) =>
+    name
+      .replace(/[\\/:*?"<>|\p{Cc}]/gu, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 120)
+      // Windows cannot save a file whose name ends with a dot or a space.
+      .replace(/[.\s]+$/, '');
+
+  const name = safe(title) || safe(uploadedName.replace(/\.pdf$/i, '')) || 'document';
+
+  return `${name} (signed).pdf`;
+};
 
 export async function loader({ params, request }: Route.LoaderArgs) {
   const { user } = await getOptionalSession(request);
@@ -74,6 +108,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   if (!isDocumentAccessValid) {
     return {
       isDocumentAccessValid: false,
+      teamName: document.team?.name ?? null,
       recipientEmail: recipient.email,
       branding,
     } as const;
@@ -102,6 +137,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
 
   return {
     isDocumentAccessValid: true,
+    teamName: document.team?.name ?? null,
     emailsSignedCopy,
     statusColor,
     canSignUp,
@@ -168,18 +204,21 @@ export default function CompletedSigningPage({ loaderData }: Route.ComponentProp
     setIsDownloadingSignedCopy(true);
 
     try {
-      await downloadPDF({
+      const { blob } = await fetchPDF({
         envelopeItem: singleEnvelopeItem,
         token: recipient?.token,
-        fileName: singleEnvelopeItem.title,
         version: 'signed',
+      });
+
+      downloadFile({
+        filename: toSignedCopyFileName(document?.title ?? '', singleEnvelopeItem.title),
+        data: blob,
       });
     } catch (error) {
       console.error(error);
 
       toast({
-        title: _(msg`Something went wrong`),
-        description: _(msg`This document could not be downloaded at this time. Please try again.`),
+        title: _(msg`We couldn’t download the signed copy. Try again.`),
         variant: 'destructive',
       });
     } finally {
@@ -221,17 +260,18 @@ export default function CompletedSigningPage({ loaderData }: Route.ComponentProp
               size="default"
               className="mb-6 rounded-xl border border-border bg-transparent ring-0"
             >
-              <span className="block max-w-[calc(100vw-4rem)] truncate font-medium hover:underline md:max-w-[28rem]">
+              <span className="block max-w-[calc(100vw-4rem)] truncate font-medium md:max-w-[28rem]">
                 {document.title}
               </span>
             </Badge>
 
-            {/* The signature on a plain card: a 1px border, without the vendor's glowing border, ring and sheen.
-                Nothing on it is clickable, so a typed signature is weight 500 and keeps its colour on hover. */}
+            {/* The signature on a plain, still card: a 1px border, without the vendor's glowing border, ring,
+                sheen or tilt after the pointer. Nothing on it is clickable, so a typed signature is weight 500
+                in full ink (the theme foreground, #0f172a in light) and keeps its colour on hover. */}
             <SigningCard3D
               name={recipientName}
               signature={signatures.at(0)}
-              className="[&>div]:!bg-none [&_.gradient-border-mask_span]:!font-medium [&_.gradient-border-mask_span]:!text-muted-foreground/60 [&_.gradient-border-mask]:border [&_.gradient-border-mask]:border-border [&_.gradient-border-mask]:shadow-none [&_.gradient-border-mask]:before:hidden"
+              className="[&>div]:!bg-none [&>div]:![transform:none] [&_.gradient-border-mask_span]:!font-medium [&_.gradient-border-mask_span]:!text-foreground [&_.gradient-border-mask]:border [&_.gradient-border-mask]:border-border [&_.gradient-border-mask]:shadow-none [&_.gradient-border-mask]:before:hidden"
             />
 
             <h2 className="mt-6 max-w-[35ch] text-center font-medium text-2xl leading-normal md:text-3xl lg:text-4xl">

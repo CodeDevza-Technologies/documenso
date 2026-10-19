@@ -28,6 +28,10 @@ msgctxt "Recipient signing confirmation button"
 msgid "Sign"
 msgstr "Finish and send"
 
+#: apps/remix/app/routes/_recipient+/sign.$token+/_index.tsx
+msgid "Sign {title} · {provider}"
+msgstr "Sign {title} · {provider}"
+
 #: apps/remix/app/components/general/document-signing/document-signing-reject-dialog.tsx
 msgctxt "Recipient signing toast"
 msgid "Document rejected"
@@ -527,6 +531,10 @@ msgstr "{teamName} has invited you to {0}<0/>\"{documentName}\""
 #: packages/email/templates/document-invite.tsx
 msgid "{teamName} has invited you to {action} {documentName}"
 msgstr "{teamName} has invited you to {action} {documentName}"
+
+#: apps/remix/app/routes/_recipient+/sign.$token+/complete.tsx
+msgid "{title} signed · {provider}"
+msgstr "{title} signed · {provider}"
 
 #: apps/remix/app/components/general/app-command-menu.tsx
 msgid "{totalVisibleCount} items"
@@ -10639,7 +10647,6 @@ msgstr "Some signers have not been assigned a signature field. Please assign at 
 #: apps/remix/app/utils/toast-error-messages.ts
 #: apps/remix/app/utils/toast-error-messages.ts
 #: packages/ui/components/document/document-share-button.tsx
-#: apps/remix/app/routes/_recipient+/sign.$token+/complete.tsx
 msgid "Something went wrong"
 msgstr "Something went wrong"
 
@@ -11937,7 +11944,6 @@ msgid "This document could not be deleted at this time. Please try again."
 msgstr "This document could not be deleted at this time. Please try again."
 
 #: apps/remix/app/components/dialogs/envelope-download-dialog.tsx
-#: apps/remix/app/routes/_recipient+/sign.$token+/complete.tsx
 msgid "This document could not be downloaded at this time. Please try again."
 msgstr "This document could not be downloaded at this time. Please try again."
 
@@ -13422,6 +13428,10 @@ msgstr "We couldn't convert this file. Please check it's a valid Word document o
 #: apps/remix/app/routes/_authenticated+/admin+/organisations.$id.tsx
 msgid "We couldn't create a Stripe customer. Please try again."
 msgstr "We couldn't create a Stripe customer. Please try again."
+
+#: apps/remix/app/routes/_recipient+/sign.$token+/complete.tsx
+msgid "We couldn’t download the signed copy. Try again."
+msgstr "We couldn’t download the signed copy. Try again."
 
 #: apps/remix/app/components/dialogs/ai-features-enable-dialog.tsx
 msgid "We couldn't enable AI features right now. Please try again."
