@@ -267,11 +267,12 @@ export default function CompletedSigningPage({ loaderData }: Route.ComponentProp
 
             {/* The signature on a plain, still card: a 1px border, without the vendor's glowing border, ring,
                 sheen or tilt after the pointer. Nothing on it is clickable, so a typed signature is weight 500
-                in full ink (the theme foreground, #0f172a in light) and keeps its colour on hover. */}
+                in full ink (the theme foreground, #0f172a in light) and keeps its colour on hover. It is as wide
+                as a drawn signature's card, so a typed one, which has no width of its own, never shrinks it. */}
             <SigningCard3D
               name={recipientName}
               signature={signatures.at(0)}
-              className="[&>div]:!bg-none [&>div]:![transform:none] [&_.gradient-border-mask_span]:!font-medium [&_.gradient-border-mask_span]:!text-foreground [&_.gradient-border-mask]:border [&_.gradient-border-mask]:border-border [&_.gradient-border-mask]:shadow-none [&_.gradient-border-mask]:before:hidden"
+              className="[&>div]:!bg-none [&>div]:![transform:none] [&_.gradient-border-mask_span]:!font-medium [&_.gradient-border-mask_span]:!text-foreground min-w-[min(24rem,calc(100vw-2rem))] md:min-w-[28rem] [&_.gradient-border-mask]:border [&_.gradient-border-mask]:border-border [&_.gradient-border-mask]:shadow-none [&_.gradient-border-mask]:before:hidden"
             />
 
             <h2 className="mt-6 max-w-[35ch] text-center font-medium text-2xl leading-normal md:text-3xl lg:text-4xl">
