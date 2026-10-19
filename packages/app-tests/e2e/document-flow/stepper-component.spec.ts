@@ -489,7 +489,7 @@ test('[DOCUMENT_FLOW]: should be able to sign a document with custom date', asyn
   await page.getByRole('button', { name: 'Finish and send' }).click();
 
   await page.waitForURL(`/sign/${token}/complete`);
-  await expect(page.getByText('Document Signed')).toBeVisible();
+  await expect(page.getByText('You’ve signed')).toBeVisible();
 
   const field = await prisma.field.findFirst({
     where: {
@@ -619,7 +619,7 @@ test('[DOCUMENT_FLOW]: should be able to create and sign a document with 3 recip
     await page.getByRole('button', { name: 'Finish and send' }).click();
 
     await page.waitForURL(`/sign/${recipient?.token}/complete`);
-    await expect(page.getByText('Document Signed')).toBeVisible();
+    await expect(page.getByText('You’ve signed')).toBeVisible();
 
     const updatedRecipient = await prisma.recipient.findFirst({
       where: { id: recipient?.id },

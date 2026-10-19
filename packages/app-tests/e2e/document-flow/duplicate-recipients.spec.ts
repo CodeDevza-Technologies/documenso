@@ -213,7 +213,7 @@ test.describe('[DOCUMENT_FLOW]: Duplicate Recipients', () => {
 
       // Verify completion
       await page.waitForURL(`/sign/${recipient?.token}/complete`);
-      await expect(page.getByText('Document Signed')).toBeVisible();
+      await expect(page.getByText('You’ve signed')).toBeVisible();
     }
   });
 

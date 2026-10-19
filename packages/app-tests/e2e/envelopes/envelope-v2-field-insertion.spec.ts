@@ -71,7 +71,7 @@ test.describe('V2 envelope field insertion during signing', () => {
     await page.getByRole('button', { name: 'Finish and send' }).click();
 
     await page.waitForURL(`/sign/${token}/complete`);
-    await expect(page.getByText('Document Signed')).toBeVisible();
+    await expect(page.getByText('You’ve signed')).toBeVisible();
 
     // Verify the date field was inserted in the database with the correct format.
     const dateField = await prisma.field.findFirstOrThrow({
@@ -204,7 +204,7 @@ test.describe('V2 envelope field insertion during signing', () => {
     await page.getByRole('button', { name: 'Finish and send' }).click();
 
     await page.waitForURL(`/sign/${token}/complete`);
-    await expect(page.getByText('Document Signed')).toBeVisible();
+    await expect(page.getByText('You’ve signed')).toBeVisible();
 
     // Verify the date field was auto-inserted with the correct format.
     const dateField = await prisma.field.findFirstOrThrow({

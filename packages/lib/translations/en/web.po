@@ -1654,7 +1654,7 @@ msgstr "All items must be of the same type."
 
 #: apps/remix/app/routes/_recipient+/sign.$token+/complete.tsx
 msgid "All recipients have signed. The document is being processed and you will receive an email copy shortly."
-msgstr "All recipients have signed. The document is being processed and you will receive an email copy shortly."
+msgstr "Everyone has signed. We’ll email you the signed copy."
 
 #: apps/remix/app/components/dialogs/envelope-delete-dialog.tsx
 #: apps/remix/app/components/dialogs/envelopes-bulk-delete-dialog.tsx
@@ -4351,7 +4351,7 @@ msgstr "Document already signed"
 
 #: apps/remix/app/routes/_recipient+/sign.$token+/complete.tsx
 msgid "Document Approved"
-msgstr "Document Approved"
+msgstr "You’ve approved the document"
 
 #: apps/remix/app/components/dialogs/envelope-cancel-dialog.tsx
 #: apps/remix/app/components/general/document/document-status.tsx
@@ -4593,7 +4593,7 @@ msgstr "Document Settings"
 
 #: apps/remix/app/routes/_recipient+/sign.$token+/complete.tsx
 msgid "Document Signed"
-msgstr "Document Signed"
+msgstr "You’ve signed"
 
 #: packages/lib/utils/document-audit-logs.ts
 msgctxt "Audit log format"
@@ -4663,7 +4663,7 @@ msgstr "Document viewed"
 
 #: apps/remix/app/routes/_recipient+/sign.$token+/complete.tsx
 msgid "Document Viewed"
-msgstr "Document Viewed"
+msgstr "You’ve viewed the document"
 
 #: apps/remix/app/components/general/admin-global-settings-section.tsx
 #: apps/remix/app/components/general/envelope-editor/envelope-editor-settings-dialog.tsx
@@ -5689,7 +5689,7 @@ msgstr "Everyone has signed"
 
 #: apps/remix/app/routes/_recipient+/sign.$token+/complete.tsx
 msgid "Everyone has signed! You will receive an email copy of the signed document."
-msgstr "Everyone has signed! You will receive an email copy of the signed document."
+msgstr "We’ll email you the signed copy."
 
 #: apps/remix/app/components/general/organisation-usage-panel.tsx
 msgid "Exceeded"
@@ -6204,7 +6204,7 @@ msgstr "Go back home"
 #: apps/remix/app/routes/_recipient+/sign.$token+/_index.tsx
 #: apps/remix/app/routes/_recipient+/sign.$token+/complete.tsx
 msgid "Go Back Home"
-msgstr "Go Back Home"
+msgstr "Go back home"
 
 #: apps/remix/app/routes/_authenticated+/_layout.tsx
 #: apps/remix/app/routes/_authenticated+/t.$teamUrl+/documents.$id.edit.tsx
@@ -8810,7 +8810,7 @@ msgstr "Proceed"
 
 #: apps/remix/app/routes/_recipient+/sign.$token+/complete.tsx
 msgid "Processing document"
-msgstr "Processing document"
+msgstr "Preparing the signed copy"
 
 #: apps/remix/app/components/general/app-command-menu.tsx
 #: apps/remix/app/routes/_authenticated+/settings+/profile.tsx
@@ -14726,7 +14726,7 @@ msgstr "You will now be required to enter a code from your authenticator app whe
 
 #: apps/remix/app/routes/_recipient+/sign.$token+/complete.tsx
 msgid "You will receive an email copy of the signed document once everyone has signed."
-msgstr "You will receive an email copy of the signed document once everyone has signed."
+msgstr "We’ll email you the signed copy once everyone has signed."
 
 #: apps/remix/app/components/dialogs/ai-features-enable-dialog.tsx
 msgid "You're an admin. You can enable AI features for this team right away. Everyone on the team will see AI detection once enabled."

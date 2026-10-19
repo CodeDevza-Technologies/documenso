@@ -90,8 +90,8 @@ test('[PUBLIC_PROFILE]: create team profile', async ({ page }) => {
   await page.getByRole('button', { name: 'Finish' }).click();
   await page.getByRole('button', { name: 'Finish and send' }).click();
 
-  await expect(page.getByRole('heading', { name: 'Document Signed' })).toBeVisible();
-  await expect(page.getByRole('heading')).toContainText('Document Signed');
+  await expect(page.getByRole('heading', { name: 'You’ve signed' })).toBeVisible();
+  await expect(page.getByRole('heading')).toContainText('You’ve signed');
 });
 
 test('[PUBLIC_PROFILE]: empty-profile settings hint only shows to team managers', async ({ page }) => {

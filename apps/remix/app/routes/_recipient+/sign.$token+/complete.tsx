@@ -9,6 +9,7 @@ import { getFieldsForToken } from '@documenso/lib/server-only/field/get-fields-f
 import { getRecipientByToken } from '@documenso/lib/server-only/recipient/get-recipient-by-token';
 import { getRecipientSignatures } from '@documenso/lib/server-only/recipient/get-recipient-signatures';
 import { getUserByEmail } from '@documenso/lib/server-only/user/get-user-by-email';
+import { extractDerivedDocumentEmailSettings } from '@documenso/lib/types/document-email';
 import { isDocumentCompleted } from '@documenso/lib/utils/document';
 import { trpc } from '@documenso/trpc/react';
 import { SigningCard3D } from '@documenso/ui/components/signing-card';
@@ -88,8 +89,13 @@ export async function loader({ params, request }: Route.LoaderArgs) {
 
   const returnToHomePath = canRedirectToFolder ? `/t/${document.team.url}/documents/f/${document.folderId}` : '/';
 
+  // Whether the signed copy is emailed to each recipient once everyone has signed: the page only
+  // promises an email when the document will send one.
+  const emailsSignedCopy = extractDerivedDocumentEmailSettings(document.documentMeta).documentCompleted;
+
   return {
     isDocumentAccessValid: true,
+    emailsSignedCopy,
     canSignUp,
     recipientName,
     recipientEmail: recipient.email,
@@ -110,6 +116,7 @@ export default function CompletedSigningPage({ loaderData }: Route.ComponentProp
 
   const {
     isDocumentAccessValid,
+    emailsSignedCopy,
     canSignUp,
     recipientName,
     signatures,
@@ -180,7 +187,7 @@ export default function CompletedSigningPage({ loaderData }: Route.ComponentProp
               signingCelebrationImage={signingCelebration}
             />
 
-            <h2 className="mt-6 max-w-[35ch] text-center font-semibold text-2xl leading-normal md:text-3xl lg:text-4xl">
+            <h2 className="mt-6 max-w-[35ch] text-center font-medium text-2xl leading-normal md:text-3xl lg:text-4xl">
               {recipient.role === RecipientRole.SIGNER && <Trans>Document Signed</Trans>}
               {recipient.role === RecipientRole.VIEWER && <Trans>Document Viewed</Trans>}
               {recipient.role === RecipientRole.APPROVER && <Trans>Document Approved</Trans>}
@@ -188,7 +195,7 @@ export default function CompletedSigningPage({ loaderData }: Route.ComponentProp
 
             {match({ status: signingStatus, deletedAt: document.deletedAt })
               .with({ status: 'COMPLETED' }, () => (
-                <div className="mt-4 flex items-center text-center text-documenso-700">
+                <div className="mt-4 flex items-center text-center text-primary">
                   <CheckCircle2 className="mr-2 h-5 w-5" />
                   <span className="text-sm">
                     <Trans>Everyone has signed</Trans>
@@ -196,7 +203,7 @@ export default function CompletedSigningPage({ loaderData }: Route.ComponentProp
                 </div>
               ))
               .with({ status: 'PROCESSING' }, () => (
-                <div className="mt-4 flex items-center text-center text-orange-600">
+                <div className="mt-4 flex items-center text-center text-primary">
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   <span className="text-sm">
                     <Trans>Processing document</Trans>
@@ -204,7 +211,7 @@ export default function CompletedSigningPage({ loaderData }: Route.ComponentProp
                 </div>
               ))
               .with({ deletedAt: null }, () => (
-                <div className="mt-4 flex items-center text-center text-blue-600">
+                <div className="mt-4 flex items-center text-center text-primary">
                   <Clock8 className="mr-2 h-5 w-5" />
                   <span className="text-sm">
                     <Trans>Waiting for others to sign</Trans>
@@ -220,27 +227,40 @@ export default function CompletedSigningPage({ loaderData }: Route.ComponentProp
                 </div>
               ))}
 
+            {/* What happens next, said only as far as it is true: an email only when the document sends one. */}
             {match({ status: signingStatus, deletedAt: document.deletedAt })
               .with({ status: 'COMPLETED' }, () => (
-                <p className="mt-2.5 max-w-[60ch] text-center font-medium text-muted-foreground/60 text-sm md:text-base">
-                  <Trans>Everyone has signed! You will receive an email copy of the signed document.</Trans>
+                <p className="mt-2.5 max-w-[60ch] text-center text-muted-foreground text-sm md:text-base">
+                  {emailsSignedCopy ? (
+                    <Trans>Everyone has signed! You will receive an email copy of the signed document.</Trans>
+                  ) : (
+                    <Trans>Download the signed copy below.</Trans>
+                  )}
                 </p>
               ))
               .with({ status: 'PROCESSING' }, () => (
-                <p className="mt-2.5 max-w-[60ch] text-center font-medium text-muted-foreground/60 text-sm md:text-base">
-                  <Trans>
-                    All recipients have signed. The document is being processed and you will receive an email copy
-                    shortly.
-                  </Trans>
+                <p className="mt-2.5 max-w-[60ch] text-center text-muted-foreground text-sm md:text-base">
+                  {emailsSignedCopy ? (
+                    <Trans>
+                      All recipients have signed. The document is being processed and you will receive an email copy
+                      shortly.
+                    </Trans>
+                  ) : (
+                    <Trans>Everyone has signed. You can download the signed copy here once it is ready.</Trans>
+                  )}
                 </p>
               ))
               .with({ deletedAt: null }, () => (
-                <p className="mt-2.5 max-w-[60ch] text-center font-medium text-muted-foreground/60 text-sm md:text-base">
-                  <Trans>You will receive an email copy of the signed document once everyone has signed.</Trans>
+                <p className="mt-2.5 max-w-[60ch] text-center text-muted-foreground text-sm md:text-base">
+                  {emailsSignedCopy ? (
+                    <Trans>You will receive an email copy of the signed document once everyone has signed.</Trans>
+                  ) : (
+                    <Trans>Once everyone has signed, you can download the signed copy from this page.</Trans>
+                  )}
                 </p>
               ))
               .otherwise(() => (
-                <p className="mt-2.5 max-w-[60ch] text-center font-medium text-muted-foreground/60 text-sm md:text-base">
+                <p className="mt-2.5 max-w-[60ch] text-center text-muted-foreground text-sm md:text-base">
                   <Trans>
                     This document has been cancelled by the owner and is no longer available for others to sign.
                   </Trans>
@@ -248,10 +268,11 @@ export default function CompletedSigningPage({ loaderData }: Route.ComponentProp
               ))}
 
             <div className="mt-8 flex w-full max-w-xs flex-col items-stretch gap-4 md:w-auto md:max-w-none md:flex-row md:items-center">
-              {isDocumentCompleted(document) && (
+              {/* Offered as soon as the page learns the signed copy is ready, not only on a reload. */}
+              {(isDocumentCompleted(document) || signingStatus === 'COMPLETED') && (
                 <EnvelopeDownloadDialog
                   envelopeId={document.envelopeId}
-                  envelopeStatus={document.status}
+                  envelopeStatus={signingStatus === 'COMPLETED' ? DocumentStatus.COMPLETED : document.status}
                   envelopeItems={document.envelopeItems}
                   token={recipient?.token}
                   trigger={
@@ -276,7 +297,7 @@ export default function CompletedSigningPage({ loaderData }: Route.ComponentProp
           <div className="flex flex-col items-center">
             {canSignUp && (
               <div className="flex max-w-xl flex-col items-center justify-center p-4 md:p-12">
-                <h2 className="mt-8 text-center font-semibold text-xl md:mt-0">
+                <h2 className="mt-8 text-center font-medium text-xl md:mt-0">
                   <Trans>Need to sign documents?</Trans>
                 </h2>
 

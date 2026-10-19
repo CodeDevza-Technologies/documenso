@@ -213,7 +213,7 @@ test('[DIRECT_TEMPLATES]: V1 direct template link auth access', async ({ page })
 
   await page.getByRole('button', { name: 'Finish and send' }).click();
   await page.waitForURL(/\/sign/);
-  await expect(page.getByRole('heading', { name: 'Document Signed' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'You’ve signed' })).toBeVisible();
 });
 
 test('[DIRECT_TEMPLATES]: V2 direct template link auth access', async ({ page }) => {
@@ -282,7 +282,7 @@ test('[DIRECT_TEMPLATES]: V2 direct template link auth access', async ({ page })
 
   await page.getByRole('button', { name: 'Finish and send' }).click();
   await page.waitForURL(/\/sign/);
-  await expect(page.getByRole('heading', { name: 'Document Signed' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'You’ve signed' })).toBeVisible();
 });
 
 test('[DIRECT_TEMPLATES]: use direct template link with 1 recipient', async ({ page }) => {
@@ -321,7 +321,7 @@ test('[DIRECT_TEMPLATES]: use direct template link with 1 recipient', async ({ p
   await page.getByRole('button', { name: 'Finish' }).click();
   await page.getByRole('button', { name: 'Finish and send' }).click();
   await page.waitForURL(/\/sign/);
-  await expect(page.getByRole('heading', { name: 'Document Signed' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'You’ve signed' })).toBeVisible();
 
   // Add a longer waiting period to ensure document status is updated
   await page.waitForTimeout(3000);
@@ -411,7 +411,7 @@ test('[DIRECT_TEMPLATES]: V1 use direct template link with 2 recipients with nex
 
   await page.getByRole('button', { name: 'Finish and send' }).click();
   await page.waitForURL(/\/sign/);
-  await expect(page.getByRole('heading', { name: 'Document Signed' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'You’ve signed' })).toBeVisible();
 
   const createdEnvelopeRecipients = await prisma.recipient.findMany({
     where: {
@@ -539,7 +539,7 @@ test('[DIRECT_TEMPLATES]: V2 use direct template link with 2 recipients with nex
 
   await page.getByRole('button', { name: 'Finish and send' }).click();
   await page.waitForURL(/\/sign/);
-  await expect(page.getByRole('heading', { name: 'Document Signed' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'You’ve signed' })).toBeVisible();
 
   const createdEnvelopeRecipients = await prisma.recipient.findMany({
     where: {
