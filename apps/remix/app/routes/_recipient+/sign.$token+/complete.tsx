@@ -216,17 +216,22 @@ export default function CompletedSigningPage({ loaderData }: Route.ComponentProp
               'mb-8 p-4 md:mb-0 md:p-12': canSignUp,
             })}
           >
-            <Badge variant="neutral" size="default" className="mb-6 rounded-xl border bg-transparent">
+            <Badge
+              variant="neutral"
+              size="default"
+              className="mb-6 rounded-xl border border-border bg-transparent ring-0"
+            >
               <span className="block max-w-[calc(100vw-4rem)] truncate font-medium hover:underline md:max-w-[28rem]">
                 {document.title}
               </span>
             </Badge>
 
-            {/* The signature on a plain card: a 1px border, without the vendor's glowing border, ring and sheen. */}
+            {/* The signature on a plain card: a 1px border, without the vendor's glowing border, ring and sheen.
+                Nothing on it is clickable, so a typed signature is weight 500 and keeps its colour on hover. */}
             <SigningCard3D
               name={recipientName}
               signature={signatures.at(0)}
-              className="[&>div]:!bg-none [&_.gradient-border-mask]:border [&_.gradient-border-mask]:border-border [&_.gradient-border-mask]:shadow-none [&_.gradient-border-mask]:before:hidden"
+              className="[&>div]:!bg-none [&_.gradient-border-mask_span]:!font-medium [&_.gradient-border-mask_span]:!text-muted-foreground/60 [&_.gradient-border-mask]:border [&_.gradient-border-mask]:border-border [&_.gradient-border-mask]:shadow-none [&_.gradient-border-mask]:before:hidden"
             />
 
             <h2 className="mt-6 max-w-[35ch] text-center font-medium text-2xl leading-normal md:text-3xl lg:text-4xl">
