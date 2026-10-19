@@ -1,5 +1,6 @@
 import { downloadPDF } from '@documenso/lib/client-only/download-pdf';
 import { trpc } from '@documenso/trpc/react';
+import { cn } from '@documenso/ui/lib/utils';
 import { Button } from '@documenso/ui/primitives/button';
 import {
   Dialog,
@@ -19,6 +20,8 @@ import { useMemo, useState } from 'react';
 type EnvelopeItemToDownload = Pick<EnvelopeItem, 'id' | 'envelopeId' | 'title' | 'order'>;
 
 type EnvelopeDownloadDialogProps = {
+  /** 48px download buttons on a phone, for a recipient's own page. */
+  largeButtons?: boolean;
   envelopeId: string;
   envelopeStatus: DocumentStatus;
 
@@ -46,6 +49,7 @@ type EnvelopeDownloadDialogProps = {
 };
 
 export const EnvelopeDownloadDialog = ({
+  largeButtons = false,
   envelopeId,
   envelopeStatus,
   isLegacy,
@@ -198,7 +202,7 @@ export const EnvelopeDownloadDialog = ({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="text-xs"
+                      className={cn('text-xs', largeButtons && 'h-12 md:h-9')}
                       onClick={async () => onDownload(item, 'original')}
                       loading={isDownloadingState[generateDownloadKey(item.id, 'original')]}
                     >
@@ -212,7 +216,7 @@ export const EnvelopeDownloadDialog = ({
                       <Button
                         variant="default"
                         size="sm"
-                        className="text-xs"
+                        className={cn('text-xs', largeButtons && 'h-12 md:h-9')}
                         onClick={async () => onDownload(item, secondaryDownload.version)}
                         loading={isDownloadingState[generateDownloadKey(item.id, secondaryDownload.version)]}
                       >

@@ -1,5 +1,5 @@
-import signingCelebration from '@documenso/assets/images/signing-celebration.png';
 import { getOptionalSession } from '@documenso/auth/server/lib/utils/get-session';
+import { downloadPDF } from '@documenso/lib/client-only/download-pdf';
 import { useOptionalSession } from '@documenso/lib/client-only/providers/session';
 import { isSignupEnabledForProvider } from '@documenso/lib/constants/auth';
 import { loadRecipientBrandingByTeamId } from '@documenso/lib/server-only/branding/load-recipient-branding';
@@ -10,16 +10,20 @@ import { getRecipientByToken } from '@documenso/lib/server-only/recipient/get-re
 import { getRecipientSignatures } from '@documenso/lib/server-only/recipient/get-recipient-signatures';
 import { getUserByEmail } from '@documenso/lib/server-only/user/get-user-by-email';
 import { extractDerivedDocumentEmailSettings } from '@documenso/lib/types/document-email';
+import { darkenForContrast } from '@documenso/lib/utils/brand-button-contrast';
 import { isDocumentCompleted } from '@documenso/lib/utils/document';
 import { trpc } from '@documenso/trpc/react';
 import { SigningCard3D } from '@documenso/ui/components/signing-card';
 import { cn } from '@documenso/ui/lib/utils';
 import { Badge } from '@documenso/ui/primitives/badge';
 import { Button } from '@documenso/ui/primitives/button';
+import { useToast } from '@documenso/ui/primitives/use-toast';
+import { msg } from '@lingui/core/macro';
 import { useLingui } from '@lingui/react';
 import { Trans } from '@lingui/react/macro';
 import { DocumentStatus, FieldType, RecipientRole } from '@prisma/client';
 import { CheckCircle2, Clock8, DownloadIcon, Loader2 } from 'lucide-react';
+import { useState } from 'react';
 import { Link } from 'react-router';
 import { match } from 'ts-pattern';
 
@@ -93,9 +97,13 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   // promises an email when the document will send one.
   const emailsSignedCopy = extractDerivedDocumentEmailSettings(document.documentMeta).documentCompleted;
 
+  // The status line is text on white in the team's colour: at least 4.5:1, even for a pale brand.
+  const statusColor = darkenForContrast(branding.colors?.primary ?? '#1fb97f', 4.5);
+
   return {
     isDocumentAccessValid: true,
     emailsSignedCopy,
+    statusColor,
     canSignUp,
     recipientName,
     recipientEmail: recipient.email,
@@ -109,6 +117,9 @@ export async function loader({ params, request }: Route.LoaderArgs) {
 
 export default function CompletedSigningPage({ loaderData }: Route.ComponentProps) {
   const { _ } = useLingui();
+  const { toast } = useToast();
+
+  const [isDownloadingSignedCopy, setIsDownloadingSignedCopy] = useState(false);
 
   const { sessionData } = useOptionalSession();
   const user = sessionData?.user;
@@ -117,6 +128,7 @@ export default function CompletedSigningPage({ loaderData }: Route.ComponentProp
   const {
     isDocumentAccessValid,
     emailsSignedCopy,
+    statusColor,
     canSignUp,
     recipientName,
     signatures,
@@ -144,6 +156,36 @@ export default function CompletedSigningPage({ loaderData }: Route.ComponentProp
 
   // Use signing status from query if available, otherwise fall back to document status
   const signingStatus = signingStatusData?.status ?? 'PENDING';
+
+  const singleEnvelopeItem =
+    isDocumentAccessValid && document.envelopeItems.length === 1 ? document.envelopeItems[0] : null;
+
+  const onDownloadSignedCopy = async () => {
+    if (!singleEnvelopeItem || isDownloadingSignedCopy) {
+      return;
+    }
+
+    setIsDownloadingSignedCopy(true);
+
+    try {
+      await downloadPDF({
+        envelopeItem: singleEnvelopeItem,
+        token: recipient?.token,
+        fileName: singleEnvelopeItem.title,
+        version: 'signed',
+      });
+    } catch (error) {
+      console.error(error);
+
+      toast({
+        title: _(msg`Something went wrong`),
+        description: _(msg`This document could not be downloaded at this time. Please try again.`),
+        variant: 'destructive',
+      });
+    } finally {
+      setIsDownloadingSignedCopy(false);
+    }
+  };
 
   if (!isDocumentAccessValid) {
     return (
@@ -175,16 +217,16 @@ export default function CompletedSigningPage({ loaderData }: Route.ComponentProp
             })}
           >
             <Badge variant="neutral" size="default" className="mb-6 rounded-xl border bg-transparent">
-              <span className="block max-w-[10rem] truncate font-medium hover:underline md:max-w-[20rem]">
+              <span className="block max-w-[calc(100vw-4rem)] truncate font-medium hover:underline md:max-w-[28rem]">
                 {document.title}
               </span>
             </Badge>
 
-            {/* Card with recipient */}
+            {/* The signature on a plain card: a 1px border, without the vendor's glowing border, ring and sheen. */}
             <SigningCard3D
               name={recipientName}
               signature={signatures.at(0)}
-              signingCelebrationImage={signingCelebration}
+              className="[&>div]:!bg-none [&_.gradient-border-mask]:border [&_.gradient-border-mask]:border-border [&_.gradient-border-mask]:shadow-none [&_.gradient-border-mask]:before:hidden"
             />
 
             <h2 className="mt-6 max-w-[35ch] text-center font-medium text-2xl leading-normal md:text-3xl lg:text-4xl">
@@ -195,7 +237,7 @@ export default function CompletedSigningPage({ loaderData }: Route.ComponentProp
 
             {match({ status: signingStatus, deletedAt: document.deletedAt })
               .with({ status: 'COMPLETED' }, () => (
-                <div className="mt-4 flex items-center text-center text-primary">
+                <div className="mt-4 flex items-center text-center" style={{ color: statusColor }}>
                   <CheckCircle2 className="mr-2 h-5 w-5" />
                   <span className="text-sm">
                     <Trans>Everyone has signed</Trans>
@@ -203,7 +245,7 @@ export default function CompletedSigningPage({ loaderData }: Route.ComponentProp
                 </div>
               ))
               .with({ status: 'PROCESSING' }, () => (
-                <div className="mt-4 flex items-center text-center text-primary">
+                <div className="mt-4 flex items-center text-center" style={{ color: statusColor }}>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   <span className="text-sm">
                     <Trans>Processing document</Trans>
@@ -211,7 +253,7 @@ export default function CompletedSigningPage({ loaderData }: Route.ComponentProp
                 </div>
               ))
               .with({ deletedAt: null }, () => (
-                <div className="mt-4 flex items-center text-center text-primary">
+                <div className="mt-4 flex items-center text-center" style={{ color: statusColor }}>
                   <Clock8 className="mr-2 h-5 w-5" />
                   <span className="text-sm">
                     <Trans>Waiting for others to sign</Trans>
@@ -230,7 +272,7 @@ export default function CompletedSigningPage({ loaderData }: Route.ComponentProp
             {/* What happens next, said only as far as it is true: an email only when the document sends one. */}
             {match({ status: signingStatus, deletedAt: document.deletedAt })
               .with({ status: 'COMPLETED' }, () => (
-                <p className="mt-2.5 max-w-[60ch] text-center text-muted-foreground text-sm md:text-base">
+                <p className="mt-2.5 max-w-[60ch] text-center text-muted-foreground text-sm">
                   {emailsSignedCopy ? (
                     <Trans>Everyone has signed! You will receive an email copy of the signed document.</Trans>
                   ) : (
@@ -239,19 +281,19 @@ export default function CompletedSigningPage({ loaderData }: Route.ComponentProp
                 </p>
               ))
               .with({ status: 'PROCESSING' }, () => (
-                <p className="mt-2.5 max-w-[60ch] text-center text-muted-foreground text-sm md:text-base">
+                <p className="mt-2.5 max-w-[60ch] text-center text-muted-foreground text-sm">
                   {emailsSignedCopy ? (
                     <Trans>
                       All recipients have signed. The document is being processed and you will receive an email copy
                       shortly.
                     </Trans>
                   ) : (
-                    <Trans>Everyone has signed. You can download the signed copy here once it is ready.</Trans>
+                    <Trans>Everyone has signed. You can download the signed copy here when it’s ready.</Trans>
                   )}
                 </p>
               ))
               .with({ deletedAt: null }, () => (
-                <p className="mt-2.5 max-w-[60ch] text-center text-muted-foreground text-sm md:text-base">
+                <p className="mt-2.5 max-w-[60ch] text-center text-muted-foreground text-sm">
                   {emailsSignedCopy ? (
                     <Trans>You will receive an email copy of the signed document once everyone has signed.</Trans>
                   ) : (
@@ -260,7 +302,7 @@ export default function CompletedSigningPage({ loaderData }: Route.ComponentProp
                 </p>
               ))
               .otherwise(() => (
-                <p className="mt-2.5 max-w-[60ch] text-center text-muted-foreground text-sm md:text-base">
+                <p className="mt-2.5 max-w-[60ch] text-center text-muted-foreground text-sm">
                   <Trans>
                     This document has been cancelled by the owner and is no longer available for others to sign.
                   </Trans>
@@ -269,23 +311,38 @@ export default function CompletedSigningPage({ loaderData }: Route.ComponentProp
 
             <div className="mt-8 flex w-full max-w-xs flex-col items-stretch gap-4 md:w-auto md:max-w-none md:flex-row md:items-center">
               {/* Offered as soon as the page learns the signed copy is ready, not only on a reload. */}
-              {(isDocumentCompleted(document) || signingStatus === 'COMPLETED') && (
-                <EnvelopeDownloadDialog
-                  envelopeId={document.envelopeId}
-                  envelopeStatus={signingStatus === 'COMPLETED' ? DocumentStatus.COMPLETED : document.status}
-                  envelopeItems={document.envelopeItems}
-                  token={recipient?.token}
-                  trigger={
-                    <Button type="button" variant="outline" className="flex-1 md:flex-initial">
-                      <DownloadIcon className="mr-2 h-5 w-5" />
-                      <Trans>Download</Trans>
-                    </Button>
-                  }
-                />
-              )}
+              {(isDocumentCompleted(document) || signingStatus === 'COMPLETED') &&
+                // One document: one tap downloads its signed copy. Several: the picker lists them.
+                (singleEnvelopeItem ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-12 md:h-10"
+                    loading={isDownloadingSignedCopy}
+                    onClick={onDownloadSignedCopy}
+                  >
+                    {!isDownloadingSignedCopy && <DownloadIcon className="mr-2 h-5 w-5" />}
+                    {/* Its own context, so the en catalogue can say "Download the signed copy" here only. */}
+                    <Trans context="Recipient completion download button">Download</Trans>
+                  </Button>
+                ) : (
+                  <EnvelopeDownloadDialog
+                    largeButtons
+                    envelopeId={document.envelopeId}
+                    envelopeStatus={signingStatus === 'COMPLETED' ? DocumentStatus.COMPLETED : document.status}
+                    envelopeItems={document.envelopeItems}
+                    token={recipient?.token}
+                    trigger={
+                      <Button type="button" variant="outline" className="h-12 md:h-10">
+                        <DownloadIcon className="mr-2 h-5 w-5" />
+                        <Trans context="Recipient completion download button">Download</Trans>
+                      </Button>
+                    }
+                  />
+                ))}
 
               {user && (
-                <Button asChild>
+                <Button asChild className="h-12 md:h-10">
                   <Link to={returnToHomePath}>
                     <Trans>Go Back Home</Trans>
                   </Link>

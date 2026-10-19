@@ -18,6 +18,11 @@ msgctxt "Recipient signing confirmation"
 msgid "Are you sure?"
 msgstr "Ready to finish?"
 
+#: apps/remix/app/routes/_recipient+/sign.$token+/complete.tsx
+msgctxt "Recipient completion download button"
+msgid "Download"
+msgstr "Download the signed copy"
+
 #: apps/remix/app/components/general/document-signing/document-signing-complete-dialog.tsx
 msgctxt "Recipient signing confirmation button"
 msgid "Sign"
@@ -4860,6 +4865,10 @@ msgstr "Download PDF"
 msgid "Download Template CSV"
 msgstr "Download Template CSV"
 
+#: apps/remix/app/routes/_recipient+/sign.$token+/complete.tsx
+msgid "Download the signed copy below."
+msgstr "Download the signed copy below."
+
 #. placeholder {0}: envelope.title
 #: apps/remix/app/components/dialogs/envelopes-bulk-download-dialog.tsx
 msgid "Download version for {0}"
@@ -5690,6 +5699,10 @@ msgstr "Everyone has signed"
 #: apps/remix/app/routes/_recipient+/sign.$token+/complete.tsx
 msgid "Everyone has signed! You will receive an email copy of the signed document."
 msgstr "We’ll email you the signed copy."
+
+#: apps/remix/app/routes/_recipient+/sign.$token+/complete.tsx
+msgid "Everyone has signed. You can download the signed copy here when it’s ready."
+msgstr "Everyone has signed. You can download the signed copy here when it’s ready."
 
 #: apps/remix/app/components/general/organisation-usage-panel.tsx
 msgid "Exceeded"
@@ -7937,6 +7950,10 @@ msgstr "Once confirmed, the following will occur:"
 #: packages/lib/constants/template.ts
 msgid "Once enabled, you can select any active recipient to be a direct link signing recipient, or create a new one. This recipient type cannot be edited or deleted."
 msgstr "Once enabled, you can select any active recipient to be a direct link signing recipient, or create a new one. This recipient type cannot be edited or deleted."
+
+#: apps/remix/app/routes/_recipient+/sign.$token+/complete.tsx
+msgid "Once everyone has signed, you can download the signed copy from this page."
+msgstr "Once everyone has signed, you can download the signed copy from this page."
 
 #: apps/remix/app/components/forms/2fa/enable-authenticator-app-dialog.tsx
 msgid "Once you have scanned the QR code or entered the code manually, enter the code provided by your authenticator app below."
@@ -10622,6 +10639,7 @@ msgstr "Some signers have not been assigned a signature field. Please assign at 
 #: apps/remix/app/utils/toast-error-messages.ts
 #: apps/remix/app/utils/toast-error-messages.ts
 #: packages/ui/components/document/document-share-button.tsx
+#: apps/remix/app/routes/_recipient+/sign.$token+/complete.tsx
 msgid "Something went wrong"
 msgstr "Something went wrong"
 
@@ -11919,6 +11937,7 @@ msgid "This document could not be deleted at this time. Please try again."
 msgstr "This document could not be deleted at this time. Please try again."
 
 #: apps/remix/app/components/dialogs/envelope-download-dialog.tsx
+#: apps/remix/app/routes/_recipient+/sign.$token+/complete.tsx
 msgid "This document could not be downloaded at this time. Please try again."
 msgstr "This document could not be downloaded at this time. Please try again."
 
@@ -11941,7 +11960,7 @@ msgstr "This document has been cancelled"
 
 #: apps/remix/app/routes/_recipient+/sign.$token+/complete.tsx
 msgid "This document has been cancelled by the owner and is no longer available for others to sign."
-msgstr "This document has been cancelled by the owner and is no longer available for others to sign."
+msgstr "This document has been cancelled by the sender and is no longer available for others to sign."
 
 #: apps/remix/app/routes/_recipient+/sign.$token+/_index.tsx
 #: apps/remix/app/routes/_recipient+/sign.$token+/_index.tsx
