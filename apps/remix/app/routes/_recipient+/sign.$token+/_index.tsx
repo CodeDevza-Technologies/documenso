@@ -56,6 +56,7 @@ import { superLoaderJson, useSuperLoaderData } from '~/utils/super-json-loader';
 
 import type { Route } from './+types/_index';
 
+/** The tab names the team only when its pages carry its branding, otherwise Operify AI. */
 type SigningTab = { title: string | null; teamName: string | null };
 
 export function meta({ data }: Route.MetaArgs) {
@@ -386,7 +387,7 @@ export async function loader(loaderArgs: Route.LoaderArgs) {
     const tab: SigningTab = {
       // The title only once the recipient may see the document.
       title: payloadV2.isDocumentAccessValid ? foundRecipient.envelope.title : null,
-      teamName: foundRecipient.envelope.team.name,
+      teamName: branding.allowCustomBranding ? foundRecipient.envelope.team.name : null,
     };
 
     const responseHeaders =
@@ -407,7 +408,7 @@ export async function loader(loaderArgs: Route.LoaderArgs) {
 
   const tab: SigningTab = {
     title: payloadV1.isDocumentAccessValid ? foundRecipient.envelope.title : null,
-    teamName: foundRecipient.envelope.team.name,
+    teamName: branding.allowCustomBranding ? foundRecipient.envelope.team.name : null,
   };
 
   return superLoaderJson({

@@ -66,5 +66,8 @@ export const recipientMetaTags = (title: string) => [
   { name: 'robots', content: 'noindex, nofollow, noarchive, nosnippet, noimageindex' },
 ];
 
-/** The provider a recipient sees named: the team that sent the document, or Operify AI without one. */
+/**
+ * The provider a recipient sees named: the team that sent the document when its pages carry its
+ * branding (the caller passes no name otherwise), or Operify AI.
+ */
 export const recipientProviderName = (teamName?: string | null) => teamName?.trim() || 'Operify AI';

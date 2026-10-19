@@ -108,7 +108,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   if (!isDocumentAccessValid) {
     return {
       isDocumentAccessValid: false,
-      teamName: document.team?.name ?? null,
+      teamName: branding.allowCustomBranding ? (document.team?.name ?? null) : null,
       recipientEmail: recipient.email,
       branding,
     } as const;
@@ -137,7 +137,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
 
   return {
     isDocumentAccessValid: true,
-    teamName: document.team?.name ?? null,
+    teamName: branding.allowCustomBranding ? (document.team?.name ?? null) : null,
     emailsSignedCopy,
     statusColor,
     canSignUp,
