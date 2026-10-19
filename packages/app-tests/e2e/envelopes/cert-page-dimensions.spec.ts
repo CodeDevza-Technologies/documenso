@@ -129,10 +129,10 @@ const signAndVerifyPageDimensions = async ({
     redirectPath: signUrl,
   });
 
-  await expect(page.getByRole('heading', { name: 'Sign Document' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Sign the document' })).toBeVisible();
 
-  await page.getByRole('button', { name: 'Complete' }).click();
-  await page.getByRole('button', { name: 'Sign' }).click();
+  await page.getByRole('button', { name: 'Finish' }).click();
+  await page.getByRole('button', { name: 'Finish and send' }).click();
   await page.waitForURL(`${signUrl}/complete`);
 
   await expect(async () => {

@@ -1,4 +1,5 @@
 import { useCurrentEnvelopeRender } from '@documenso/lib/client-only/providers/envelope-render-provider';
+import { PDF_VIEWER_CONTENT_SELECTOR } from '@documenso/lib/constants/pdf-viewer';
 import { PDF_VIEWER_ERROR_MESSAGES } from '@documenso/lib/constants/pdf-viewer-i18n';
 import { mapSecondaryIdToDocumentId } from '@documenso/lib/utils/envelope';
 import { cn } from '@documenso/ui/lib/utils';
@@ -15,7 +16,7 @@ import {
   PanelLeftOpenIcon,
   PaperclipIcon,
 } from 'lucide-react';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router';
 import { match } from 'ts-pattern';
 
@@ -54,6 +55,7 @@ export const DocumentSigningPageViewV2 = () => {
     recipientFieldsRemaining,
     requiredRecipientFields,
     selectedAssistantRecipientFields,
+    focusedField,
   } = useRequiredEnvelopeSigningContext();
 
   const {
@@ -78,6 +80,40 @@ export const DocumentSigningPageViewV2 = () => {
 
     return recipientFields.filter((field) => !field.inserted);
   }, [recipientFieldsRemaining, selectedAssistantRecipientFields, currentEnvelopeItem]);
+
+  /**
+   * Scroll to the field the signer is being taken to, switching document if it is in another.
+   */
+  useEffect(() => {
+    const field = recipientFields.find((f) => f.id === focusedField?.id);
+
+    if (!field) {
+      return;
+    }
+
+    const isEnvelopeItemSwitch = field.envelopeItemId !== currentEnvelopeItem?.id;
+
+    if (isEnvelopeItemSwitch) {
+      setCurrentEnvelopeItem(field.envelopeItemId);
+    }
+
+    const timeout = setTimeout(
+      () => {
+        const fieldTooltip = document.querySelector(`#field-tooltip`);
+
+        if (fieldTooltip) {
+          fieldTooltip.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          // Tooltip not in DOM (page virtualized away) — signal the PDF viewer
+          // to scroll to the correct page via the data attribute.
+          document.querySelector(PDF_VIEWER_CONTENT_SELECTOR)?.setAttribute('data-scroll-to-page', String(field.page));
+        }
+      },
+      isEnvelopeItemSwitch ? 150 : 50,
+    );
+
+    return () => clearTimeout(timeout);
+  }, [focusedField?.key]);
 
   return (
     <div className="min-h-screen w-screen bg-gray-50 dark:bg-background">
@@ -116,7 +152,7 @@ export const DocumentSigningPageViewV2 = () => {
 
           <div className={cn('flex flex-1 flex-col overflow-hidden py-4', isSidebarCollapsed && 'invisible w-0')}>
             <div className="px-4">
-              <h3 className="flex items-end justify-between font-semibold text-foreground text-sm">
+              <h3 className="flex items-end justify-between font-medium text-foreground text-sm">
                 {match(recipient.role)
                   .with(RecipientRole.VIEWER, () => <Trans>View Document</Trans>)
                   .with(RecipientRole.SIGNER, () => <Trans>Sign Document</Trans>)
@@ -165,7 +201,7 @@ export const DocumentSigningPageViewV2 = () => {
             {/* Quick Actions. */}
             {!isDirectTemplate && (
               <div className="embed--Actions space-y-3 px-4">
-                <h4 className="font-semibold text-foreground text-sm">
+                <h4 className="font-medium text-foreground text-sm">
                   <Trans>Actions</Trans>
                 </h4>
 

@@ -59,7 +59,7 @@ interface TabsListProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export function TabsList({ children, className, ...props }: TabsListProps) {
   return (
-    <div className={cn('flex flex-wrap border-border border-b', className)} role="tabslist" {...props}>
+    <div className={cn('flex flex-wrap border-border border-b', className)} role="tablist" {...props}>
       {children}
     </div>
   );
@@ -95,7 +95,7 @@ export function TabsTrigger({ value, icon, children, className, ...props }: Tabs
       {isSelected && (
         <motion.div
           layoutId="activeTabIndicator"
-          className="absolute bottom-0 left-0 h-0.5 w-full rounded-full bg-foreground/40"
+          className="absolute bottom-0 left-0 h-0.5 w-full rounded-full bg-primary"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{

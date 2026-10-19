@@ -366,7 +366,7 @@ test('[DOCUMENT_FLOW]: should be able to approve a document', async ({ page }) =
     await page.goto(signUrl);
     await expect(
       page.getByRole('heading', {
-        name: role === RecipientRole.SIGNER ? 'Sign Document' : 'Approve Document',
+        name: role === RecipientRole.SIGNER ? 'Sign the document' : 'Approve the document',
       }),
     ).toBeVisible();
 
@@ -378,7 +378,7 @@ test('[DOCUMENT_FLOW]: should be able to approve a document', async ({ page }) =
       await expect(page.locator(`#field-${field.id}`)).toHaveAttribute('data-inserted', 'true');
     }
 
-    await page.getByRole('button', { name: role === RecipientRole.SIGNER ? 'Complete' : 'Approve' }).click();
+    await page.getByRole('button', { name: role === RecipientRole.SIGNER ? 'Finish' : 'Approve' }).click();
     await page.getByRole('button', { name: role === RecipientRole.SIGNER ? 'Sign' : 'Approve' }).click();
     await page.waitForURL(`${signUrl}/complete`);
   }
@@ -451,9 +451,7 @@ test('[DOCUMENT_FLOW]: should be able to create, send with redirect url, sign a 
   expect(status).toBe(DocumentStatus.PENDING);
 
   await page.getByRole('button', { name: 'Approve' }).click();
-  await expect(
-    page.getByRole('dialog').getByText('You are about to complete approving the following document').first(),
-  ).toBeVisible();
+  await expect(page.getByRole('dialog').getByText('You’re about to approve this document.').first()).toBeVisible();
   await page.getByRole('button', { name: 'Approve' }).click();
 
   await page.waitForURL('https://documenso.com');
@@ -486,12 +484,12 @@ test('[DOCUMENT_FLOW]: should be able to sign a document with custom date', asyn
 
   await page.locator(`#field-${recipientField.id}`).getByRole('button').click();
 
-  await page.getByRole('button', { name: 'Complete' }).click();
+  await page.getByRole('button', { name: 'Finish' }).click();
   await expect(page.getByRole('dialog').getByText('Complete Signing').first()).toBeVisible();
-  await page.getByRole('button', { name: 'Sign' }).click();
+  await page.getByRole('button', { name: 'Finish and send' }).click();
 
   await page.waitForURL(`/sign/${token}/complete`);
-  await expect(page.getByText('Document Signed')).toBeVisible();
+  await expect(page.getByText('You’ve signed')).toBeVisible();
 
   const field = await prisma.field.findFirst({
     where: {
@@ -612,16 +610,16 @@ test('[DOCUMENT_FLOW]: should be able to create and sign a document with 3 recip
     }
 
     await page.goto(`/sign/${recipient?.token}`);
-    await expect(page.getByRole('heading', { name: 'Sign Document' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Sign the document' })).toBeVisible();
     await signSignaturePad(page);
 
     await page.locator(`#field-${recipientField.id}`).getByRole('button').click();
 
-    await page.getByRole('button', { name: 'Complete' }).click();
-    await page.getByRole('button', { name: 'Sign' }).click();
+    await page.getByRole('button', { name: 'Finish' }).click();
+    await page.getByRole('button', { name: 'Finish and send' }).click();
 
     await page.waitForURL(`/sign/${recipient?.token}/complete`);
-    await expect(page.getByText('Document Signed')).toBeVisible();
+    await expect(page.getByText('You’ve signed')).toBeVisible();
 
     const updatedRecipient = await prisma.recipient.findFirst({
       where: { id: recipient?.id },
@@ -671,7 +669,7 @@ test('[DOCUMENT_FLOW]: should prevent out-of-order signing in sequential mode', 
   await page.goto(`/sign/${activeRecipient?.token}`);
 
   await expect(page).not.toHaveURL(`/sign/${activeRecipient?.token}/waiting`);
-  await expect(page.getByRole('heading', { name: 'Sign Document' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Sign the document' })).toBeVisible();
 });
 
 test('[DOCUMENT_FLOW]: should skip CC recipients in sequential signing order', async ({ page }) => {
@@ -721,7 +719,7 @@ test('[DOCUMENT_FLOW]: should skip CC recipients in sequential signing order', a
 
   // Sign as the first signer.
   await page.goto(`/sign/${firstSigner?.token}`);
-  await expect(page.getByRole('heading', { name: 'Sign Document' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Sign the document' })).toBeVisible();
   await signSignaturePad(page);
 
   const firstSignerField = await prisma.field.findFirstOrThrow({
@@ -730,14 +728,14 @@ test('[DOCUMENT_FLOW]: should skip CC recipients in sequential signing order', a
 
   await page.locator(`#field-${firstSignerField.id}`).getByRole('button').click();
 
-  await page.getByRole('button', { name: 'Complete' }).click();
-  await page.getByRole('button', { name: 'Sign' }).click();
+  await page.getByRole('button', { name: 'Finish' }).click();
+  await page.getByRole('button', { name: 'Finish and send' }).click();
   await page.waitForURL(`/sign/${firstSigner?.token}/complete`);
 
   // The CC recipient at order 2 must not block the last signer at order 3.
   await page.goto(`/sign/${lastSigner?.token}`);
   await expect(page).not.toHaveURL(`/sign/${lastSigner?.token}/waiting`);
-  await expect(page.getByRole('heading', { name: 'Sign Document' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Sign the document' })).toBeVisible();
 
   await signSignaturePad(page);
 
@@ -747,8 +745,8 @@ test('[DOCUMENT_FLOW]: should skip CC recipients in sequential signing order', a
 
   await page.locator(`#field-${lastSignerField.id}`).getByRole('button').click();
 
-  await page.getByRole('button', { name: 'Complete' }).click();
-  await page.getByRole('button', { name: 'Sign' }).click();
+  await page.getByRole('button', { name: 'Finish' }).click();
+  await page.getByRole('button', { name: 'Finish and send' }).click();
   await page.waitForURL(`/sign/${lastSigner?.token}/complete`);
 
   // The document completes without any action from the CC recipient.
@@ -808,7 +806,7 @@ test('[DOCUMENT_FLOW]: should skip unsigned CC recipients in sequential signing 
 
   // Sign as the first signer.
   await page.goto(`/sign/${firstSigner?.token}`);
-  await expect(page.getByRole('heading', { name: 'Sign Document' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Sign the document' })).toBeVisible();
   await signSignaturePad(page);
 
   const firstSignerField = await prisma.field.findFirstOrThrow({
@@ -817,14 +815,14 @@ test('[DOCUMENT_FLOW]: should skip unsigned CC recipients in sequential signing 
 
   await page.locator(`#field-${firstSignerField.id}`).getByRole('button').click();
 
-  await page.getByRole('button', { name: 'Complete' }).click();
-  await page.getByRole('button', { name: 'Sign' }).click();
+  await page.getByRole('button', { name: 'Finish' }).click();
+  await page.getByRole('button', { name: 'Finish and send' }).click();
   await page.waitForURL(`/sign/${firstSigner?.token}/complete`);
 
   // The unsigned CC recipient at order 2 must not block the last signer at order 3.
   await page.goto(`/sign/${lastSigner?.token}`);
   await expect(page).not.toHaveURL(`/sign/${lastSigner?.token}/waiting`);
-  await expect(page.getByRole('heading', { name: 'Sign Document' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Sign the document' })).toBeVisible();
 
   await signSignaturePad(page);
 
@@ -834,8 +832,8 @@ test('[DOCUMENT_FLOW]: should skip unsigned CC recipients in sequential signing 
 
   await page.locator(`#field-${lastSignerField.id}`).getByRole('button').click();
 
-  await page.getByRole('button', { name: 'Complete' }).click();
-  await page.getByRole('button', { name: 'Sign' }).click();
+  await page.getByRole('button', { name: 'Finish' }).click();
+  await page.getByRole('button', { name: 'Finish and send' }).click();
   await page.waitForURL(`/sign/${lastSigner?.token}/complete`);
 
   // The document completes without any action from the CC recipient.

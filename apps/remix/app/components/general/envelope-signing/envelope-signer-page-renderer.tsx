@@ -15,12 +15,14 @@ import {
 } from '@documenso/lib/universal/field-renderer/field-canvas-style';
 import { createSpinner } from '@documenso/lib/universal/field-renderer/field-generic-items';
 import { renderField } from '@documenso/lib/universal/field-renderer/render-field';
-import { isFieldUnsignedAndRequired } from '@documenso/lib/utils/advanced-fields-helpers';
+import { isFieldUnsignedAndRequired, isRequiredField } from '@documenso/lib/utils/advanced-fields-helpers';
+import { darkenForContrast } from '@documenso/lib/utils/brand-button-contrast';
 import { getClientSideFieldTranslations } from '@documenso/lib/utils/fields';
 import { extractInitials } from '@documenso/lib/utils/recipient-formatter';
 import type { TSignEnvelopeFieldValue } from '@documenso/trpc/server/envelope-router/sign-envelope-field.types';
 import { EnvelopeRecipientFieldTooltip } from '@documenso/ui/components/document/envelope-recipient-field-tooltip';
 import { EnvelopeFieldToolTip } from '@documenso/ui/components/field/envelope-field-tooltip';
+import { getRecipientColorStyles } from '@documenso/ui/lib/recipient-colors';
 import { useToast } from '@documenso/ui/primitives/use-toast';
 import { Trans, useLingui } from '@lingui/react/macro';
 import { type Field, FieldType, type Recipient, RecipientRole, type Signature, SigningStatus } from '@prisma/client';
@@ -42,6 +44,132 @@ import { handleTextFieldClick } from '~/utils/field-signing/text-field';
 import { useRequiredDocumentSigningAuthContext } from '../document-signing/document-signing-auth-provider';
 import { useRequiredEnvelopeSigningContext } from '../document-signing/envelope-signing-provider';
 
+/**
+ * The smallest tap target, in CSS pixels, every field gets whatever its drawn size.
+ */
+const MIN_FIELD_HIT_SIZE_PX = 44;
+
+/**
+ * How far inside the field's box its outline is drawn, in CSS pixels, so the outline keeps clear
+ * of the caption printed just above the box. The box itself, its fill and the sealed PDF keep the
+ * field's own geometry.
+ */
+const FIELD_OUTLINE_INSET_PX = 3;
+
+/**
+ * Draws a field's box on the signing page: the fill over the whole box, reaching 1 px past its edge
+ * so the PDF's own thin box line never shows, and the outline drawn inside the box. Left-aligned
+ * content (answers, hints, tick boxes) moves in by the same amount so it keeps its gap from the
+ * outline. Only the screen changes: the sealed PDF draws the field from its own geometry.
+ */
+const drawFieldFrame = (fieldGroup: Konva.Group, scale: number, fieldType: FieldType, stroke: string) => {
+  const fieldRect = fieldGroup.findOne<Konva.Rect>('.field-rect');
+
+  fieldRect?.stroke(stroke);
+
+  if (fieldType !== FieldType.SIGNATURE) {
+    for (const child of fieldGroup.getChildren()) {
+      if (child !== fieldRect && !child.hasName('loading-spinner-group')) {
+        child.x(child.x() + FIELD_OUTLINE_INSET_PX / scale);
+      }
+    }
+  }
+
+  fieldRect?.sceneFunc((context, shape) => {
+    const cover = 1 / scale;
+    const inset = FIELD_OUTLINE_INSET_PX / scale;
+
+    // Opaque under the field's own fill (which is 95% white), so the PDF's box line beneath, and
+    // anything else printed there, never shows through.
+    context.setAttr('fillStyle', '#ffffff');
+    context.fillRect(-cover, -cover, shape.width() + cover * 2, shape.height() + cover * 2);
+
+    context.beginPath();
+    context.rect(-cover, -cover, shape.width() + cover * 2, shape.height() + cover * 2);
+    context.closePath();
+    context.fillShape(shape);
+
+    context.beginPath();
+    context.rect(inset, inset, shape.width() - inset * 2, shape.height() - inset * 2);
+    context.closePath();
+    context.strokeShape(shape);
+  });
+};
+
+/** The outline of a field still empty and optional, and of a read-only one: slate, 4.7:1 on white. */
+const NEUTRAL_FIELD_STROKE = '#64748b';
+
+/**
+ * A field outline's colour, at least 3.5:1 on white so it reads as a border: green once filled,
+ * orange while required and empty, neutral otherwise.
+ */
+const getFieldStroke = (field: Pick<Field, 'inserted' | 'type' | 'fieldMeta'>) => {
+  const fieldMeta = field.fieldMeta as { readOnly?: boolean } | null;
+
+  if (fieldMeta?.readOnly) {
+    return NEUTRAL_FIELD_STROKE;
+  }
+
+  if (field.inserted) {
+    return darkenForContrast(getRecipientColorStyles('green').baseRing, 3.5);
+  }
+
+  if (isRequiredField(field as Field)) {
+    return darkenForContrast(getRecipientColorStyles('orange').baseRing, 3.5);
+  }
+
+  return NEUTRAL_FIELD_STROKE;
+};
+
+type FieldBox = { x: number; y: number; width: number; height: number };
+
+const toFieldBox = (
+  field: Pick<Field, 'positionX' | 'positionY' | 'width' | 'height'>,
+  pageWidth: number,
+  pageHeight: number,
+): FieldBox => ({
+  x: (Number(field.positionX) / 100) * pageWidth,
+  y: (Number(field.positionY) / 100) * pageHeight,
+  width: (Number(field.width) / 100) * pageWidth,
+  height: (Number(field.height) / 100) * pageHeight,
+});
+
+/**
+ * How far a field's tap area reaches past each edge of its drawn box, in page units: enough for
+ * a 44 px target, centred on the box, and never more than half the gap to a neighbouring field,
+ * so two grown areas split the space between them instead of overlapping.
+ */
+const getFieldHitMargins = (box: FieldBox, neighbours: FieldBox[], scale: number) => {
+  const minSize = MIN_FIELD_HIT_SIZE_PX / scale;
+  const growX = Math.max(0, (minSize - box.width) / 2);
+  const growY = Math.max(0, (minSize - box.height) / 2);
+
+  const margins = { top: growY, bottom: growY, left: growX, right: growX };
+
+  for (const other of neighbours) {
+    const overlapsColumn = other.x < box.x + box.width && other.x + other.width > box.x;
+    const overlapsRow = other.y < box.y + box.height && other.y + other.height > box.y;
+
+    if (overlapsColumn && other.y >= box.y + box.height) {
+      margins.bottom = Math.min(margins.bottom, (other.y - (box.y + box.height)) / 2);
+    }
+
+    if (overlapsColumn && other.y + other.height <= box.y) {
+      margins.top = Math.min(margins.top, (box.y - (other.y + other.height)) / 2);
+    }
+
+    if (overlapsRow && other.x >= box.x + box.width) {
+      margins.right = Math.min(margins.right, (other.x - (box.x + box.width)) / 2);
+    }
+
+    if (overlapsRow && other.x + other.width <= box.x) {
+      margins.left = Math.min(margins.left, (box.x - (other.x + other.width)) / 2);
+    }
+  }
+
+  return margins;
+};
+
 type GenericLocalField = TEnvelope['fields'][number] & {
   recipient: Pick<Recipient, 'id' | 'name' | 'email' | 'signingStatus'>;
 };
@@ -60,6 +188,9 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
     recipientFields,
     recipientFieldsRemaining,
     showPendingFieldTooltip,
+    focusedField,
+    setFocusedField,
+    skipField,
     signField: signFieldInternal,
     email: emailState,
     setEmail,
@@ -82,6 +213,9 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
     email.current = emailState;
     signature.current = signatureState;
   }, [fullNameState, emailState, signatureState]);
+
+  // The field the flow is opening, so its handler can tell that from the signer's own tap.
+  const openingFieldId = useRef<number | null>(null);
 
   const cachedRenderFields = useRef<Map<number, Field & { signature?: Signature | null }>>(new Map());
   const prevShowPendingFieldTooltip = useRef(showPendingFieldTooltip);
@@ -150,7 +284,8 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
 
     const fieldToRender = ZFullFieldSchema.parse(unparsedField);
 
-    const isValidating = showPendingFieldTooltip && isFieldUnsignedAndRequired(fieldToRender);
+    // A required field still empty is marked from the start, not only once the signer presses Next.
+    const isValidating = isFieldUnsignedAndRequired(fieldToRender);
 
     const color = fieldToRender.fieldMeta?.readOnly ? 'readOnly' : isValidating ? 'orange' : 'green';
 
@@ -174,6 +309,35 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
       mode: 'sign',
       fieldCanvasStyleCache,
     });
+
+    // A tap target of at least 44 px around the drawn box. Only the hit region grows: the box as
+    // drawn, and the field's geometry in the sealed PDF, stay as they are.
+    // An empty required question says so beside its hint, so its orange outline reads as a to-do,
+    // not an error. On screen only, and gone once it is answered.
+    const fieldHint = fieldGroup.findOne<Konva.Text>('.field-text');
+
+    if (isValidating && fieldToRender.type !== FieldType.SIGNATURE && fieldHint?.text()) {
+      fieldHint.text(`${fieldHint.text()} · ${t`Required`}`);
+    }
+
+    drawFieldFrame(fieldGroup, scale, fieldToRender.type, getFieldStroke(fieldToRender));
+
+    const fieldRectForHit = fieldGroup.findOne<Konva.Rect>('.field-rect');
+
+    if (fieldRectForHit) {
+      const box = toFieldBox(fieldToRender, unscaledViewport.width, unscaledViewport.height);
+      const neighbours = localPageFields
+        .filter((f) => f.id !== fieldToRender.id)
+        .map((f) => toFieldBox(f, unscaledViewport.width, unscaledViewport.height));
+      const { top, bottom, left, right } = getFieldHitMargins(box, neighbours, scale);
+
+      fieldRectForHit.hitFunc((context, shape) => {
+        context.beginPath();
+        context.rect(-left, -top, shape.width() + left + right, shape.height() + top + bottom);
+        context.closePath();
+        context.fillStrokeShape(shape);
+      });
+    }
 
     const handleFieldGroupClick = (e: KonvaEventObject<Event>) => {
       const currentTarget = e.currentTarget as Konva.Group;
@@ -220,7 +384,11 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
          * CHECKBOX FIELD.
          */
         .with({ type: FieldType.CHECKBOX }, (field) => {
-          const clickedCheckboxIndex = Number(target.getAttr('internalCheckboxIndex'));
+          // A tap in the grown area around a single tick box ticks it.
+          const clickedCheckboxIndex =
+            target.getAttr('internalCheckboxIndex') === undefined && field.fieldMeta.values?.length === 1
+              ? 0
+              : Number(target.getAttr('internalCheckboxIndex'));
 
           if (Number.isNaN(clickedCheckboxIndex)) {
             return;
@@ -281,6 +449,11 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
         .with({ type: FieldType.TEXT }, (field) => {
           void handleTextFieldClick({ field, text: null })
             .then(async (payload) => {
+              if (payload === 'skip') {
+                skipField(field.id);
+                return;
+              }
+
               if (payload) {
                 fieldGroup.add(loadingSpinnerGroup);
                 await signField(field.id, payload);
@@ -377,10 +550,16 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
          * SIGNATURE FIELD.
          */
         .with({ type: FieldType.SIGNATURE }, (field) => {
+          // Opened by Next: always show the pad, with any signature already made, so Next never
+          // signs on the signer's behalf.
+          const isOpenedByNext = openingFieldId.current === field.id;
+          openingFieldId.current = null;
+
           void handleSignatureFieldClick({
             field,
             fullName: fullName.current,
             signature: signature.current,
+            alwaysAsk: isOpenedByNext,
             typedSignatureEnabled: envelope.documentMeta.typedSignatureEnabled,
             uploadSignatureEnabled: envelope.documentMeta.uploadSignatureEnabled,
             drawSignatureEnabled: envelope.documentMeta.drawSignatureEnabled,
@@ -482,6 +661,7 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
         // and shouldn't intercept events meant for the current recipient's
         // fields. Disable hit detection on the entire group.
         fieldGroup.listening(false);
+        drawFieldFrame(fieldGroup, scale, field.type, NEUTRAL_FIELD_STROKE);
       } catch (err) {
         console.error('Unable to render one or more fields belonging to other recipients.');
         console.error(err);
@@ -548,6 +728,26 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
   }, [localPageFields, showPendingFieldTooltip]);
 
   /**
+   * Open the dialog of the field the signer is being taken to, once its page has rendered.
+   */
+  useEffect(() => {
+    if (!focusedField?.open || !pageLayer.current) {
+      return;
+    }
+
+    const field = localPageFields.find((f) => f.id === focusedField.id);
+    const fieldGroup = pageLayer.current.findOne(`#${focusedField.id}`);
+
+    if (!field || field.inserted || !fieldGroup) {
+      return;
+    }
+
+    setFocusedField({ ...focusedField, open: false });
+    openingFieldId.current = field.id;
+    fieldGroup.fire('pointerdown', { target: fieldGroup, currentTarget: fieldGroup });
+  }, [focusedField, localPageFields, pageData.imageLoadingState]);
+
+  /**
    * Rerender the whole page if the selected assistant recipient changes.
    */
   useEffect(() => {
@@ -568,18 +768,32 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
     return null;
   }
 
+  // The field the signer is being taken to, else the first required field still empty.
+  const highlightedField =
+    recipientFields.find((field) => field.id === focusedField?.id && !field.inserted) ?? recipientFieldsRemaining[0];
+
   return (
     <>
       {showPendingFieldTooltip &&
-        recipientFieldsRemaining.length > 0 &&
-        recipientFieldsRemaining[0]?.envelopeItemId === currentEnvelopeItem?.id &&
-        recipientFieldsRemaining[0]?.page === pageNumber && (
+        highlightedField?.envelopeItemId === currentEnvelopeItem.id &&
+        highlightedField.page === pageNumber && (
+          // Drawn inside the field so it never covers the question above it. Text and tick-box
+          // fields only get the outline, so their own label stays readable.
+          // An optional question keeps its neutral outline: only a required field still empty is orange.
           <EnvelopeFieldToolTip
-            key={recipientFieldsRemaining[0].id}
-            field={recipientFieldsRemaining[0]}
+            key={highlightedField.id}
+            field={highlightedField}
             color="warning"
+            placement="inside"
+            className={isRequiredField(highlightedField) ? undefined : 'outline-transparent'}
+            outlineColor={getFieldStroke(highlightedField)}
           >
-            <Trans>Click to insert field</Trans>
+            {match(highlightedField.type)
+              .with(FieldType.TEXT, FieldType.CHECKBOX, () => null)
+              .with(FieldType.SIGNATURE, () => <Trans>Tap to sign</Trans>)
+              .otherwise(() => (
+                <Trans>Click to insert field</Trans>
+              ))}
           </EnvelopeFieldToolTip>
         )}
 

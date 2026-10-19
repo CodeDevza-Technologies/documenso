@@ -12,6 +12,7 @@ import {
 import { calculateOverflowLayout } from './calculate-overflow-layout';
 import {
   createFieldHoverInteraction,
+  konvaHintTextFill,
   konvaTextFill,
   konvaTextFontFamily,
   upsertFieldGroup,
@@ -141,6 +142,26 @@ const upsertFieldText = (field: FieldToRender, options: RenderFieldElementOption
     width: overflowLayout.width,
     height: overflowLayout.height,
   } satisfies Partial<Konva.TextConfig>);
+
+  // On the signing page an empty box's label is a hint: muted, italic, left-aligned like an
+  // answer, on one line cut with an ellipsis. A date question whose label does not fit shows only
+  // its format; its dialog carries the full question.
+  if (mode === 'sign' && isLabel) {
+    fieldText.setAttrs({
+      wrap: 'none',
+      ellipsis: true,
+      align: 'left',
+      fill: konvaHintTextFill,
+      fontStyle: 'italic',
+    });
+
+    const placeholder = fieldMeta?.type === 'text' ? fieldMeta.placeholder : undefined;
+    const isDateQuestion = placeholder?.trim().toLowerCase() === 'dd/mm/yyyy';
+
+    if (placeholder && isDateQuestion && fieldText.measureSize(textToRender).width > fieldText.width()) {
+      fieldText.text(placeholder);
+    }
+  }
 
   return {
     fieldText,

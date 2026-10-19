@@ -47,7 +47,7 @@ export const EnvelopeSignerHeader = () => {
             </Link>
           ))}
 
-        <h1 title={envelope.title} className="min-w-0 truncate font-semibold text-base text-foreground md:hidden">
+        <h1 title={envelope.title} className="min-w-0 truncate font-medium text-base text-foreground md:hidden">
           {envelope.title}
         </h1>
 

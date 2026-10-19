@@ -56,3 +56,18 @@ export const appMetaTags = (title?: MessageDescriptor) => {
     },
   ];
 };
+
+/**
+ * A recipient page's tab: the title, and the same no-indexing rule as the recipient layout, which a
+ * route's own meta replaces.
+ */
+export const recipientMetaTags = (title: string) => [
+  { title },
+  { name: 'robots', content: 'noindex, nofollow, noarchive, nosnippet, noimageindex' },
+];
+
+/**
+ * The provider a recipient sees named: the team that sent the document when its pages carry its
+ * branding (the caller passes no name otherwise), or Operify AI.
+ */
+export const recipientProviderName = (teamName?: string | null) => teamName?.trim() || 'Operify AI';

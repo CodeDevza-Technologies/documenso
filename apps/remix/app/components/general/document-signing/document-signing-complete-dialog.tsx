@@ -2,6 +2,7 @@ import { AppError, AppErrorCode } from '@documenso/lib/errors/app-error';
 import { type TRecipientAccessAuth, ZDocumentAccessAuthSchema } from '@documenso/lib/types/document-auth';
 import { fieldsContainUnsignedRequiredField } from '@documenso/lib/utils/advanced-fields-helpers';
 import { zEmail } from '@documenso/lib/utils/zod';
+import { cn } from '@documenso/ui/lib/utils';
 import { Button } from '@documenso/ui/primitives/button';
 import {
   Dialog,
@@ -53,6 +54,8 @@ export type DocumentSigningCompleteDialogProps = {
   buttonSize?: 'sm' | 'lg';
   position?: 'start' | 'end' | 'center';
   disableNameInput?: boolean;
+  /** Extra classes for the button that opens the dialog, e.g. a 44 px height on a phone. */
+  buttonClassName?: string;
 };
 
 const ZNextSignerFormSchema = z.object({
@@ -84,6 +87,7 @@ export const DocumentSigningCompleteDialog = ({
   buttonSize = 'lg',
   position,
   disableNameInput = false,
+  buttonClassName,
 }: DocumentSigningCompleteDialogProps) => {
   const { t } = useLingui();
 
@@ -191,17 +195,22 @@ export const DocumentSigningCompleteDialog = ({
     <Dialog open={showDialog} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button
-          className="w-full"
+          className={cn('w-full', buttonClassName)}
           type="button"
           size={buttonSize}
           onClick={fieldsValidated}
           loading={isSubmitting}
+          data-signing-next-step
           disabled={disabled}
         >
           {match({ isComplete, role: recipient.role })
             .with({ isComplete: false }, () => <Trans>Next Field</Trans>)
             .with({ isComplete: true, role: RecipientRole.APPROVER }, () => <Trans>Approve</Trans>)
             .with({ isComplete: true, role: RecipientRole.VIEWER }, () => <Trans>Mark as viewed</Trans>)
+            .with({ isComplete: true, role: RecipientRole.SIGNER }, () => (
+              // The same id as the dialog's own button, so both read the same.
+              <Trans context="Recipient signing confirmation button">Sign</Trans>
+            ))
             .with({ isComplete: true }, () => <Trans>Complete</Trans>)
             .exhaustive()}
         </Button>
@@ -209,8 +218,9 @@ export const DocumentSigningCompleteDialog = ({
 
       <DialogContent position={position}>
         <DialogHeader>
-          <DialogTitle>
-            <Trans>Are you sure?</Trans>
+          <DialogTitle className="font-medium">
+            {/* Its own id, so the signer's wording does not change the other "Are you sure?" dialogs. */}
+            <Trans context="Recipient signing confirmation">Are you sure?</Trans>
           </DialogTitle>
           <DialogDescription>
             <div className="max-w-[50ch] text-muted-foreground">
@@ -241,9 +251,8 @@ export const DocumentSigningCompleteDialog = ({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="rounded-lg border border-border bg-muted/50 p-4 text-center">
-          <p className="font-medium text-muted-foreground text-sm">{documentTitle}</p>
-        </div>
+        {/* The document's name as plain text: a filled box here read like an input. */}
+        <p className="text-center font-medium text-foreground">{documentTitle}</p>
 
         {!showTwoFactorForm && (
           <fieldset disabled={form.formState.isSubmitting} className="border-none p-0">
@@ -360,7 +369,10 @@ export const DocumentSigningCompleteDialog = ({
                   <Button type="submit" disabled={!isComplete} loading={form.formState.isSubmitting}>
                     {match(recipient.role)
                       .with(RecipientRole.VIEWER, () => <Trans>Mark as Viewed</Trans>)
-                      .with(RecipientRole.SIGNER, () => <Trans>Sign</Trans>)
+                      .with(RecipientRole.SIGNER, () => (
+                        // Its own id: "Sign" is shared with many other buttons.
+                        <Trans context="Recipient signing confirmation button">Sign</Trans>
+                      ))
                       .with(RecipientRole.APPROVER, () => <Trans>Approve</Trans>)
                       .with(RecipientRole.CC, () => <Trans>Mark as Viewed</Trans>)
                       .with(RecipientRole.ASSISTANT, () => <Trans>Complete</Trans>)

@@ -42,7 +42,7 @@ export const DocumentSigningMobileWidget = () => {
                   <Button
                     variant="outline"
                     onClick={() => setIsExpanded(!isExpanded)}
-                    className="flex h-8 w-8 items-center justify-center"
+                    className="flex h-11 w-11 items-center justify-center border-muted-foreground"
                     aria-label={isExpanded ? 'Collapse' : 'Expand'}
                   >
                     {isExpanded ? (
@@ -54,10 +54,16 @@ export const DocumentSigningMobileWidget = () => {
                 )}
 
                 <div>
-                  <h2 className="font-semibold text-foreground text-lg">
+                  <h2 className="font-medium text-foreground text-lg">
                     {match(recipient.role)
                       .with(RecipientRole.VIEWER, () => <Trans>View Document</Trans>)
-                      .with(RecipientRole.SIGNER, () => <Trans>Sign Document</Trans>)
+                      .with(RecipientRole.SIGNER, () =>
+                        recipientFieldsRemaining.length === 0 ? (
+                          <Trans>Ready to finish</Trans>
+                        ) : (
+                          <Trans>Sign Document</Trans>
+                        ),
+                      )
                       .with(RecipientRole.APPROVER, () => <Trans>Approve Document</Trans>)
                       .with(RecipientRole.ASSISTANT, () => <Trans>Assist Document</Trans>)
                       .otherwise(() => null)}
@@ -84,7 +90,7 @@ export const DocumentSigningMobileWidget = () => {
             </div>
 
             <div>
-              <EnvelopeSignerCompleteDialog />
+              <EnvelopeSignerCompleteDialog buttonClassName="h-11" />
             </div>
           </div>
 

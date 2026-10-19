@@ -55,11 +55,11 @@ test.describe('Signing Certificate Tests', () => {
       await expect(page.locator(`#field-${field.id}`)).toHaveAttribute('data-inserted', 'true');
     }
 
-    await page.getByRole('button', { name: 'Complete' }).click();
+    await page.getByRole('button', { name: 'Finish' }).click();
 
     await page.waitForTimeout(1000);
 
-    await page.getByRole('button', { name: 'Sign' }).click({ force: true });
+    await page.getByRole('button', { name: 'Finish and send' }).click({ force: true });
     await page.waitForURL(`/sign/${recipient.token}/complete`);
 
     await page.waitForTimeout(10000);
@@ -163,8 +163,8 @@ test.describe('Signing Certificate Tests', () => {
       await expect(page.locator(`#field-${field.id}`)).toHaveAttribute('data-inserted', 'true');
     }
 
-    await page.getByRole('button', { name: 'Complete' }).click();
-    await page.getByRole('button', { name: 'Sign' }).click();
+    await page.getByRole('button', { name: 'Finish' }).click();
+    await page.getByRole('button', { name: 'Finish and send' }).click();
     await page.waitForURL(`/sign/${recipient.token}/complete`);
 
     await expect(async () => {
@@ -266,8 +266,8 @@ test.describe('Signing Certificate Tests', () => {
       await expect(page.locator(`#field-${field.id}`)).toHaveAttribute('data-inserted', 'true');
     }
 
-    await page.getByRole('button', { name: 'Complete' }).click();
-    await page.getByRole('button', { name: 'Sign' }).click();
+    await page.getByRole('button', { name: 'Finish' }).click();
+    await page.getByRole('button', { name: 'Finish and send' }).click();
     await page.waitForURL(`/sign/${recipient.token}/complete`);
 
     await expect(async () => {

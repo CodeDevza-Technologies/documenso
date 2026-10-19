@@ -54,7 +54,7 @@ test('[ENVELOPE_EXPIRATION]: non-expired recipient can access signing page', asy
 
   await page.goto(`/sign/${recipient.token}`);
 
-  await expect(page.getByRole('heading', { name: 'Sign Document' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Sign the document' })).toBeVisible();
 });
 
 test('[ENVELOPE_EXPIRATION]: recipient with null expiresAt can sign normally', async ({ page }) => {
@@ -77,7 +77,7 @@ test('[ENVELOPE_EXPIRATION]: recipient with null expiresAt can sign normally', a
 
   await page.goto(`/sign/${recipient.token}`);
 
-  await expect(page.getByRole('heading', { name: 'Sign Document' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Sign the document' })).toBeVisible();
 });
 
 test('[ENVELOPE_EXPIRATION]: expired recipient cannot complete signing', async ({ page }) => {
@@ -99,7 +99,7 @@ test('[ENVELOPE_EXPIRATION]: expired recipient cannot complete signing', async (
     redirectPath: `/sign/${recipient.token}`,
   });
 
-  await expect(page.getByRole('heading', { name: 'Sign Document' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Sign the document' })).toBeVisible();
 
   // Now expire the recipient while they're on the signing page.
   await prisma.recipient.update({

@@ -63,7 +63,8 @@ export function DocumentSigningRejectDialog({
       });
 
       toast({
-        title: t`Document rejected`,
+        // Its own id, so the signer's wording does not change the "Document rejected" status label.
+        title: t({ message: `Document rejected`, context: 'Recipient signing toast' }),
         description: t`The document has been successfully rejected.`,
         duration: 5000,
       });
@@ -109,7 +110,7 @@ export function DocumentSigningRejectDialog({
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="font-medium">
             <Trans>Reject Document</Trans>
           </DialogTitle>
 

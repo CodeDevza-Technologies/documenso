@@ -9,6 +9,10 @@ type HandleSignatureFieldClickOptions = {
   field: TFieldSignature;
   fullName?: string;
   signature: string | null;
+  /**
+   * Show the pad even when a signature is already made (filled in with it), so the signer confirms.
+   */
+  alwaysAsk?: boolean;
   typedSignatureEnabled?: boolean;
   uploadSignatureEnabled?: boolean;
   drawSignatureEnabled?: boolean;
@@ -17,7 +21,8 @@ type HandleSignatureFieldClickOptions = {
 export const handleSignatureFieldClick = async (
   options: HandleSignatureFieldClickOptions,
 ): Promise<Extract<TSignEnvelopeFieldValue, { type: typeof FieldType.SIGNATURE }> | null> => {
-  const { field, fullName, signature, typedSignatureEnabled, uploadSignatureEnabled, drawSignatureEnabled } = options;
+  const { field, fullName, signature, alwaysAsk, typedSignatureEnabled, uploadSignatureEnabled, drawSignatureEnabled } =
+    options;
 
   if (field.type !== FieldType.SIGNATURE) {
     throw new AppError(AppErrorCode.INVALID_REQUEST, {
@@ -34,8 +39,9 @@ export const handleSignatureFieldClick = async (
 
   let signatureToInsert = signature;
 
-  if (!signatureToInsert) {
+  if (!signatureToInsert || alwaysAsk) {
     signatureToInsert = await SignFieldSignatureDialog.call({
+      initialSignature: signatureToInsert ?? undefined,
       fullName,
       typedSignatureEnabled,
       uploadSignatureEnabled,

@@ -209,11 +209,11 @@ test('[DIRECT_TEMPLATES]: V1 direct template link auth access', async ({ page })
   await page.locator(`#field-${directSignatureField.id}`).getByRole('button').click();
   await expect(page.locator(`#field-${directSignatureField.id}`)).toHaveAttribute('data-inserted', 'true');
 
-  await page.getByRole('button', { name: 'Complete' }).click();
+  await page.getByRole('button', { name: 'Finish' }).click();
 
-  await page.getByRole('button', { name: 'Sign' }).click();
+  await page.getByRole('button', { name: 'Finish and send' }).click();
   await page.waitForURL(/\/sign/);
-  await expect(page.getByRole('heading', { name: 'Document Signed' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'You’ve signed' })).toBeVisible();
 });
 
 test('[DIRECT_TEMPLATES]: V2 direct template link auth access', async ({ page }) => {
@@ -275,14 +275,14 @@ test('[DIRECT_TEMPLATES]: V2 direct template link auth access', async ({ page })
     ((Number(directSignatureField.height) / 100) * canvasBox.height) / 2;
 
   await canvas.click({ position: { x, y } });
-  await expect(page.getByText('0 Fields Remaining').first()).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByText('All filled in').first()).toBeVisible({ timeout: 10_000 });
 
-  await page.getByRole('button', { name: 'Complete' }).click();
-  await expect(page.getByLabel('Your Email')).not.toBeVisible();
+  await page.getByRole('button', { name: 'Finish' }).click();
+  await expect(page.getByLabel('Your email')).not.toBeVisible();
 
-  await page.getByRole('button', { name: 'Sign' }).click();
+  await page.getByRole('button', { name: 'Finish and send' }).click();
   await page.waitForURL(/\/sign/);
-  await expect(page.getByRole('heading', { name: 'Document Signed' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'You’ve signed' })).toBeVisible();
 });
 
 test('[DIRECT_TEMPLATES]: use direct template link with 1 recipient', async ({ page }) => {
@@ -306,7 +306,7 @@ test('[DIRECT_TEMPLATES]: use direct template link with 1 recipient', async ({ p
 
   await page.getByRole('button', { name: 'Continue' }).click();
 
-  await expect(page.getByText('Next Recipient Name')).not.toBeVisible();
+  await expect(page.getByText('Next recipient’s name')).not.toBeVisible();
 
   const directSignatureField = template.fields[0];
 
@@ -318,10 +318,10 @@ test('[DIRECT_TEMPLATES]: use direct template link with 1 recipient', async ({ p
   await page.locator(`#field-${directSignatureField.id}`).getByRole('button').click();
   await expect(page.locator(`#field-${directSignatureField.id}`)).toHaveAttribute('data-inserted', 'true');
 
-  await page.getByRole('button', { name: 'Complete' }).click();
-  await page.getByRole('button', { name: 'Sign' }).click();
+  await page.getByRole('button', { name: 'Finish' }).click();
+  await page.getByRole('button', { name: 'Finish and send' }).click();
   await page.waitForURL(/\/sign/);
-  await expect(page.getByRole('heading', { name: 'Document Signed' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'You’ve signed' })).toBeVisible();
 
   // Add a longer waiting period to ensure document status is updated
   await page.waitForTimeout(3000);
@@ -393,25 +393,25 @@ test('[DIRECT_TEMPLATES]: V1 use direct template link with 2 recipients with nex
   await page.locator(`#field-${directSignatureField.id}`).getByRole('button').click();
   await expect(page.locator(`#field-${directSignatureField.id}`)).toHaveAttribute('data-inserted', 'true');
 
-  await page.getByRole('button', { name: 'Complete' }).click();
+  await page.getByRole('button', { name: 'Finish' }).click();
 
-  await expect(page.getByText('Next Recipient Name')).toBeVisible();
+  await expect(page.getByText('Next recipient’s name')).toBeVisible();
 
-  const nextRecipientNameInputValue = await page.getByLabel('Next Recipient Name').inputValue();
+  const nextRecipientNameInputValue = await page.getByLabel('Next recipient’s name').inputValue();
   expect(nextRecipientNameInputValue).toBe(originalName);
 
-  const nextRecipientEmailInputValue = await page.getByLabel('Next Recipient Email').inputValue();
+  const nextRecipientEmailInputValue = await page.getByLabel('Next recipient’s email').inputValue();
   expect(nextRecipientEmailInputValue).toBe(originalSecondSignerEmail);
 
   const newName = 'Hello';
   const newSecondSignerEmail = seedTestEmail();
 
-  await page.getByLabel('Next Recipient Email').fill(newSecondSignerEmail);
-  await page.getByLabel('Next Recipient Name').fill(newName);
+  await page.getByLabel('Next recipient’s email').fill(newSecondSignerEmail);
+  await page.getByLabel('Next recipient’s name').fill(newName);
 
-  await page.getByRole('button', { name: 'Sign' }).click();
+  await page.getByRole('button', { name: 'Finish and send' }).click();
   await page.waitForURL(/\/sign/);
-  await expect(page.getByRole('heading', { name: 'Document Signed' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'You’ve signed' })).toBeVisible();
 
   const createdEnvelopeRecipients = await prisma.recipient.findMany({
     where: {
@@ -513,9 +513,9 @@ test('[DIRECT_TEMPLATES]: V2 use direct template link with 2 recipients with nex
     ((Number(directSignatureField.height) / 100) * canvasBox.height) / 2;
 
   await canvas.click({ position: { x, y } });
-  await expect(page.getByText('0 Fields Remaining').first()).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByText('All filled in').first()).toBeVisible({ timeout: 10_000 });
 
-  await page.getByRole('button', { name: 'Complete' }).click();
+  await page.getByRole('button', { name: 'Finish' }).click();
 
   const currentName = 'John Doe';
   const currentEmail = seedTestEmail();
@@ -523,23 +523,23 @@ test('[DIRECT_TEMPLATES]: V2 use direct template link with 2 recipients with nex
   await page.getByPlaceholder('Enter Your Name').fill(currentName);
   await page.getByPlaceholder('Enter Your Email').fill(currentEmail);
 
-  await expect(page.getByText('Next Recipient Name')).toBeVisible();
+  await expect(page.getByText('Next recipient’s name')).toBeVisible();
 
-  const nextRecipientNameInputValue = await page.getByLabel('Next Recipient Name').inputValue();
+  const nextRecipientNameInputValue = await page.getByLabel('Next recipient’s name').inputValue();
   expect(nextRecipientNameInputValue).toBe(originalName);
 
-  const nextRecipientEmailInputValue = await page.getByLabel('Next Recipient Email').inputValue();
+  const nextRecipientEmailInputValue = await page.getByLabel('Next recipient’s email').inputValue();
   expect(nextRecipientEmailInputValue).toBe(originalSecondSignerEmail);
 
   const newName = 'Hello';
   const newSecondSignerEmail = seedTestEmail();
 
-  await page.getByLabel('Next Recipient Email').fill(newSecondSignerEmail);
-  await page.getByLabel('Next Recipient Name').fill(newName);
+  await page.getByLabel('Next recipient’s email').fill(newSecondSignerEmail);
+  await page.getByLabel('Next recipient’s name').fill(newName);
 
-  await page.getByRole('button', { name: 'Sign' }).click();
+  await page.getByRole('button', { name: 'Finish and send' }).click();
   await page.waitForURL(/\/sign/);
-  await expect(page.getByRole('heading', { name: 'Document Signed' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'You’ve signed' })).toBeVisible();
 
   const createdEnvelopeRecipients = await prisma.recipient.findMany({
     where: {
@@ -604,5 +604,5 @@ test('[DIRECT_TEMPLATES]: V2 direct template without signature fields shows inva
 
   // The signing flow (PDF canvas) must not render.
   await expect(page.locator('.konva-container canvas')).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Complete' })).not.toBeVisible();
+  await expect(page.getByRole('button', { name: 'Finish' })).not.toBeVisible();
 });

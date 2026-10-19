@@ -35,7 +35,7 @@ test.describe('V2 envelope field insertion during signing', () => {
     await expect(canvas).toBeVisible({ timeout: 30_000 });
 
     // DATE is auto-filled, but SIGNATURE still needs manual interaction.
-    await expect(page.getByText('1 Field Remaining').first()).toBeVisible();
+    await expect(page.getByText('1 left to fill in').first()).toBeVisible();
 
     // Set up a signature via the sidebar form.
     await page.getByTestId('signature-pad-dialog-button').click();
@@ -64,14 +64,14 @@ test.describe('V2 envelope field insertion during signing', () => {
     await canvas.click({ position: { x, y } });
     await page.waitForTimeout(500);
 
-    await expect(page.getByText('0 Fields Remaining').first()).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText('All filled in').first()).toBeVisible({ timeout: 10_000 });
 
-    await page.getByRole('button', { name: 'Complete' }).click();
-    await expect(page.getByRole('heading', { name: 'Are you sure?' })).toBeVisible();
-    await page.getByRole('button', { name: 'Sign' }).click();
+    await page.getByRole('button', { name: 'Finish' }).click();
+    await expect(page.getByRole('heading', { name: 'Ready to finish?' })).toBeVisible();
+    await page.getByRole('button', { name: 'Finish and send' }).click();
 
     await page.waitForURL(`/sign/${token}/complete`);
-    await expect(page.getByText('Document Signed')).toBeVisible();
+    await expect(page.getByText('You’ve signed')).toBeVisible();
 
     // Verify the date field was inserted in the database with the correct format.
     const dateField = await prisma.field.findFirstOrThrow({
@@ -144,7 +144,7 @@ test.describe('V2 envelope field insertion during signing', () => {
     await expect(canvas).toBeVisible({ timeout: 30_000 });
 
     // DATE and EMAIL fields are auto-filled, so only NAME and SIGNATURE remain.
-    await expect(page.getByText('2 Fields Remaining').first()).toBeVisible();
+    await expect(page.getByText('2 left to fill in').first()).toBeVisible();
 
     // Set up a signature via the sidebar form.
     await page.getByTestId('signature-pad-dialog-button').click();
@@ -197,14 +197,14 @@ test.describe('V2 envelope field insertion during signing', () => {
     }
 
     // All fields should now be complete.
-    await expect(page.getByText('0 Fields Remaining').first()).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText('All filled in').first()).toBeVisible({ timeout: 10_000 });
 
-    await page.getByRole('button', { name: 'Complete' }).click();
-    await expect(page.getByRole('heading', { name: 'Are you sure?' })).toBeVisible();
-    await page.getByRole('button', { name: 'Sign' }).click();
+    await page.getByRole('button', { name: 'Finish' }).click();
+    await expect(page.getByRole('heading', { name: 'Ready to finish?' })).toBeVisible();
+    await page.getByRole('button', { name: 'Finish and send' }).click();
 
     await page.waitForURL(`/sign/${token}/complete`);
-    await expect(page.getByText('Document Signed')).toBeVisible();
+    await expect(page.getByText('You’ve signed')).toBeVisible();
 
     // Verify the date field was auto-inserted with the correct format.
     const dateField = await prisma.field.findFirstOrThrow({

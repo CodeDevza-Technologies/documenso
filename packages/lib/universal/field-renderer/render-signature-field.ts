@@ -5,7 +5,13 @@ import { AppError } from '../../errors/app-error';
 import type { TSignatureFieldMeta } from '../../types/field-meta';
 import { resolveFieldOverflowMode } from '../../types/field-meta';
 import { calculateOverflowLayout } from './calculate-overflow-layout';
-import { createFieldHoverInteraction, upsertFieldGroup, upsertFieldRect } from './field-generic-items';
+import {
+  createFieldHoverInteraction,
+  konvaHintTextFill,
+  konvaTextFill,
+  upsertFieldGroup,
+  upsertFieldRect,
+} from './field-generic-items';
 import type { FieldToRender, RenderFieldElementOptions } from './field-renderer';
 import { calculateFieldPosition } from './field-renderer';
 
@@ -19,11 +25,21 @@ void (async () => {
   }
 })();
 
+/**
+ * The clear space kept round a drawn signature inside its field, as a share of the field's smaller
+ * side, so the drawing never touches the box.
+ */
+const SIGNATURE_IMAGE_PADDING = 0.12;
+
 const getImageDimensions = (img: HTMLImageElement, fieldWidth: number, fieldHeight: number) => {
   let imageWidth = img.width;
   let imageHeight = img.height;
 
-  const scalingFactor = Math.min(fieldWidth / imageWidth, fieldHeight / imageHeight, 1);
+  const padding = Math.min(fieldWidth, fieldHeight) * SIGNATURE_IMAGE_PADDING;
+  const availableWidth = fieldWidth - padding * 2;
+  const availableHeight = fieldHeight - padding * 2;
+
+  const scalingFactor = Math.min(availableWidth / imageWidth, availableHeight / imageHeight, 1);
 
   imageWidth = imageWidth * scalingFactor;
   imageHeight = imageHeight * scalingFactor;
@@ -213,6 +229,8 @@ const createFieldSignature = (field: FieldToRender, options: RenderFieldElementO
     align: overflowLayout.textAlign,
     width: overflowLayout.width,
     height: overflowLayout.height,
+    // On the signing page the empty box's "Signature" is a hint, muted so it never reads as signed.
+    fill: mode === 'sign' && isLabel ? konvaHintTextFill : konvaTextFill,
   } satisfies Partial<Konva.TextConfig>);
 
   return { node: fieldText, isImageSignature: false, isLabel };

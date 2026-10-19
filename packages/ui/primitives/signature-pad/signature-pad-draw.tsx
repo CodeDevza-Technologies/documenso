@@ -41,6 +41,53 @@ const checkSignatureValidity = (element: RefObject<HTMLCanvasElement>) => {
   return isValid;
 };
 
+/**
+ * The drawing as an image cropped to its ink (every stroke), with a margin, so wherever it was drawn
+ * on the pad it is centred and fills its field. An empty pad gives the whole canvas back.
+ */
+const toInkDataUrl = (canvas: HTMLCanvasElement) => {
+  const ctx = canvas.getContext('2d');
+
+  if (!ctx || canvas.width === 0 || canvas.height === 0) {
+    return canvas.toDataURL();
+  }
+
+  const { data, width, height } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+  let top = height;
+  let left = width;
+  let right = -1;
+  let bottom = -1;
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (data[(y * width + x) * 4 + 3] > 0) {
+        top = Math.min(top, y);
+        bottom = Math.max(bottom, y);
+        left = Math.min(left, x);
+        right = Math.max(right, x);
+      }
+    }
+  }
+
+  if (right < 0) {
+    return canvas.toDataURL();
+  }
+
+  const margin = Math.round(Math.max(right - left, bottom - top) * 0.04) + 2;
+  const x = Math.max(0, left - margin);
+  const y = Math.max(0, top - margin);
+  const w = Math.min(width, right + margin + 1) - x;
+  const h = Math.min(height, bottom + margin + 1) - y;
+
+  const cropped = document.createElement('canvas');
+  cropped.width = w;
+  cropped.height = h;
+  cropped.getContext('2d')?.drawImage(canvas, x, y, w, h, 0, 0, w, h);
+
+  return cropped.toDataURL();
+};
+
 export type SignaturePadDrawProps = {
   className?: string;
   value: string;
@@ -161,7 +208,7 @@ export const SignaturePadDraw = ({ className, value, onChange, ...props }: Signa
         setIsSignatureValid(isValidSignature);
 
         if (isValidSignature) {
-          onChange?.($el.current.toDataURL());
+          onChange?.(toInkDataUrl($el.current));
         }
         ctx.save();
       }
@@ -231,7 +278,7 @@ export const SignaturePadDraw = ({ className, value, onChange, ...props }: Signa
       ctx?.fill(pathData);
     });
 
-    onChange?.($el.current.toDataURL());
+    onChange?.(toInkDataUrl($el.current));
   };
 
   unsafe_useEffectOnce(() => {
@@ -248,7 +295,11 @@ export const SignaturePadDraw = ({ className, value, onChange, ...props }: Signa
       const img = new Image();
 
       img.onload = () => {
-        ctx?.drawImage(img, 0, 0, Math.min(width, img.width), Math.min(height, img.height));
+        // A signature made earlier is cropped to its ink: show it centred on the pad.
+        const drawWidth = Math.min(width, img.width);
+        const drawHeight = Math.min(height, img.height);
+
+        ctx?.drawImage(img, (width - drawWidth) / 2, (height - drawHeight) / 2, drawWidth, drawHeight);
 
         const defaultImageData = ctx?.getImageData(0, 0, width, height) || null;
 
@@ -259,49 +310,48 @@ export const SignaturePadDraw = ({ className, value, onChange, ...props }: Signa
     }
   });
 
+  const hasDrawing = isPressed || lines.length > 0 || currentLine.length > 0 || Boolean(value);
+
   return (
-    <div className={cn('h-full w-full', className)}>
-      <canvas
-        data-testid="signature-pad-draw"
-        ref={$el}
-        className={cn('h-full w-full', {
-          'dark:hue-rotate-180 dark:invert': selectedColor === 'black',
-        })}
-        style={{ touchAction: 'none' }}
-        onPointerMove={(event) => onMouseMove(event)}
-        onPointerDown={(event) => onMouseDown(event)}
-        onPointerUp={(event) => onMouseUp(event)}
-        onPointerLeave={(event) => onMouseLeave(event)}
-        onPointerEnter={(event) => onMouseEnter(event)}
-        {...props}
-      />
+    <div className={cn('flex w-full flex-col', className)}>
+      {/* The drawing area spans the whole pad: no control sits over it, so no stroke is broken. */}
+      <div className="relative flex aspect-signature-pad items-center justify-center rounded-md border border-muted-foreground bg-muted/25 text-center">
+        {/* An empty pad shows where to sign: a light line and a muted hint, gone once drawing starts. */}
+        {!hasDrawing && (
+          <div aria-hidden="true" className="pointer-events-none absolute inset-x-6 bottom-[30%]">
+            <span className="mb-1 block text-muted-foreground text-sm">
+              <Trans>Sign here</Trans>
+            </span>
+            <div className="h-px w-full bg-muted-foreground" />
+          </div>
+        )}
 
-      <SignaturePadColorPicker selectedColor={selectedColor} setSelectedColor={setSelectedColor} />
-
-      <div className="absolute right-3 bottom-3 flex gap-2">
-        <button
-          type="button"
-          className="rounded-full p-0 text-[0.688rem] text-muted-foreground/60 ring-offset-background hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          onClick={() => onClearClick()}
-        >
-          <Trans>Clear Signature</Trans>
-        </button>
+        <canvas
+          data-testid="signature-pad-draw"
+          ref={$el}
+          className={cn('h-full w-full', {
+            'dark:hue-rotate-180 dark:invert': selectedColor === 'black',
+          })}
+          style={{ touchAction: 'none' }}
+          onPointerMove={(event) => onMouseMove(event)}
+          onPointerDown={(event) => onMouseDown(event)}
+          onPointerUp={(event) => onMouseUp(event)}
+          onPointerLeave={(event) => onMouseLeave(event)}
+          onPointerEnter={(event) => onMouseEnter(event)}
+          {...props}
+        />
       </div>
 
-      {isSignatureValid === false && (
-        <div className="absolute bottom-4 left-4 flex gap-2">
-          <span className="text-destructive text-xs">
-            <Trans>Signature is too small</Trans>
-          </span>
-        </div>
-      )}
-
-      {isSignatureValid && lines.length > 0 && (
-        <div className="absolute bottom-4 left-4 flex gap-2">
+      {/* The pad's controls, in a row under it whose height is kept from the start, so the dialog
+          never jumps when undo and Clear signature appear. */}
+      <div className="mt-2 grid h-11 grid-cols-[1fr_auto_1fr] items-center gap-2">
+        <div className="flex items-center gap-2">
+          {/* Always in its place, off until there is a stroke to undo, so the row never changes. */}
           <button
             type="button"
             title="undo"
-            className="rounded-full p-0 text-[0.688rem] text-muted-foreground/60 ring-offset-background hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            disabled={lines.length === 0}
+            className="flex h-11 w-11 items-center justify-center rounded-full text-muted-foreground ring-offset-background hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-40"
             onClick={onUndoClick}
           >
             <Undo2 className="h-4 w-4" />
@@ -309,8 +359,38 @@ export const SignaturePadDraw = ({ className, value, onChange, ...props }: Signa
               <Trans>Undo</Trans>
             </span>
           </button>
+
+          {isSignatureValid === false && (
+            <span className="text-destructive text-xs">
+              <Trans>Signature is too small</Trans>
+            </span>
+          )}
         </div>
-      )}
+
+        {/* Centred, so it stays put when undo and Clear signature appear. */}
+        <SignaturePadColorPicker
+          className="static [&>button]:m-0"
+          selectedColor={selectedColor}
+          setSelectedColor={setSelectedColor}
+        />
+
+        <div className="flex justify-end">
+          {hasDrawing && (
+            <button
+              type="button"
+              className="flex h-11 items-center rounded-md border border-muted-foreground bg-background px-3 text-muted-foreground text-xs ring-offset-background hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              onClick={() => onClearClick()}
+            >
+              <Trans>Clear Signature</Trans>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Sign stays off until something is drawn: say so, in a line kept for it. */}
+      <p className={cn('mt-1 text-muted-foreground text-xs', hasDrawing && 'invisible')}>
+        <Trans>Draw your signature to continue</Trans>
+      </p>
     </div>
   );
 };

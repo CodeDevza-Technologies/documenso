@@ -158,7 +158,7 @@ test.describe('[TEMPLATE_FLOW]: Duplicate Recipients', () => {
       await page.waitForSelector(PDF_VIEWER_PAGE_SELECTOR);
 
       // Verify correct recipient name is shown
-      await expect(page.getByLabel('Full Name')).toHaveValue(recipient.name);
+      await expect(page.getByLabel('Full name')).toHaveValue(recipient.name);
 
       // Verify only one signature field is visible for this recipient
       expect(await page.locator(`[data-field-type="SIGNATURE"]:not([data-readonly="true"])`).all()).toHaveLength(1);
